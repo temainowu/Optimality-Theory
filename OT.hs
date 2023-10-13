@@ -1,8 +1,26 @@
 import GHC.CmmToAsm.AArch64.Instr (x0)
 
+type FindFeature f = Char -> f
+
+type Comp = (Char,Char) -> Bool
+
+type Lexeme = [(Char, [Int])]
+
+type Constraint = Lexeme -> Lexeme -> Int
+
+type Fluxion = [Int]
+
+type Grammar = [Constraint]
+
+type PhoneClass = [Char]
+-- PhoneClass is used when refering to classes of sounds
+-- String is used when refering to a sequence of sounds
+
+data Place = Labial | LabioDental | Alveolar | Palatal | Velar | LabioVelar deriving (Eq, Show)
+
+data Manner = Stop | Fricative | Nasal | Trill | Tap | Approximant | Vowel deriving (Eq, Show)
 
 -- Classes of sounds
-type FindFeature f = Char -> f
 
 universe = "pbmʙɸβwɱⱱfvʋtdnrɾszɹeuioasghjklzx"
 obs = stop ++ fric
@@ -29,11 +47,8 @@ labvel = "wuo"
 
 -- Auxiliary Functions
 
-data Place = Labial | LabioDental | Alveolar | Palatal | Velar | LabioVelar deriving (Eq, Show)
-data Manner = Stop | Fricative | Nasal | Trill | Tap | Approximant | Vowel deriving (Eq, Show)
-
 placeOf :: FindFeature Place
-placeOf x 
+placeOf x
     | x `elem` lab = Labial
     | x `elem` labdent = LabioDental
     | x `elem` alv = Alveolar
@@ -63,39 +78,44 @@ sonoranceOf x
     where m = mannerOf x
 -}
 
-(%) :: [Char] -> [Char] -> [Char]
+(%) :: PhoneClass -> PhoneClass -> PhoneClass
 xs % ys = [x | x <- xs, x `notElem` ys]
 
---
+index :: String -> Lexeme
+index xs = zip xs (map (: []) [0..])
 
-rect :: Int -> Int
-rect x
-    | x < 0 = 0
-    | otherwise = x
+unIndex :: Lexeme -> String
+unIndex = map fst
 
-pos :: [[Int]] -> [Int] -> [Int]
-pos xs a = [p | p <- [0..length xs - 1], xs !! p == a]
+-- Fluxions
 
-fluxionLessThan :: [Int] -> [Int] -> Bool
-fluxionLessThan [] [] = True
-fluxionLessThan (x:xs) (y:ys)
-    | x == y = fluxionLessThan xs ys
+fluxionLessThanOrEqual :: Fluxion -> Fluxion -> Bool
+fluxionLessThanOrEqual [] [] = True
+fluxionLessThanOrEqual (x:xs) (y:ys)
+    | x == y = fluxionLessThanOrEqual xs ys
     | x < y = True
     | x > y = False
 
-smallestFluxion :: [[Int]] -> [Int]
+smallestFluxion :: [Fluxion] -> Fluxion
 smallestFluxion [] = [] !! 1
 smallestFluxion [x] = x
 smallestFluxion (x:xs)
-    | fluxionLessThan x (smallestFluxion xs) = x
+    | fluxionLessThanOrEqual x (smallestFluxion xs) = x
     | otherwise = smallestFluxion xs
 
-measure :: [Constraint] -> [Char] -> [Char] -> [Int]
+smallestFluxions :: [Fluxion] -> [Bool]
+smallestFluxions xs = map (\ x -> x == smallestFluxion xs) xs
+
+mask :: [Bool] -> [a] -> [a]
+mask [] _ = []
+mask _ [] = []
+mask (True:bs) (x:xs) = x : mask bs xs
+mask (False:bs) (x:xs) = mask bs xs
+
+measure :: Grammar -> Lexeme -> Lexeme -> Fluxion
 measure fs i o = map (\ f -> f i o) fs
 
 -- Comparisons
-
-type Comp = (Char,Char) -> Bool
 
 place :: Comp
 place (a,b)
@@ -110,27 +130,80 @@ obsVoice (a,b)
 
 -- Constraints
 
-type Constraint = [Char] -> [Char] -> Int
-
 -- faithfulness constraints (care about first argument)
 
-maxIO :: Constraint
-maxIO i o = rect (length i - length o)
+-- no deletion
+maxi :: Constraint
+maxi i o = length [y | (y,[yp]) <- i, or [yp `elem` xps | (x,xps) <- o]]
 
-depIO :: Constraint
-depIO i o = rect (length o - length i)
+-- no epenthesis
+dep :: Constraint
+dep i o = length [x | (x,xps) <- o, null xps]
 
-identIO :: Comp -> Constraint
-identIO f i o = length [x | x <- zip i o, not (f x)]
+-- feature preservation
+ident :: Comp -> Constraint
+ident f i o = length [x | (x,xps) <- o, (y,[yp]) <- i, f (x,y), yp `elem` xps]
+
+-- no coalescence
+uniformity :: Constraint
+uniformity i o = length [x | (x,xps) <- o, length xps > 1]
 
 -- markedness constraints (ignore first argument)
 
+-- nasal agrees with place of following obstruent
 nasAgr :: Constraint
-nasAgr _ o = sum [auxNasAgr x | x <- zip o (drop 1 o)]
+nasAgr _ o = sum [auxNasAgr (a,b) | ((a,_),(b,_)) <- zip o (drop 1 o)]
     where auxNasAgr (a, b) | a `elem` nas && b `elem` obs && place (a,b) = 0 | a `notElem` nas || b `notElem` obs = 0 | otherwise = 1
 
 -- Main
 
-mostHarmonious :: [Constraint] -> [Char] -> [[Char]] -> [[Char]]
-mostHarmonious g i o = [o !! p | p <- pos measuredOutput (smallestFluxion measuredOutput)]
-    where measuredOutput = map (measure g i) o
+mostHarmonious :: Grammar -> String -> [Lexeme] -> [String]
+mostHarmonious g i os = map unIndex (mask (smallestFluxions (map (measure g (index i)) os)) os) 
+
+-- Examples
+
+{-
+mostHarmonious is the only function that needs to be called by the user
+it takes a grammar, an input form (which is automatically indexed), and a list of indexed output forms
+it returns a list of the most harmonious output forms (which are automatically unindexed)
+
+examples:
+
+example a)
+> mostHarmonious [nasAgr, ident obsVoice] "amda" [index "ampa", index "amda"]
+["ampa"]
+
+nasAgr dominates ident obsVoice, 
+so the output form is "ampa" because 'm' agrees with 'p' in place.
+
+tableu:
+
+  amda | nasAgr | ident obsVoice |
+_______|________|________________|
+  amda |   *!   |                |
+_______|________|________________|
+> ampa |        |       *        |
+_______|________|________________|
+
+example b)
+> mostHarmonious [ident obsVoice, nasAgr] "amda" [index "ampa", index "amda"]
+["amda"]
+
+identIO obsVoice dominates nasAgr,
+so the output form is "amda" because 'd' is voiced,
+ which matches the voicing of the corresponding input segment 'd'.
+
+tableu:
+
+  amda | ident obsVoice | nasAgr |
+_______|________________|________|
+> amda |                |   *    |
+_______|________________|________|
+  ampa |       *!       |        |
+_______|________________|________|
+
+the forms; index "amba", index "anda", index "embi", [(n,1),(d,2)], and [] 
+are all more harmonious forms in both examples,
+but they were not chosen because they were not in the input list.
+
+-}

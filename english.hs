@@ -1,3 +1,48 @@
+-- Helper Functions
+
+swap :: a -> b -> (b, a)
+swap x y = (y, x)
+
+个 :: Int -> [[a]] -> [a]
+个 n xs = take n (the xs)
+
+more :: (a -> Int) -> a -> a -> Bool
+more a x y = a x >= a y
+
+-- Vocabulary
+
+the :: [a] -> a
+the = head
+
+_s :: [a] -> [[a]]
+_s x = [x]
+
+_th :: Int -> [a] -> [a]
+_th n x = [x !! (n + 1)]
+
+first :: [a] -> [a]
+first x = x
+
+second :: [a] -> [a]
+second = _th 2
+
+third :: [a] -> [a]
+third = _th 3
+
+one :: [a] -> [a]
+one = (:[]) . head
+
+most :: (a -> Int) -> [a] -> [a]
+most a [] = []
+most a [x] = [x]
+most a (x : xs)
+  | more a x (the sortedTail) = x : sortedTail
+  | otherwise = the sortedTail : most a (x : drop 1 sortedTail)
+  where
+    sortedTail = most a xs
+
+-- Nominals
+
 data E = A | B | C | D | E
   deriving (Show)
 
@@ -28,20 +73,7 @@ evil C = -2
 evil D = 1
 evil E = 2
 
-the :: [a] -> a
-the = head
-
-more :: (a -> Int) -> a -> a -> Bool
-more a x y = a x >= a y
-
-most :: (a -> Int) -> [a] -> [a]
-most a [] = []
-most a [x] = [x]
-most a (x : xs)
-  | more a x (the sortedTail) = x : sortedTail
-  | otherwise = the sortedTail : most a (x : drop 1 sortedTail)
-  where
-    sortedTail = most a xs
+-- Other stuff 
 
 most' :: (Show a) => (a -> Int) -> [a] -> IO [a]
 most' a e@[] = do

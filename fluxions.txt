@@ -1,7 +1,11 @@
+fluxions /flʌksɪj+ɒn+z/ [flʌk.si.jɒnz] are based on isaac newton 's concept of 
+"fluxions" /flʌks+jən+z/ [flʌk.ʃ(ə)nz]
+they are infinite dimentional vectors with powers of the constant ε differentiating the components
+
 in OT.hs, [2,7,5] represents the fluxion 2+7ε+5ε²
 where ε is a number such that 
-x∈ℝ, y∈ℝ, 0 < x, 0 < y ⇒ 0 < xε < y
 x∈ℝ, y∈ℝ, 0 ≠ x, 0 ≠ y ⇒ yεˣ ∉ ℝ
+x∈ℝ, y∈ℝ, 0 < x, 0 < y ⇒ 0 < xε < y
 
 ω is defined as such:
 ω = ε⁻¹
@@ -12,11 +16,17 @@ z∈ℝ<ε>, x∈ℝ, y∈ℝ, x < z < y ⇒ x < ℜ(z) < y
 
 the characteristic function f of a fluxion z is the function such that f(ω) = z
 p(z) = f ⇒ f(ω) = z
+(
+    I don't think "characteristic function" is a good name for this,
+    I have only really defined this as a concept because it is useful in the definition of rank.
+    I also feel this definition is probably not sufficient,
+    what I really mean is "take all the ωs in a fluxion and replace them with xs"
+)
 
 the rank of a fluxion is the largest power of ω that occurs in it and is defined as such:
 rank(z) = ln((O⁻¹∘p(z))(ω))/ln(ω)
 (
-    I think this^^^ definition needs explaining:
+    I think this definition needs explaining:
     in big O notation you can say that certain programs "are" O(x) or O(log(x)) etc.
     I have chosen to interpret this as the function of their time complexity *equaling* O(x) or O(log(x)) etc.
     O is a bijection but not a function (just like \x -> ±x).
@@ -79,3 +89,6 @@ d f x = f (x+ε) - f x
 ℜ . \x -> 2x + ε
 \x -> ℜ (2x + ε)
 \x -> 2x
+
+here's a playlist of videos that fluxions help you to have a deeper understanding of:
+https://youtube.com/playlist?list=PLpd7l38mvDXfyE-zmw2csetDhgDECd64n&si=EBUE1nkMUQ9Li1qh

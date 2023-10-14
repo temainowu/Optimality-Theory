@@ -13,8 +13,8 @@ type Fluxion = [Int]
 type Grammar = [Constraint]
 
 type PhoneClass = [Char]
--- PhoneClass is used when refering to classes of sounds
--- String is used when refering to a sequence of sounds
+-- PhoneClass (= [Char]) is used when refering to classes of phones
+-- String (= [Char]) is used when refering to a sequence of phones
 
 data Place = Labial | LabioDental | Alveolar | Palatal | Velar | LabioVelar deriving (Eq, Show)
 
@@ -78,9 +78,11 @@ sonoranceOf x
     where m = mannerOf x
 -}
 
+-- % is the set difference operator
 (%) :: PhoneClass -> PhoneClass -> PhoneClass
 xs % ys = [x | x <- xs, x `notElem` ys]
 
+-- index "abc" = [('a',[0]),('b',[1]),('c',[2])] 
 index :: String -> Lexeme
 index xs = zip xs (map (: []) [0..])
 
@@ -153,7 +155,11 @@ uniformity i o = length [x | (x,xps) <- o, length xps > 1]
 -- nasal agrees with place of following obstruent
 nasAgr :: Constraint
 nasAgr _ o = sum [auxNasAgr (a,b) | ((a,_),(b,_)) <- zip o (drop 1 o)]
-    where auxNasAgr (a, b) | a `elem` nas && b `elem` obs && place (a,b) = 0 | a `notElem` nas || b `notElem` obs = 0 | otherwise = 1
+    where 
+        auxNasAgr (a, b) 
+            | a `elem` nas && b `elem` obs && place (a,b) = 0 
+            | a `notElem` nas || b `notElem` obs = 0 
+            | otherwise = 1
 
 -- Main
 
@@ -202,7 +208,7 @@ _______|________________|________|
   ampa |       *!       |        |
 _______|________________|________|
 
-the forms; index "amba", index "anda", index "embi", [(n,1),(d,2)], and [] 
+the forms; index "amba", index "anda", index "embi", [('n',1),('d',2)], and [] 
 are all more harmonious forms in both examples,
 but they were not chosen because they were not in the input list.
 

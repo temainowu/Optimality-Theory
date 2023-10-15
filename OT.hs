@@ -1,10 +1,14 @@
-import GHC.CmmToAsm.AArch64.Instr (x0)
+import Test.QuickCheck
+import GHC.Data.FastString.Env (FastStringEnv)
 
 type FindFeature f = Char -> f
 
 type Comp = (Char,Char) -> Bool
 
 type Lexeme = [(Char, [Int])]
+-- should the first element of the tuples be of type Char?
+-- should it be String to account for phones that are more than one character long?
+-- should it be [Place, Manner, ...] to represent phones more abstractly?
 
 type Constraint = Lexeme -> Lexeme -> Int
 
@@ -22,28 +26,41 @@ data Manner = Stop | Fricative | Nasal | Trill | Tap | Approximant | Vowel deriv
 
 -- Classes of sounds
 
-universe = "pbmʙɸβwɱⱱfvʋtdnrɾszɹeuioasghjklzx"
+universe = "pbmʙɸβwɱⱱfvʋtdnrɾszɬɮɹlcɟɲçʝjʎkgŋxɣɰʟieɛæɪyøœɵəɐaɯɤʌɑʊuoɔɒ"
 obs = stop ++ fric
 res = universe % obs
-vowel = "aeiou"
+vowel = "ieɛæɪyøœɵəɐaɯɤʌɑʊuoɔɒ"
 consonant = universe % vowel
-voiced = "bβvdz" ++ res
+voiced = "bβvdzɮɟʝgɣ" ++ res
 unvoiced = universe % voiced
+rounded = "wyøœɵəɐaʊuoɔɒ"
+unrounded = universe % rounded
+lat = "ɬɮlʎʟ"
+lax = "ɪʊəɐ"
 
 -- manners
-stop = "pbtdkg"
-fric = "ɸβfvszhx"
-nas = "mɱn"
+stop = "pbtdcɟkg"
+fric = "ɸβfvszɬɮçʝxɣ"
+nas = "mɱnɲŋ"
 tap = "ⱱɾ"
 trill = "ʙr"
-appr = "wʋɹ"
+appr = "wʋɹljɰʎʟ"
+
+hi = "iɪyɵɯʊu"
+mhi = "eøɤo"
+mlo = "ɛœʌɔ"
+lo = "æɐaɑɒ"
+
+-- ə is not given a manner because it is true mid
 
 -- places
 lab = "pbmʙɸβ"
 labdent = "ɱⱱfvʋ"
-alv = "tdnrɾszɹ"
-vel = "kgx"
-labvel = "wuo"
+alv = "tdnrɾszɬɮɹl"
+pal = "cɟɲçʝjʎieɛæɪyøœ"
+vel = "kgŋxɣɰʟɯwɤʌɑʊuoɔɒ"
+
+-- ɵəɐa are not given places because they are central
 
 -- Auxiliary Functions
 
@@ -52,8 +69,8 @@ placeOf x
     | x `elem` lab = Labial
     | x `elem` labdent = LabioDental
     | x `elem` alv = Alveolar
+    | x `elem` pal = Palatal
     | x `elem` vel = Velar
-    | x `elem` labvel = LabioVelar
 
 mannerOf :: FindFeature Manner
 mannerOf x
@@ -144,7 +161,7 @@ dep i o = length [x | (x,xps) <- o, null xps]
 
 -- feature preservation
 ident :: Comp -> Constraint
-ident f i o = length [x | (x,xps) <- o, (y,[yp]) <- i, f (x,y), yp `elem` xps]
+ident f i o = length [x | (x,xps) <- o, (y,[yp]) <- i, not (f (x,y)), yp `elem` xps]
 
 -- no coalescence
 uniformity :: Constraint
@@ -165,6 +182,12 @@ nasAgr _ o = sum [auxNasAgr (a,b) | ((a,_),(b,_)) <- zip o (drop 1 o)]
 
 mostHarmonious :: Grammar -> String -> [Lexeme] -> [String]
 mostHarmonious g i os = map unIndex (mask (smallestFluxions (map (measure g (index i)) os)) os) 
+
+prop_mostHarmonious :: Grammar -> String -> Fluxion -> Lexeme -> [String]
+prop_mostHarmonious g i n o = fluxionLessThanOrEqual (measure g (index i) (head . mostHarmonious g i [o])) n
+
+-- quickCheck (prop_mostHarmonios *grammar* *input form* *harmony*)
+-- theorhetically should return a form of harmony greater than the inputed harmony if one exists
 
 -- Examples
 

@@ -172,19 +172,19 @@ uniformity i o = length [x | (x,xps) <- o, length xps > 1]
 -- nasal agrees with place of following obstruent
 nasAgr :: Constraint
 nasAgr _ o = sum [auxNasAgr (a,b) | ((a,_),(b,_)) <- zip o (drop 1 o)]
-    where 
-        auxNasAgr (a, b) 
-            | a `elem` nas && b `elem` obs && place (a,b) = 0 
-            | a `notElem` nas || b `notElem` obs = 0 
+    where
+        auxNasAgr (a, b)
+            | a `elem` nas && b `elem` obs && place (a,b) = 0
+            | a `notElem` nas || b `notElem` obs = 0
             | otherwise = 1
 
 -- Main
 
 mostHarmonious :: Grammar -> String -> [Lexeme] -> [String]
-mostHarmonious g i os = map unIndex (mask (smallestFluxions (map (measure g (index i)) os)) os) 
+mostHarmonious g i os = map unIndex (mask (smallestFluxions (map (measure g (index i)) os)) os)
 
-prop_mostHarmonious :: Grammar -> String -> Fluxion -> Lexeme -> [String]
-prop_mostHarmonious g i n o = fluxionLessThanOrEqual (measure g (index i) (head . mostHarmonious g i [o])) n
+prop_mostHarmonious :: Grammar -> String -> Fluxion -> Lexeme -> Bool
+prop_mostHarmonious g i n o = fluxionLessThanOrEqual (measure g (index i) (head (mask (smallestFluxions [measure g (index i) o]) [o]))) n
 
 -- quickCheck (prop_mostHarmonios *grammar* *input form* *harmony*)
 -- theorhetically should return a form of harmony greater than the inputed harmony if one exists

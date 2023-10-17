@@ -152,7 +152,7 @@ fluxionLessThanOrEqual (x:xs,n) (y:ys,m)
 -- so some of the above cases are redundant
 
 smallestFluxion :: [Fluxion] -> Fluxion
-smallestFluxion [] = ([1], 1)
+smallestFluxion [] = ([1], 9999999999)
 smallestFluxion (x:xs)
     | fluxionLessThanOrEqual x (smallestFluxion xs) = x
     | otherwise = smallestFluxion xs

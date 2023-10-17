@@ -1,9 +1,8 @@
 import Test.QuickCheck
-import GHC.Data.FastString.Env (FastStringEnv)
 
 type FindFeature f = Char -> f
 
-type Comp = (Char,Char) -> Bool
+type Comp = Char -> Char -> Bool
 
 type Lexeme = [(Char, [Int])]
 -- should the first element of the tuples be of type Char?
@@ -12,13 +11,18 @@ type Lexeme = [(Char, [Int])]
 
 type Constraint = Lexeme -> Lexeme -> Int
 
-type Fluxion = [Int]
+type Fluxion = ([Int], Int)
+-- Fluxions are used to represent the harmony of a form
+-- the smaller the fluxion, the more harmonic the form
+-- the type Fluxion cannot represent fluxion with negative powers of ε
+-- see fluxions.txt for more information on fluxions
 
 type Grammar = [Constraint]
 
 type PhoneClass = [Char]
 -- PhoneClass (= [Char]) is used when refering to classes of phones
 -- String (= [Char]) is used when refering to a sequence of phones
+-- Lexeme (= [(Char, [Int])]) is used when refering to an indexed sequence of phones
 
 data Place = Labial | LabioDental | Alveolar | Palatal | Velar | LabioVelar deriving (Eq, Show)
 
@@ -26,17 +30,19 @@ data Manner = Stop | Fricative | Nasal | Trill | Tap | Approximant | Vowel deriv
 
 -- Classes of sounds
 
+boundaries = ".+"
 universe = "pbmʙɸβwɱⱱfvʋtdnrɾszɬɮɹlcɟɲçʝjʎkgŋxɣɰʟieɛæɪyøœɵəɐaɯɤʌɑʊuoɔɒ"
 obs = stop ++ fric
-res = universe % obs
+res = complement obs
 vowel = "ieɛæɪyøœɵəɐaɯɤʌɑʊuoɔɒ"
-consonant = universe % vowel
+consonant = complement vowel
 voiced = "bβvdzɮɟʝgɣ" ++ res
-unvoiced = universe % voiced
+unvoiced = complement voiced
 rounded = "wyøœɵəɐaʊuoɔɒ"
-unrounded = universe % rounded
+unrounded = complement rounded
 lat = "ɬɮlʎʟ"
 lax = "ɪʊəɐ"
+tense = complement lax
 
 -- manners
 stop = "pbtdcɟkg"
@@ -99,31 +105,62 @@ sonoranceOf x
 (%) :: PhoneClass -> PhoneClass -> PhoneClass
 xs % ys = [x | x <- xs, x `notElem` ys]
 
+-- complement of set
+complement :: PhoneClass -> PhoneClass
+complement xs = universe % xs
+
 -- index "abc" = [('a',[0]),('b',[1]),('c',[2])] 
 index :: String -> Lexeme
 index xs = zip xs (map (: []) [0..])
 
+-- unIndex [('a',[0, 1]),('b',[]),('c',[2, 3, 4])] = "abc"
 unIndex :: Lexeme -> String
-unIndex = map fst
+unIndex = filter (/= '+') . map fst
+
+affix :: String -> String -> String
+affix xs ys = xs ++ '+' : ys
+
+groups :: Int -> [a] -> [[a]]
+groups n xs = [take n (drop i xs) | i <- [0..length xs - n]]
+
+syllables :: String -> [String]
+syllables [] = []
+syllables ('.':xs) = syllables xs
+syllables xs = (\ f (a,as) -> a : f as) syllables (break (== '.') xs)
 
 -- Fluxions
 
 fluxionLessThanOrEqual :: Fluxion -> Fluxion -> Bool
-fluxionLessThanOrEqual [] [] = True
-fluxionLessThanOrEqual (x:xs) (y:ys)
-    | x == y = fluxionLessThanOrEqual xs ys
-    | x < y = True
-    | x > y = False
+fluxionLessThanOrEqual ([],0) ([],0) = True
+fluxionLessThanOrEqual ([],n) (y:ys,m)
+    | y > 0 = True
+    | y < 0 = False
+    | otherwise = fluxionLessThanOrEqual ([],0) (ys,m-1)
+fluxionLessThanOrEqual (x:xs,n) ([],m)
+    | x > 0 = False
+    | x < 0 = True
+    | otherwise = fluxionLessThanOrEqual (xs,n-1) ([],0)
+fluxionLessThanOrEqual (x:xs,n) (y:ys,m)
+    | n == m = case () of
+       () | x < y -> True
+          | x > y -> False
+          | otherwise -> fluxionLessThanOrEqual (xs,n-1) (ys,m-1)
+    | otherwise = fluxionLessThanOrEqual (x-1:xs,n) (y-1:ys,m)
+
+-- in this program all fluxions are of the same length, do not contain negative values, and the right of the pair is always 0
+-- so some of the above cases are redundant
 
 smallestFluxion :: [Fluxion] -> Fluxion
-smallestFluxion [] = [] !! 1
+smallestFluxion [] = ([1], 1)
 smallestFluxion [x] = x
 smallestFluxion (x:xs)
     | fluxionLessThanOrEqual x (smallestFluxion xs) = x
     | otherwise = smallestFluxion xs
 
+-- fluxionLessThanOrEqual x (y:ys) = x
+
 smallestFluxions :: [Fluxion] -> [Bool]
-smallestFluxions xs = map (\ x -> x == smallestFluxion xs) xs
+smallestFluxions xs = map (== smallestFluxion xs) xs
 
 mask :: [Bool] -> [a] -> [a]
 mask [] _ = []
@@ -131,25 +168,36 @@ mask _ [] = []
 mask (True:bs) (x:xs) = x : mask bs xs
 mask (False:bs) (x:xs) = mask bs xs
 
-measure :: Grammar -> Lexeme -> Lexeme -> Fluxion
-measure fs i o = map (\ f -> f i o) fs
+harmony :: Grammar -> Lexeme -> Lexeme -> Fluxion
+harmony g i o = (map (\ f -> f i o) g,0)
 
--- Comparisons
+-- IO comparisons:
 
+-- same place
 place :: Comp
-place (a,b)
+place a b
     | placeOf a == placeOf b = True
     | otherwise = False
 
+-- same voicing of obstuents
 obsVoice :: Comp
-obsVoice (a,b)
+obsVoice a b
     | a `elem` voiced % res && b `elem` voiced % res = True
     | a `elem` universe % voiced && b `elem` universe % voiced = True
     | otherwise = False
 
+-- I->O comparisons:
+
+-- nasality preservation
+nasal :: Comp
+nasal a b
+    | a `notElem` nas = True
+    | a `elem` nas && b `elem` nas = True
+    | otherwise = False
+
 -- Constraints
 
--- faithfulness constraints (care about first argument)
+-- faithfulness constraints (care about both arguments)
 
 -- no deletion
 maxi :: Constraint
@@ -161,7 +209,7 @@ dep i o = length [x | (x,xps) <- o, null xps]
 
 -- feature preservation
 ident :: Comp -> Constraint
-ident f i o = length [x | (x,xps) <- o, (y,[yp]) <- i, not (f (x,y)), yp `elem` xps]
+ident f i o = length [x | (x,xps) <- o, (y,[yp]) <- i, not (f x y), yp `elem` xps]
 
 -- no coalescence
 uniformity :: Constraint
@@ -171,22 +219,28 @@ uniformity i o = length [x | (x,xps) <- o, length xps > 1]
 
 -- nasal agrees with place of following obstruent
 nasAgr :: Constraint
-nasAgr _ o = sum [auxNasAgr (a,b) | ((a,_),(b,_)) <- zip o (drop 1 o)]
+nasAgr _ o = sum [auxNasAgr a b | [a,b] <- groups 2 (unIndex o)]
     where
-        auxNasAgr (a, b)
-            | a `elem` nas && b `elem` obs && place (a,b) = 0
+        auxNasAgr a b
+            | a `elem` nas && b `elem` obs && place a b = 0
             | a `notElem` nas || b `notElem` obs = 0
             | otherwise = 1
+
+-- syllable constraints:
+
+-- no complex syllables
+noComplex :: Constraint
+noComplex _ o = length [ x | x <- groups 3 (unIndex o), '.' `notElem` x]
 
 -- Main
 
 mostHarmonious :: Grammar -> String -> [Lexeme] -> [String]
-mostHarmonious g i os = map unIndex (mask (smallestFluxions (map (measure g (index i)) os)) os)
+mostHarmonious g i os = map unIndex (mask (smallestFluxions (map (harmony g (index i)) os)) os)
 
 prop_mostHarmonious :: Grammar -> String -> Fluxion -> Lexeme -> Bool
-prop_mostHarmonious g i n o = fluxionLessThanOrEqual (measure g (index i) (head (mask (smallestFluxions [measure g (index i) o]) [o]))) n
+prop_mostHarmonious g i n o = fluxionLessThanOrEqual n (harmony g (index i) (head (mask (smallestFluxions [harmony g (index i) o]) [o])))
 
--- quickCheck (prop_mostHarmonios *grammar* *input form* *harmony*)
+-- quickCheck (prop_mostHarmonious *grammar* *input form* *harmony*)
 -- theorhetically should return a form of harmony greater than the inputed harmony if one exists
 
 -- Examples

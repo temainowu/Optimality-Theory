@@ -2,7 +2,7 @@ fluxions /flʌksɪj+ɒn+z/ [flʌk.si.jɒnz] are based on isaac newton 's concept
 "fluxions" /flʌks+jən+z/ [flʌk.ʃ(ə)nz]
 they are infinite dimentional vectors with powers of the constant ε differentiating the components
 
-in OT.hs, [2,7,5] represents the fluxion 2+7ε+5ε²
+in OT.hs, ([a,b,c],n) represents the fluxion (a+bε+cε²)ωⁿ
 where ε is a number such that 
 x∈ℝ, y∈ℝ, 0 ≠ x, 0 ≠ y ⇒ yεˣ ∉ ℝ
 x∈ℝ, y∈ℝ, 0 < x, 0 < y ⇒ 0 < xε < y
@@ -58,19 +58,6 @@ ln(x) = ℜ(x^ε/ε - ω) = ℜ((x^ε-1)/ε)
 e = ℜ((1+ε)^ω)
 
 fake haskell code:
-
-listToFluxion :: [ℝ] -> ℝ<ε>
-listToFluxion [] = 0
-listToFluxion (x:xs) = x + ε * listToFluxion xs
-
-fluxionToList :: ℝ<ε> -> [ℝ]
-fluxionToList 0 = []
-fluxionToList x = ℜ x' : fluxionToList (x' - ℜ x')
-    where x' = norm x
-
-ℜ :: ℝ<ε> -> ℝ
-ℜ = head . fluxionToList
-
 (/') :: (ℝ -> ℝ) -> (ℝ -> ℝ) -> (ℝ -> ℝ)
 (f /' g) x = (f x) / (g x)
 

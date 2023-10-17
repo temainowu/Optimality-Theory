@@ -1,28 +1,28 @@
 import Test.QuickCheck
 
-type FindFeature f = Char -> f
-
-type Comp = Char -> Char -> Bool
-
-type Lexeme = [(Char, [Int])]
--- should the first element of the tuples be of type Char?
+type Phone = Char
+-- should Phone be of type Char?
 -- should it be String to account for phones that are more than one character long?
 -- should it be [Place, Manner, ...] to represent phones more abstractly?
+
+type FindFeature f = Phone -> f
+
+type Comp = Phone -> Phone -> Bool
+
+type Lexeme = [(Phone, [Int])]
 
 type Constraint = Lexeme -> Lexeme -> Int
 
 type Fluxion = ([Int], Int)
 -- Fluxions are used to represent the harmony of a form
 -- the smaller the fluxion, the more harmonic the form
--- the type Fluxion cannot represent fluxion with negative powers of ε
 -- see fluxions.txt for more information on fluxions
 
 type Grammar = [Constraint]
 
-type PhoneClass = [Char]
--- PhoneClass (= [Char]) is used when refering to classes of phones
--- String (= [Char]) is used when refering to a sequence of phones
--- Lexeme (= [(Char, [Int])]) is used when refering to an indexed sequence of phones
+type PhoneClass = [Phone]
+-- PhoneClass (= [Phone]) is used when refering to classes of phones
+-- String (= [Phone]) is used when refering to a sequence of phones
 
 data Place = Labial | LabioDental | Alveolar | Palatal | Velar | LabioVelar deriving (Eq, Show)
 

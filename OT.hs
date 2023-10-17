@@ -131,21 +131,22 @@ syllables xs = (\ f (a,as) -> a : f as) syllables (break (== '.') xs)
 -- Fluxions
 
 fluxionLessThanOrEqual :: Fluxion -> Fluxion -> Bool
-fluxionLessThanOrEqual ([],0) ([],0) = True
+fluxionLessThanOrEqual ([],n) ([],m) = True
 fluxionLessThanOrEqual ([],n) (y:ys,m)
-    | y > 0 = True
-    | y < 0 = False
+    | y /= 0 = y > 0
     | otherwise = fluxionLessThanOrEqual ([],0) (ys,m-1)
 fluxionLessThanOrEqual (x:xs,n) ([],m)
-    | x > 0 = False
-    | x < 0 = True
+    | x /= 0 = x < 0
     | otherwise = fluxionLessThanOrEqual (xs,n-1) ([],0)
 fluxionLessThanOrEqual (x:xs,n) (y:ys,m)
+    | x == 0 = fluxionLessThanOrEqual (xs,n-1) (y:ys,m)
+    | y == 0 = fluxionLessThanOrEqual (x:xs,n) (ys,m-1)
+    | n < m = y > 0
+    | n > m = x < 0
     | n == m = case () of
        () | x < y -> True
           | x > y -> False
           | otherwise -> fluxionLessThanOrEqual (xs,n-1) (ys,m-1)
-    | otherwise = fluxionLessThanOrEqual (x-1:xs,n) (y-1:ys,m)
 
 -- in this program all fluxions are of the same length, do not contain negative values, and the right of the pair is always 0
 -- so some of the above cases are redundant

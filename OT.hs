@@ -51,7 +51,6 @@ nas = "mɱnɲŋ"
 tap = "ⱱɾ"
 trill = "ʙr"
 appr = "wʋɹljɰʎʟ"
-
 hi = "iɪyɵɯʊu"
 mhi = "eøɤo"
 mlo = "ɛœʌɔ"
@@ -130,31 +129,50 @@ syllables xs = (\ f (a,as) -> a : f as) syllables (break (== '.') xs)
 
 -- Fluxions
 
-fluxionLessThanOrEqual :: Fluxion -> Fluxion -> Bool
-fluxionLessThanOrEqual ([],n) ([],m) = True
-fluxionLessThanOrEqual ([],n) (y:ys,m)
+fluxionLEq :: Fluxion -> Fluxion -> Bool
+fluxionLEq ([],n) ([],m) = True
+fluxionLEq ([],n) (y:ys,m)
     | y /= 0 = y > 0
-    | otherwise = fluxionLessThanOrEqual ([],0) (ys,m-1)
-fluxionLessThanOrEqual (x:xs,n) ([],m)
+    | otherwise = fluxionLEq ([],0) (ys,m-1)
+fluxionLEq (x:xs,n) ([],m)
     | x /= 0 = x < 0
-    | otherwise = fluxionLessThanOrEqual (xs,n-1) ([],0)
-fluxionLessThanOrEqual (x:xs,n) (y:ys,m)
-    | x == 0 = fluxionLessThanOrEqual (xs,n-1) (y:ys,m)
-    | y == 0 = fluxionLessThanOrEqual (x:xs,n) (ys,m-1)
+    | otherwise = fluxionLEq (xs,n-1) ([],0)
+fluxionLEq (x:xs,n) (y:ys,m)
+    | x == 0 = fluxionLEq (xs,n-1) (y:ys,m)
+    | y == 0 = fluxionLEq (x:xs,n) (ys,m-1)
     | n < m = y > 0
     | n > m = x < 0
     | n == m = case () of
        () | x < y -> True
           | x > y -> False
-          | otherwise -> fluxionLessThanOrEqual (xs,n-1) (ys,m-1)
+          | otherwise -> fluxionLEq (xs,n-1) (ys,m-1)
+
+-- equivalent to fluxionLEq written by cosmo bobak (https://github.com/cosmobobak):
+
+-- takes two fluxions to representations with the same "n" and equal-length lists
+doubleNormalise :: ([Int], Int) -> ([Int], Int) -> (([Int], Int), ([Int], Int))
+doubleNormalise ([], n) ([], m) = doubleNormalise ([0], n) ([0], m)
+doubleNormalise r@(xs, n) l@(ys, m)
+  -- if the offsets are the same, we just need to pad the shorter list with zeros
+  | n == m = ((xs ++ replicate xsMakeUp 0, n), (ys ++ replicate ysMakeUp 0, m))
+  -- if the left fluxion has a smaller offset, we need to left-pad it with zeros
+  | n < m = doubleNormalise (replicate (m - n) 0 ++ xs, m) l
+  -- if the right fluxion has a smaller offset, we need to left-pad it with zeros
+  | otherwise = doubleNormalise r (replicate (n - m) 0 ++ ys, n)
+  where
+    xsMakeUp = max (length ys - length xs) 0
+    ysMakeUp = max (length xs - length ys) 0
+
+leq :: ([Int], Int) -> ([Int], Int) -> Bool
+leq x y = uncurry (\(xs, _) (ys, _) -> xs <= ys) (doubleNormalise x y)
 
 -- in this program all fluxions are of the same length, do not contain negative values, and the right of the pair is always 0
 -- so some of the above cases are redundant
 
 smallestFluxion :: [Fluxion] -> Fluxion
-smallestFluxion [] = ([1], 9999999999)
+smallestFluxion [x] = x
 smallestFluxion (x:xs)
-    | fluxionLessThanOrEqual x (smallestFluxion xs) = x
+    | fluxionLEq x (smallestFluxion xs) = x
     | otherwise = smallestFluxion xs
 
 -- fluxionLessThanOrEqual x (y:ys) = x
@@ -238,7 +256,7 @@ mostHarmonious :: Grammar -> String -> [Lexeme] -> [String]
 mostHarmonious g i os = map unIndex (mask (smallestFluxions (map (harmony g (index i)) os)) os)
 
 prop_mostHarmonious :: Grammar -> String -> Fluxion -> Lexeme -> Bool
-prop_mostHarmonious g i n o = fluxionLessThanOrEqual n (harmony g (index i) (head (mask (smallestFluxions [harmony g (index i) o]) [o])))
+prop_mostHarmonious g i n o = fluxionLEq n (harmony g (index i) (head (mask (smallestFluxions [harmony g (index i) o]) [o])))
 
 -- quickCheck (prop_mostHarmonious *grammar* *input form* *harmony*)
 -- theorhetically should return a form of harmony greater than the inputed harmony if one exists

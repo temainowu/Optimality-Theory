@@ -49,7 +49,7 @@ x∈ℝ, f(x)∈ℝ ⇒ f⁽ⁿ⁾(x) = n!ℜ(f(x+ε)/(ε^n))
 fluxions are useful when working with zero as ε is pretty much zero but one can divide by it
 you can replace awkward zeros with εs and take ℜ when you are done and you'll probably be right
 (
-    for any continuous function f from reals to reals I conjecture that when f(0) is defined f(0) = ℜ(f(ε))
+    for any continuous function f from reals to reals, I conjecture that when f(0) is defined, f(0) = ℜ(f(ε))
     this is trivially true if f is the identity function but I don't know if there are counter examples
 )
 

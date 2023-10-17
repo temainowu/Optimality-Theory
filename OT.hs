@@ -170,6 +170,7 @@ leq x y = uncurry (\(xs, _) (ys, _) -> xs <= ys) (doubleNormalise x y)
 -- so some of the above cases are redundant
 
 smallestFluxion :: [Fluxion] -> Fluxion
+smallestFluxion [] = error "no fluxions"
 smallestFluxion [x] = x
 smallestFluxion (x:xs)
     | fluxionLEq x (smallestFluxion xs) = x

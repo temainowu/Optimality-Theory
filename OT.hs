@@ -169,8 +169,11 @@ doubleNormalise r@(xs, n) l@(ys, m)
     xsMakeUp = max (length ys - length xs) 0
     ysMakeUp = max (length xs - length ys) 0
 
-leq :: ([Int], Int) -> ([Int], Int) -> Bool
+leq :: Fluxion -> Fluxion -> Bool
 leq x y = uncurry (\(xs, _) (ys, _) -> xs <= ys) (doubleNormalise x y)
+
+prop_leq :: Fluxion -> Fluxion -> Bool
+prop_leq x y = leq x y == fluxionLEq x y
 
 -- in this program all fluxions are of the same length, do not contain negative values, and the right of the pair is always 0
 -- so some of the above cases are redundant
@@ -196,6 +199,7 @@ mask (False:bs) (x:xs) = mask bs xs
 eval :: Grammar -> Lexeme -> Lexeme -> Fluxion
 eval g i o = (map (\ f -> f i o) g,0)
 
+-- fix: does not generate all possible forms
 gen :: String -> [String]
 gen [] = []
 gen (x:xs) = map (: xs) (complement [x]) ++ map (x :) (gen xs)
@@ -236,9 +240,11 @@ maxi i o = length [ 1 | (y,[yp]) <- i, or [yp `elem` xps | (x,xps) <- o]]
 dep :: Constraint
 dep i o = length [ 1 | (x,xps) <- o, null xps]
 
--- feature preservation
+-- feature similarity/preservation
 ident :: Comp -> Constraint
 ident f i o = length [ 1 | (x,xps) <- o, (y,[yp]) <- i, not (f x y), yp `elem` xps]
+-- "ident nasal" = "IdentI->O(nasal)" in OT
+-- "ident place" = "IdentIO(place)" in OT
 
 -- no coalescence
 uniformity :: Constraint

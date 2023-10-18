@@ -1,5 +1,4 @@
 import Test.QuickCheck
-import GHC.Base (VecElem(Int16ElemRep))
 
 type Phone = Char
 -- should Phone be of type Char?
@@ -17,6 +16,8 @@ type Constraint = Lexeme -> Lexeme -> Int
 type Fluxion = ([Int], Int)
 -- Fluxions are used to represent the harmony of a form
 -- the smaller the fluxion, the more harmonic the form
+-- ([a₀,a₁,...,aₖ],n) represents the fluxion (a₀ε⁰+a₁ε¹+...+aₖεᵏ)ωⁿ
+-- this is able to represent all possible finitely long integer fluxions
 -- see fluxions.txt for more information on fluxions
 
 type Grammar = [Constraint]

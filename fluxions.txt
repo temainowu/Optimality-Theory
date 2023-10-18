@@ -1,8 +1,6 @@
 fluxions /flʌksɪj+ɒn+z/ [flʌk.si.jɒnz] are based on isaac newton 's concept of 
 "fluxions" /flʌks+jən+z/ [flʌk.ʃ(ə)nz]
 they are infinite dimentional vectors with powers of the constant ε differentiating the components
-
-in OT.hs, ([a,b,c],n) represents the fluxion (a+bε+cε²)ωⁿ
 where ε is a number such that 
 x∈ℝ, y∈ℝ, 0 ≠ x, 0 ≠ y ⇒ yεˣ ∉ ℝ
 x∈ℝ, y∈ℝ, 0 < x, 0 < y ⇒ 0 < xε < y

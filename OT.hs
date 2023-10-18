@@ -11,7 +11,7 @@ type Comp = Phone -> Phone -> Bool
 
 type Lexeme = [(Phone, [Int])]
 
-type Constraint = Lexeme -> Lexeme -> Int
+type Constraint = Lexeme -> Lexeme -> Int 
 
 type Fluxion = ([Int], Int)
 -- Fluxions are used to represent the harmony of a form
@@ -136,6 +136,14 @@ sizeOfCoda (x:y:xs)
 
 (≻) :: Lexeme -> Lexeme -> Grammar -> String -> Bool
 x ≻ y = \g i -> fluxionLEq (eval g (index i) x) (eval g (index i) y)
+
+{- not possible because Constraint can't be an instance of Eq
+(⪢) :: Constraint -> Constraint -> Grammar -> Bool
+x ⪢ y = \g -> find g x < find g y
+
+find :: Eq a => [a] -> a -> Int
+find xs y = head [i | (i,x) <- zip [0..] xs, y == x]
+-}
 
 -- Fluxions
 

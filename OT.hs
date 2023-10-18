@@ -340,6 +340,6 @@ _______|________________|________|
 
 the forms; index "amba", index "anda", index "embi", [('n',1),('d',2)], and [] 
 are all more harmonious forms in both examples,
-but they were not chosen because they were not in the input list.
+but they were not chosen because they were not in the list of possible outputs.
 
 -}

@@ -267,9 +267,9 @@ nasAgr _ o = sum [auxNasAgr a b | [a,b] <- groups 2 (unIndex o)]
 linearity :: Constraint
 linearity _ o = length [ 1 | [as,bs] <- groups 2 (map snd o), or [ any (< a) bs | a <- as]]
 
--- no front vowels
-noFront :: Constraint
-noFront _ o = length [ 1 | (x,xps) <- o, x `elem` pal && x `elem` vowel && x `elem` rounded]
+-- no non-back rounded vowels
+noFrontRound :: Constraint
+noFrontRound _ o = length [ 1 | (x,xps) <- o, x `notElem` vel && x `elem` vowel && x `elem` rounded]
 
 -- syllable constraints:
 

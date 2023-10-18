@@ -126,6 +126,13 @@ syllables [] = []
 syllables ('.':xs) = syllables xs
 syllables xs = (\ f (a,as) -> a : f as) syllables (break (== '.') xs)
 
+increasing :: [Int] -> Int
+increasing [] = 0
+increasing [x] = 0
+increasing (x:y:xs)
+    | x > y = 1 + increasing (y:xs)
+    | otherwise = 0 + increasing (y:xs)
+
 -- Fluxions
 
 fluxionLEq :: Fluxion -> Fluxion -> Bool
@@ -252,6 +259,10 @@ nasAgr _ o = sum [auxNasAgr a b | [a,b] <- groups 2 (unIndex o)]
 linearity :: Constraint
 linearity _ o = length [ 1 | [as,bs] <- groups 2 (map snd o), or [ any (< a) bs | a <- as]]
 
+-- no front vowels
+noFront :: Constraint
+noFront _ o = length [ 1 | (x,xps) <- o, x `elem` pal && x `elem` vowel && x `elem` rounded]
+
 -- syllable constraints:
 
 -- no complex syllables
@@ -261,13 +272,10 @@ noComplex _ o = length [ x | x <- groups 3 (unIndex o), '.' `notElem` x]
 -- no coda
 noCoda :: Constraint
 noCoda _ o = sum (map (increasing . map sonorityOf) (syllables (unIndex o)))
-    where
-        increasing :: [Int] -> Int
-        increasing [] = 0
-        increasing [x] = 0
-        increasing (x:y:xs)
-            | x > y = 1 + increasing (y:xs)
-            | otherwise = 0 + increasing (y:xs)
+
+-- no empty onset
+onset :: Constraint
+onset _ o = sum (map (increasing . take 2 . map sonorityOf) (syllables (unIndex o)))
 
 -- Main
 

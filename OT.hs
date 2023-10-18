@@ -314,12 +314,12 @@ so the output form is "ampa" because 'm' agrees with 'p' in place.
 
 tableu:
 
-  amda | nasAgr | ident obsVoice |
-_______|________|________________|
-  amda |   *!   |                |
-_______|________|________________|
-> ampa |        |       *        |
-_______|________|________________|
+  amda │ nasAgr │ indent obsVoice │
+───────┼────────┼─────────────────┤
+  amda │   *!   │                 │
+───────┼────────┼─────────────────┤
+> ampa │        │        *        │
+───────┴────────┴─────────────────┘
 
 example b)
 > mostHarmonious [ident obsVoice, nasAgr] "amda" [index "ampa", index "amda"]
@@ -331,12 +331,12 @@ so the output form is "amda" because 'd' is voiced,
 
 tableu:
 
-  amda | ident obsVoice | nasAgr |
-_______|________________|________|
-> amda |                |   *    |
-_______|________________|________|
-  ampa |       *!       |        |
-_______|________________|________|
+  amda │ ident obsVoice │ nasAgr │
+───────┼────────────────┼────────┤
+> amda │                │   *    │
+───────┼────────────────┼────────┤
+  ampa │       *!       │        │
+───────┴────────────────┴────────┘
 
 the forms; index "amba", index "anda", index "embi", [('n',1),('d',2)], and [] 
 are all more harmonious forms in both examples,

@@ -1,4 +1,5 @@
 import Test.QuickCheck
+import GHC.Base (VecElem(Int16ElemRep))
 
 type Phone = Char
 -- should Phone be of type Char?
@@ -30,7 +31,7 @@ data Manner = Stop | Fricative | Nasal | Trill | Tap | Approximant | Vowel deriv
 
 -- Classes of sounds
 
-boundaries = ".+"
+boundary = ".+"
 universe = "pbmʙɸβwɱⱱfvʋtdnrɾszɬɮɹlcɟɲçʝjʎkgŋxɣɰʟieɛæɪyøœɵəɐaɯɤʌɑʊuoɔɒ"
 obs = stop ++ fric
 res = complement obs
@@ -87,18 +88,16 @@ mannerOf x
     | x `elem` appr = Approximant
     | x `elem` vowel = Vowel
 
-{-
-sonoranceOf :: FindFeature Int
-sonoranceOf x 
+sonorityOf :: FindFeature Int
+sonorityOf x
     | m == Stop = 0
     | m == Fricative = 1
     | m == Nasal = 2
     | m == Trill = 3
-    | m == Tap = 4 
+    | m == Tap = 4
     | m == Approximant = 5
     | m == Vowel = 6
     where m = mannerOf x
--}
 
 -- % is the set difference operator
 (%) :: PhoneClass -> PhoneClass -> PhoneClass
@@ -258,6 +257,17 @@ linearity _ o = length [ 1 | [as,bs] <- groups 2 (map snd o), or [ any (< a) bs 
 -- no complex syllables
 noComplex :: Constraint
 noComplex _ o = length [ x | x <- groups 3 (unIndex o), '.' `notElem` x]
+
+-- no coda
+noCoda :: Constraint
+noCoda _ o = sum (map (increasing . map sonorityOf) (syllables (unIndex o)))
+    where
+        increasing :: [Int] -> Int
+        increasing [] = 0
+        increasing [x] = 0
+        increasing (x:y:xs)
+            | x > y = 1 + increasing (y:xs)
+            | otherwise = 0 + increasing (y:xs)
 
 -- Main
 

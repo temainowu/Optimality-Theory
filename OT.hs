@@ -187,8 +187,12 @@ mask _ [] = []
 mask (True:bs) (x:xs) = x : mask bs xs
 mask (False:bs) (x:xs) = mask bs xs
 
-harmony :: Grammar -> Lexeme -> Lexeme -> Fluxion
-harmony g i o = (map (\ f -> f i o) g,0)
+eval :: Grammar -> Lexeme -> Lexeme -> Fluxion
+eval g i o = (map (\ f -> f i o) g,0)
+
+gen :: String -> [String]
+gen [] = []
+gen (x:xs) = map (: xs) (complement [x]) ++ map (x :) (gen xs)
 
 -- IO comparisons:
 
@@ -220,19 +224,19 @@ nasal a b
 
 -- no deletion
 maxi :: Constraint
-maxi i o = length [y | (y,[yp]) <- i, or [yp `elem` xps | (x,xps) <- o]]
+maxi i o = length [ 1 | (y,[yp]) <- i, or [yp `elem` xps | (x,xps) <- o]]
 
 -- no epenthesis
 dep :: Constraint
-dep i o = length [x | (x,xps) <- o, null xps]
+dep i o = length [ 1 | (x,xps) <- o, null xps]
 
 -- feature preservation
 ident :: Comp -> Constraint
-ident f i o = length [x | (x,xps) <- o, (y,[yp]) <- i, not (f x y), yp `elem` xps]
+ident f i o = length [ 1 | (x,xps) <- o, (y,[yp]) <- i, not (f x y), yp `elem` xps]
 
 -- no coalescence
 uniformity :: Constraint
-uniformity i o = length [x | (x,xps) <- o, length xps > 1]
+uniformity i o = length [ 1 | (x,xps) <- o, length xps > 1]
 
 -- markedness constraints (ignore first argument)
 
@@ -245,6 +249,10 @@ nasAgr _ o = sum [auxNasAgr a b | [a,b] <- groups 2 (unIndex o)]
             | a `notElem` nas || b `notElem` obs = 0
             | otherwise = 1
 
+-- linear order preservation/no metathesis (usually classed as a faithfulness constraint)
+linearity :: Constraint
+linearity _ o = length [ 1 | [as,bs] <- groups 2 (map snd o), or [ any (< a) bs | a <- as]]
+
 -- syllable constraints:
 
 -- no complex syllables
@@ -254,10 +262,10 @@ noComplex _ o = length [ x | x <- groups 3 (unIndex o), '.' `notElem` x]
 -- Main
 
 mostHarmonious :: Grammar -> String -> [Lexeme] -> [String]
-mostHarmonious g i os = map unIndex (mask (smallestFluxions (map (harmony g (index i)) os)) os)
+mostHarmonious g i os = map unIndex (mask (smallestFluxions (map (eval g (index i)) os)) os)
 
 prop_mostHarmonious :: Grammar -> String -> Fluxion -> Lexeme -> Bool
-prop_mostHarmonious g i n o = fluxionLEq n (harmony g (index i) (head (mask (smallestFluxions [harmony g (index i) o]) [o])))
+prop_mostHarmonious g i n o = fluxionLEq n (eval g (index i) (head (mask (smallestFluxions [eval g (index i) o]) [o])))
 
 -- quickCheck (prop_mostHarmonious *grammar* *input form* *harmony*)
 -- theorhetically should return a form of harmony greater than the inputed harmony if one exists

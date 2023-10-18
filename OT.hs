@@ -256,6 +256,7 @@ nasAgr _ o = sum [auxNasAgr a b | [a,b] <- groups 2 (unIndex o)]
             | otherwise = 1
 
 -- linear order preservation/no metathesis (usually classed as a faithfulness constraint)
+-- fix: [('b',[1]),('c',[2]),('a',[0])] gives 1 violation but should give 2
 linearity :: Constraint
 linearity _ o = length [ 1 | [as,bs] <- groups 2 (map snd o), or [ any (< a) bs | a <- as]]
 
@@ -273,7 +274,7 @@ noComplex _ o = length [ x | x <- groups 3 (unIndex o), '.' `notElem` x]
 noCoda :: Constraint
 noCoda _ o = sum (map (increasing . map sonorityOf) (syllables (unIndex o)))
 
--- no empty onset
+-- no empty onset - fix: "sto" gives violation but "o" does not
 onset :: Constraint
 onset _ o = sum (map (increasing . take 2 . map sonorityOf) (syllables (unIndex o)))
 

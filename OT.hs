@@ -264,6 +264,9 @@ uniformity i o = length [ 1 | (x,xps) <- o, length xps > 1]
 
 -- markedness constraints (ignore first argument)
 
+agree :: Comp -> Constraint
+agree f _ o = length [ 1 | [a,b] <- groups 2 (unIndex o), not (f a b)]
+
 -- nasal agrees with place of following obstruent
 nasAgr :: Constraint
 nasAgr _ o = sum [auxNasAgr a b | [a,b] <- groups 2 (unIndex o)]

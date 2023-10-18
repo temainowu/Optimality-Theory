@@ -127,12 +127,12 @@ syllables [] = []
 syllables ('.':xs) = syllables xs
 syllables xs = (\ f (a,as) -> a : f as) syllables (break (== '.') xs)
 
-increasing :: [Int] -> Int
-increasing [] = 0
-increasing [x] = 0
-increasing (x:y:xs)
-    | x > y = 1 + increasing (y:xs)
-    | otherwise = 0 + increasing (y:xs)
+sizeOfCoda :: String -> Int
+sizeOfCoda [] = 0
+sizeOfCoda [x] = 0
+sizeOfCoda (x:y:xs)
+    | sonorityOf x > sonorityOf y = 1 + sizeOfCoda (y:xs)
+    | otherwise = 0 + sizeOfCoda (y:xs)
 
 -- Fluxions
 
@@ -272,6 +272,7 @@ noFrontRound :: Constraint
 noFrontRound _ o = length [ 1 | (x,xps) <- o, x `notElem` vel && x `elem` vowel && x `elem` rounded]
 
 -- syllable constraints:
+-- a syllable is too hard to define so a lot of the following constraints are just approximations that will likely never be perfect
 
 -- no complex syllables
 noComplex :: Constraint
@@ -279,11 +280,15 @@ noComplex _ o = length [ x | x <- groups 3 (unIndex o), '.' `notElem` x]
 
 -- no coda
 noCoda :: Constraint
-noCoda _ o = sum (map (increasing . map sonorityOf) (syllables (unIndex o)))
+noCoda _ o = sum (map sizeOfCoda (syllables (unIndex o)))
 
--- no empty onset - fix: "sto" gives violation but "o" does not
+-- no empty onset - fix: "sto" gives violation
 onset :: Constraint
-onset _ o = sum (map (increasing . take 2 . map sonorityOf) (syllables (unIndex o)))
+onset _ o = sum (map (f . take 2 . map sonorityOf) (syllables (unIndex o)))
+    where 
+        f :: [Int] -> Int
+        f [x] = 1
+        f [a,b] | a > b = 1 | otherwise = 0
 
 -- Main
 

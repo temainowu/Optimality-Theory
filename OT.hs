@@ -42,9 +42,10 @@ voiced = "bβvdzɮɟʝgɣ" ++ res
 unvoiced = complement voiced
 rounded = "wyøœɵəɐaʊuoɔɒ"
 unrounded = complement rounded
-lat = "ɬɮlʎʟ"
 lax = "ɪʊəɐ"
 tense = complement lax
+lat = "ɬɮlʎʟ"
+sib = "sz"
 
 -- manners
 stop = "pbtdcɟkg"
@@ -264,7 +265,7 @@ uniformity i o = length [ 1 | (x,xps) <- o, length xps > 1]
 
 -- markedness constraints (ignore first argument)
 
--- adjacent elements agree in some feature f
+-- adjacent elements must agree in some feature f
 agree :: Comp -> Constraint
 agree f _ o = length [ 1 | [a,b] <- groups 2 (unIndex o), not (f a b)]
 

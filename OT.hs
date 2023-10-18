@@ -134,6 +134,9 @@ sizeOfCoda (x:y:xs)
     | sonorityOf x > sonorityOf y = 1 + sizeOfCoda (y:xs)
     | otherwise = 0 + sizeOfCoda (y:xs)
 
+(≻) :: Lexeme -> Lexeme -> Grammar -> String -> Bool
+x ≻ y = \g i -> fluxionLEq (eval g (index i) x) (eval g (index i) y)
+
 -- Fluxions
 
 fluxionLEq :: Fluxion -> Fluxion -> Bool

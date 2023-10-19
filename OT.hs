@@ -47,6 +47,12 @@ tense = complement lax
 lat = "ɬɮlʎʟ"
 sib = "sz"
 
+-- tongue places
+
+api = "tdnszɹ" ++ "rɾɬɮl"
+lam = "tdnszɹ" ++ ""
+dors = "cɟɲçʝjʎkgŋxɣɰʟ"
+
 -- manners
 stop = "pbtdcɟkg"
 fric = "ɸβfvszɬɮçʝxɣ"

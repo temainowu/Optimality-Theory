@@ -1,6 +1,4 @@
 import Test.QuickCheck
-import GHC.Driver.Session (globalPackageDatabasePath)
-import GHC.Parser.Lexer (P)
 
 type Phone = PhoneData
 
@@ -62,7 +60,7 @@ and considering æ to be a cardinal vowel.
 -}
 
 boundary = ".+"
-universe = "pbmʙɸβwʍɱⱱfvʋθðtdnrɾɺszɬɮɹlʃʒɕʑʈɖɳɽʂʐɻɭcɟɲçʝjɥʎkgŋxɣɰʟqɢɴʀχʁħʕhɦʔʜʢʡieɛæɶɪyøœɵəɐaɯɤʌɑʊuoɔɒ"
+universe = "pbmʙɸβwʍɱⱱfvʋθðtdnrɾɺszɬɮɹlʃʒɕʑʈɖɳɽʂʐɻɭcɟɲçʝjɥʎkgŋxɣɰʟqɢɴʀχʁħʕhɦʔʜʢʡʘǀǃǂǁieɛæɶɪyøœɵəɐaɯɤʌɑʊuoɔɒ"
 obs = stop ++ fric
 res = complement obs
 vowel = "ieɛæɪyøœɶɵəɐaɯɤʌɑʊuoɔɒ"
@@ -71,7 +69,7 @@ rounded = "ʍwɥyøœɵəɶɐaʊuoɔɒ"
 unrounded = complement rounded
 lax = "ɪɵʊəɐ"
 tense = complement lax
-lat = "ɺɬɮlɭʎʟ"
+lat = "ɺɬɮlɭʎʟǁ"
 sib = "szʃʒɕʑ"
 
 -- glottal states
@@ -82,17 +80,17 @@ breathy = "ɦ"
 closed = "ʔ"
 
 -- active articulators
-inflab = "pbmʙɸβɱⱱfvʋ"
-api = "θðtdnrɾɺszɬɮɹlʃʒʈɖɳɽʂʐɻɭ"
-lam = "ɕʑ"
+inflab = "pbmʙɸβɱⱱfvʋʘ"
+api = "θðtdnrɾɺszɬɮɹlʃʒʈɖɳɽʂʐɻɭǀǃǁ"
+lam = "ɕʑǂ"
 dors = "ʍcɟɲçʝjɥʎkgŋxɣɰʟqɢɴʀχʁħʕieɛæɪyøœɶɵəɐaɯɤʌɑʊuoɔɒ"
 epi = "ʜʢʡ"
 
 -- passive articulators
-suplab = "pbmʙɸβ"
-dent = "ɱⱱfvʋθð"
-alv = "tdnrɾɺszɬɮɹl"
-postalv = "ʃʒɕʑ"
+suplab = "pbmʙɸβʘ"
+dent = "ɱⱱfvʋθðǀ"
+alv = "tdnrɾɺszɬɮɹlǁ"
+postalv = "ʃʒɕʑǃǂ"
 pal = "ʈɖɳɽʂʐɻɭcɟɲçʝjɥʎieɛæɶɪyøœ"
 cent = "ɵəɐa"
 vel = "ʍkgŋxɣɰʟɯwɤʌɑʊuoɔɒ"
@@ -100,7 +98,7 @@ uvul = "qɢɴʀχʁ"
 phar = "ħʕʜʢʡ"
 
 -- manners
-click = ""
+click = "ʘǀǃǂǁ"
 stop = "pbtdʈɖcɟkgqɢʔʡ"
 fric = "ɸβʍfvθðszɬɮʃʒɕʑʂʐçʝxɣχʁħʕhɦʜʢ"
 nas = "mɱnɳɲŋɴ"

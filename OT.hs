@@ -56,16 +56,18 @@ e		ø		ɤ		o
 æ		ɶ	ɐ	ɑ		ɒ
 			a			
 
-this is based on dr geoff lindey 's vowel chart but with the addition of ɶ and ɒ and considering æ to be a cardinal vowel.
+this is based on dr geoff lindey 's vowel chart 
+but with the addition of ɶ and ɒ 
+and considering æ to be a cardinal vowel.
 -}
 
 boundary = ".+"
-universe = "pbmʙɸβwɱⱱfvʋtdnrɾszɬɮɹlʃʒɕʑʈɖɳɽʂʐɻɭcɟɲçʝjʎkgŋxɣɰʟieɛæɶɪyøœɵəɐaɯɤʌɑʊuoɔɒ"
+universe = "pbmʙɸβwɱⱱfvʋθðtdnrɾszɬɮɹlʃʒɕʑʈɖɳɽʂʐɻɭcɟɲçʝjʎkgŋxɣɰʟieɛæɶɪyøœɵəɐaɯɤʌɑʊuoɔɒ"
 obs = stop ++ fric
 res = complement obs
 vowel = "ieɛæɪyøœɶɵəɐaɯɤʌɑʊuoɔɒ"
 consonant = complement vowel
-unvoiced = "pɸftsɬʃʈʂcçkx"
+unvoiced = "pɸfθtsɬʃʈʂcçkx"
 voiced = complement unvoiced
 rounded = "wyøœɵəɶɐaʊuoɔɒ"
 unrounded = complement rounded
@@ -75,14 +77,25 @@ lat = "ɬɮlɭʎʟ"
 sib = "sz"
 
 -- active articulators
-api = "tdnszɹ" ++ "rɾɬɮlʃʒʈɖɳɽʂʐɻɭ" -- phones shouldn't be in multiple mutually exclusive classes
-lam = "tdnszɹ" ++ "ɕʑ" -- most alveolar phones are underspecified for laminal/apical/dental in the IPA
+inflab = "pbmʙɸβɱⱱfvʋ"
+api = "θðtdnrɾszɬɮɹlʃʒʈɖɳɽʂʐɻɭ"
+lam = "ɕʑ"
 dors = "cɟɲçʝjʎkgŋxɣɰʟ"
 epi = ""
 
+-- passive articulators
+suplab = "pbmʙɸβ"
+dent = "ɱⱱfvʋθð"
+alv = "tdnrɾszɬɮɹl"
+postalv = "ʃʒɕʑ"
+pal = "ʈɖɳɽʂʐɻɭcɟɲçʝjʎieɛæɶɪyøœ"
+vel = "kgŋxɣɰʟɯwɤʌɑʊuoɔɒ"
+uvul = ""
+phar = ""
+
 -- manners
 stop = "pbtdʈɖcɟkg"
-fric = "ɸβfvszɬɮʃʒɕʑʂʐçʝxɣ"
+fric = "ɸβfvθðszɬɮʃʒɕʑʂʐçʝxɣ"
 nas = "mɱnɳɲŋ"
 tap = "ⱱɾɽ"
 trill = "ʙr"
@@ -93,34 +106,30 @@ mid = "ɛœəʌɔ"
 mlo = "æɶɐɑɒ"
 lo = "a"
 
--- passive articulators
-lab = "pbmʙɸβ"
-labdent = "ɱⱱfvʋ"
-alv = "tdnrɾszɬɮɹl"
-postalv = "ʃʒɕʑ"
-pal = "ʈɖɳɽʂʐɻɭcɟɲçʝjʎieɛæɶɪyøœ"
-vel = "kgŋxɣɰʟɯwɤʌɑʊuoɔɒ"
-
 -- ɵəɐa are not given places because they are central
 
 -- Auxiliary Functions
 
 passiveOf :: FindFeature Passive
 passiveOf x
-    | x `elem` lab = Superiolabial
-    | x `elem` labdent = Dental
+    | x `elem` suplab = Superiolabial
+    | x `elem` dent = Dental
     | x `elem` alv = Alveolar
     | x `elem` postalv = Postalveolar
     | x `elem` pal = Palatal
     | x `elem` vel = Velar
+    | x `elem` uvul = Uvular
+    | x `elem` phar = Pharyngeal
+    | otherwise = NoPassive
 
 activeOf :: FindFeature Active
 activeOf x
-    | x `elem` lab ++ labdent = Inferiolabial
+    | x `elem` inflab = Inferiolabial
     | x `elem` api = Apical
     | x `elem` lam = Laminal
     | x `elem` dors = Dorsal
     | x `elem` epi = Epiglottal
+    | otherwise = NoActive
 
 glottalStateOf :: FindFeature GlottalState
 glottalStateOf x

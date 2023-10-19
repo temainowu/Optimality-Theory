@@ -23,7 +23,7 @@ type PhoneClass = [Char]
 -- PhoneClass (= [Char]) is used when refering to classes of phones
 -- String (= [Char]) is used when refering to a sequence of phones
 
-data PhoneData = P GlottalState Active Passive Manner | SyllableBoundary | MorphemeBoundary
+data PhoneData = P GlottalState Active Passive Manner | SyllableBoundary | MorphemeBoundary | WordBoundary
     deriving (Eq, Show)
 
 data Passive = Superiolabial | Dental | Alveolar | Postalveolar | Palatal | Central | Velar | Uvular | Pharyngeal | NoPassive
@@ -59,8 +59,8 @@ but with the addition of ɶ and ɒ
 and considering æ to be a cardinal vowel.
 -}
 
-boundary = ".+"
 universe = "pbmʙɸβwʍɱⱱfvʋθðtdnrɾɺszɬɮɹlʃʒɕʑʈɖɳɽʂʐɻɭcɟɲçʝjɥʎkgŋxɣɰʟqɢɴʀχʁħʕhɦʔʜʢʡʘǀǃǂǁieɛæɶɪyøœɵəɐaɯɤʌɑʊuoɔɒ"
+boundary = ".+#"
 obs = stop ++ fric
 res = complement obs
 vowel = "ieɛæɪyøœɶɵəɐaɯɤʌɑʊuoɔɒ"
@@ -211,6 +211,7 @@ groups n xs = [take n (drop i xs) | i <- [0..length xs - n]]
 charToPhone :: Char -> PhoneData
 charToPhone '.' = SyllableBoundary
 charToPhone '+' = MorphemeBoundary
+charToPhone '#' = WordBoundary
 charToPhone x = P (glottalStateOf x) (activeOf x) (passiveOf x) (mannerOf x)
 
 syllables :: [Phone] -> [[Phone]]

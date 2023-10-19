@@ -44,6 +44,15 @@ data GlottalState = Voiced | Voiceless
 
 -- Classes of sounds
 
+{- vowel chart:
+i		y		ɯ		u
+	ɪ		ɵ		ʊ	
+e		ø		ɤ		o
+ɛ		œ	ə	ʌ		ɔ
+æ		ɶ	ɐ	ɑ		ɒ
+			a			
+-}
+
 boundary = ".+"
 universe = "pbmʙɸβwɱⱱfvʋtdnrɾszɬɮɹlʃʒɕʑʈɖɳɽʂʐɻɭcɟɲçʝjʎkgŋxɣɰʟieɛæɪyøœɵəɐaɯɤʌɑʊuoɔɒ"
 obs = stop ++ fric
@@ -73,9 +82,9 @@ tap = "ⱱɾɽ"
 trill = "ʙr"
 appr = "wʋɹlɻɭjɰʎʟ"
 hi = "iɪyɵɯʊu"
-mhi = "eøəɤo"
-mid = "ɛœʌɔ"
-mlo = "æɐɑɒ"
+mhi = "eøɤo"
+mid = "ɛœəʌɔ"
+mlo = "æɶɐɑɒ"
 lo = "a"
 
 -- places

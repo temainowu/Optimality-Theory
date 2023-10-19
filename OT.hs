@@ -27,9 +27,17 @@ type PhoneClass = [Phone]
 -- PhoneClass (= [Phone]) is used when refering to classes of phones
 -- String (= [Phone]) is used when refering to a sequence of phones
 
-data Place = Labial | LabioDental | Alveolar | Postalveolar | Palatal | Velar | Labiovelar deriving (Eq, Show)
+data Place = InMouth Active Passive | Glottal
+    deriving (Eq, Show)
 
-data Manner = Stop | Fricative | Nasal | Trill | Tap | Approximant | Vowel deriving (Eq, Show)
+data Passive = Superiolabial | Dental | Alveolar | Postalveolar | Palatal | Velar | Uvular | Pharyngeal | Epiglottal
+    deriving (Eq, Show)
+
+data Active = Inferiolabial | Laminal | Apical | Dorsal 
+    deriving (Eq, Show)
+
+data Manner = Stop | Fricative | Nasal | Trill | Tap | Approximant | Vowel 
+    deriving (Eq, Show)
 
 -- Classes of sounds
 
@@ -80,10 +88,10 @@ vel = "kgŋxɣɰʟɯwɤʌɑʊuoɔɒ"
 
 -- Auxiliary Functions
 
-placeOf :: FindFeature Place
+placeOf :: FindFeature Passive
 placeOf x
-    | x `elem` lab = Labial
-    | x `elem` labdent = LabioDental
+    | x `elem` lab = Superiolabial
+    | x `elem` labdent = Dental
     | x `elem` alv = Alveolar
     | x `elem` postalv = Postalveolar
     | x `elem` pal = Palatal

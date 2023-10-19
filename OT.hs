@@ -4,6 +4,7 @@ type Phone = Char
 -- should Phone be of type Char?
 -- should it be String to account for phones that are more than one character long?
 -- should it be [Place, Manner, ...] to represent phones more abstractly?
+-- or not a list but a more abstract data type?
 
 type FindFeature f = Phone -> f
 
@@ -49,8 +50,8 @@ sib = "sz"
 
 -- tongue places
 
-api = "tdnszɹ" ++ "rɾɬɮlʃʒʈɖɳɽʂʐɻɭ"
-lam = "tdnszɹ" ++ "ɕʑ"
+api = "tdnszɹ" ++ "rɾɬɮlʃʒʈɖɳɽʂʐɻɭ" -- phones shouldn't be in multiple mutually exclusive classes
+lam = "tdnszɹ" ++ "ɕʑ" -- most alveolar phones are underspecified for laminal/apical/dental in the IPA
 dors = "cɟɲçʝjʎkgŋxɣɰʟ"
 
 -- manners

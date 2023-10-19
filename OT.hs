@@ -26,40 +26,40 @@ type PhoneClass = [Phone]
 -- PhoneClass (= [Phone]) is used when refering to classes of phones
 -- String (= [Phone]) is used when refering to a sequence of phones
 
-data Place = Labial | LabioDental | Alveolar | Palatal | Velar | LabioVelar deriving (Eq, Show)
+data Place = Labial | LabioDental | Alveolar | Postalveolar | Palatal | Velar | Labiovelar deriving (Eq, Show)
 
 data Manner = Stop | Fricative | Nasal | Trill | Tap | Approximant | Vowel deriving (Eq, Show)
 
 -- Classes of sounds
 
 boundary = ".+"
-universe = "pbmʙɸβwɱⱱfvʋtdnrɾszɬɮɹlcɟɲçʝjʎkgŋxɣɰʟieɛæɪyøœɵəɐaɯɤʌɑʊuoɔɒ"
+universe = "pbmʙɸβwɱⱱfvʋtdnrɾszɬɮɹlʃʒɕʑʈɖɳɽʂʐɻɭcɟɲçʝjʎkgŋxɣɰʟieɛæɪyøœɵəɐaɯɤʌɑʊuoɔɒ"
 obs = stop ++ fric
 res = complement obs
 vowel = "ieɛæɪyøœɵəɐaɯɤʌɑʊuoɔɒ"
 consonant = complement vowel
-voiced = "bβvdzɮɟʝgɣ" ++ res
-unvoiced = complement voiced
+unvoiced = "pɸftsɬʃʈʂcçkx"
+voiced = complement unvoiced
 rounded = "wyøœɵəɐaʊuoɔɒ"
 unrounded = complement rounded
 lax = "ɪʊəɐ"
 tense = complement lax
-lat = "ɬɮlʎʟ"
+lat = "ɬɮlɭʎʟ"
 sib = "sz"
 
 -- tongue places
 
-api = "tdnszɹ" ++ "rɾɬɮl"
-lam = "tdnszɹ" ++ ""
+api = "tdnszɹ" ++ "rɾɬɮlʃʒʈɖɳɽʂʐɻɭ"
+lam = "tdnszɹ" ++ "ɕʑ"
 dors = "cɟɲçʝjʎkgŋxɣɰʟ"
 
 -- manners
-stop = "pbtdcɟkg"
-fric = "ɸβfvszɬɮçʝxɣ"
-nas = "mɱnɲŋ"
-tap = "ⱱɾ"
+stop = "pbtdʈɖcɟkg"
+fric = "ɸβfvszɬɮʃʒɕʑʂʐçʝxɣ"
+nas = "mɱnɳɲŋ"
+tap = "ⱱɾɽ"
 trill = "ʙr"
-appr = "wʋɹljɰʎʟ"
+appr = "wʋɹlɻɭjɰʎʟ"
 hi = "iɪyɵɯʊu"
 mhi = "eøɤo"
 mlo = "ɛœʌɔ"
@@ -71,7 +71,8 @@ lo = "æɐaɑɒ"
 lab = "pbmʙɸβ"
 labdent = "ɱⱱfvʋ"
 alv = "tdnrɾszɬɮɹl"
-pal = "cɟɲçʝjʎieɛæɪyøœ"
+postalv = "ʃʒɕʑ"
+pal = "ʈɖɳɽʂʐɻɭcɟɲçʝjʎieɛæɪyøœ"
 vel = "kgŋxɣɰʟɯwɤʌɑʊuoɔɒ"
 
 -- ɵəɐa are not given places because they are central
@@ -83,6 +84,7 @@ placeOf x
     | x `elem` lab = Labial
     | x `elem` labdent = LabioDental
     | x `elem` alv = Alveolar
+    | x `elem` postalv = Postalveolar
     | x `elem` pal = Palatal
     | x `elem` vel = Velar
 

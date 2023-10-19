@@ -36,7 +36,7 @@ data Passive = Superiolabial | Dental | Alveolar | Postalveolar | Palatal | Vela
 data Active = Inferiolabial | Apical | Laminal | Dorsal | Glottal
     deriving (Eq, Show)
 
-data Manner = Stop | Fricative | Nasal | Trill | Tap | Approximant | Vowel 
+data Manner = Stop | Fricative | Nasal | Trill | Tap | Approximant | HighVowel | MidHighVowel | MidVowel | MidLowVowel | LowVowel
     deriving (Eq, Show)
 
 data GlottalState = Voiced | Voiceless
@@ -73,11 +73,10 @@ tap = "ⱱɾɽ"
 trill = "ʙr"
 appr = "wʋɹlɻɭjɰʎʟ"
 hi = "iɪyɵɯʊu"
-mhi = "eøɤo"
-mlo = "ɛœʌɔ"
-lo = "æɐaɑɒ"
-
--- ə is not given a manner because it is true mid
+mhi = "eøəɤo"
+mid = "ɛœʌɔ"
+mlo = "æɐɑɒ"
+lo = "a"
 
 -- places
 lab = "pbmʙɸβ"
@@ -108,7 +107,11 @@ mannerOf x
     | x `elem` trill = Trill
     | x `elem` tap = Tap
     | x `elem` appr = Approximant
-    | x `elem` vowel = Vowel
+    | x `elem` hi = HighVowel
+    | x `elem` mhi = MidHighVowel
+    | x `elem` mid = MidVowel
+    | x `elem` mlo = MidLowVowel
+    | x `elem` lo = LowVowel
 
 sonorityOf :: FindFeature Int
 sonorityOf x
@@ -118,7 +121,11 @@ sonorityOf x
     | m == Trill = 3
     | m == Tap = 4
     | m == Approximant = 5
-    | m == Vowel = 6
+    | m == HighVowel = 6
+    | m == MidHighVowel = 7
+    | m == MidVowel = 8
+    | m == MidLowVowel = 9
+    | m == LowVowel = 10
     where m = mannerOf x
 
 -- % is the set difference operator

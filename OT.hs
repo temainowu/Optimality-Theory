@@ -54,16 +54,16 @@ e		ø		ɤ		o
 -}
 
 boundary = ".+"
-universe = "pbmʙɸβwɱⱱfvʋtdnrɾszɬɮɹlʃʒɕʑʈɖɳɽʂʐɻɭcɟɲçʝjʎkgŋxɣɰʟieɛæɪyøœɵəɐaɯɤʌɑʊuoɔɒ"
+universe = "pbmʙɸβwɱⱱfvʋtdnrɾszɬɮɹlʃʒɕʑʈɖɳɽʂʐɻɭcɟɲçʝjʎkgŋxɣɰʟieɛæɶɪyøœɵəɐaɯɤʌɑʊuoɔɒ"
 obs = stop ++ fric
 res = complement obs
-vowel = "ieɛæɪyøœɵəɐaɯɤʌɑʊuoɔɒ"
+vowel = "ieɛæɪyøœɶɵəɐaɯɤʌɑʊuoɔɒ"
 consonant = complement vowel
 unvoiced = "pɸftsɬʃʈʂcçkx"
 voiced = complement unvoiced
-rounded = "wyøœɵəɐaʊuoɔɒ"
+rounded = "wyøœɵəɶɐaʊuoɔɒ"
 unrounded = complement rounded
-lax = "ɪʊəɐ"
+lax = "ɪɵʊəɐ"
 tense = complement lax
 lat = "ɬɮlɭʎʟ"
 sib = "sz"
@@ -92,7 +92,7 @@ lab = "pbmʙɸβ"
 labdent = "ɱⱱfvʋ"
 alv = "tdnrɾszɬɮɹl"
 postalv = "ʃʒɕʑ"
-pal = "ʈɖɳɽʂʐɻɭcɟɲçʝjʎieɛæɪyøœ"
+pal = "ʈɖɳɽʂʐɻɭcɟɲçʝjʎieɛæɶɪyøœ"
 vel = "kgŋxɣɰʟɯwɤʌɑʊuoɔɒ"
 
 -- ɵəɐa are not given places because they are central

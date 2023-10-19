@@ -28,7 +28,7 @@ type PhoneClass = [Phone]
 -- PhoneClass (= [Phone]) is used when refering to classes of phones
 -- String (= [Phone]) is used when refering to a sequence of phones
 
-data Phone' = P GlottalState Active Passive Manner
+data PhoneData = P GlottalState Active Passive Manner
     deriving (Eq, Show)
 
 data Passive = Superiolabial | Dental | Alveolar | Postalveolar | Palatal | Central | Velar | Uvular | Pharyngeal | NoPassive
@@ -194,7 +194,7 @@ affix xs ys = xs ++ '+' : ys
 groups :: Int -> [a] -> [[a]]
 groups n xs = [take n (drop i xs) | i <- [0..length xs - n]]
 
-charToPhone' :: Char -> Phone'
+charToPhone' :: Char -> PhoneData
 charToPhone' x = P (glottalStateOf x) (activeOf x) (passiveOf x) (mannerOf x)
 
 syllables :: String -> [String]

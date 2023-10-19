@@ -31,7 +31,7 @@ type PhoneClass = [Phone]
 data Phone' = P GlottalState Active Passive Manner
     deriving (Eq, Show)
 
-data Passive = Superiolabial | Dental | Alveolar | Postalveolar | Palatal | Velar | Uvular | Pharyngeal | NoPassive
+data Passive = Superiolabial | Dental | Alveolar | Postalveolar | Palatal | Central | Velar | Uvular | Pharyngeal | NoPassive
     deriving (Eq, Show)
 
 data Active = Inferiolabial | Apical | Laminal | Dorsal | Epiglottal | NoActive
@@ -62,25 +62,30 @@ and considering æ to be a cardinal vowel.
 -}
 
 boundary = ".+"
-universe = "pbmʙɸβwʍɱⱱfvʋθðtdnrɾɺszɬɮɹlʃʒɕʑʈɖɳɽʂʐɻɭcɟɲçʝjɥʎkgŋxɣɰʟʜʢʡieɛæɶɪyøœɵəɐaɯɤʌɑʊuoɔɒ"
+universe = "pbmʙɸβwʍɱⱱfvʋθðtdnrɾɺszɬɮɹlʃʒɕʑʈɖɳɽʂʐɻɭcɟɲçʝjɥʎkgŋxɣɰʟqɢɴʀχʁħʕhɦʔʜʢʡieɛæɶɪyøœɵəɐaɯɤʌɑʊuoɔɒ"
 obs = stop ++ fric
 res = complement obs
 vowel = "ieɛæɪyøœɶɵəɐaɯɤʌɑʊuoɔɒ"
 consonant = complement vowel
-unvoiced = "pɸʍfθtsɬʃʈʂcçkxʜʢʡ"
-voiced = complement unvoiced
 rounded = "ʍwɥyøœɵəɶɐaʊuoɔɒ"
 unrounded = complement rounded
 lax = "ɪɵʊəɐ"
 tense = complement lax
 lat = "ɺɬɮlɭʎʟ"
-sib = "sz"
+sib = "szʃʒɕʑ"
+
+-- glottal states
+unvoiced = "pɸʍfθtsɬʃʈʂcçkxqχħhʜʢʡ"
+voiced = "bmʙβwɱⱱvʋðdnrɾɺzɮɹlʒɕʑɖɳɽʐɻɭɟɲʝjɥʎgŋɣɰʟɢɴʀʁʕieɛæɶɪyøœɵəɐaɯɤʌɑʊuoɔɒ"
+creaky = ""
+breathy = "ɦ"
+closed = "ʔ"
 
 -- active articulators
 inflab = "pbmʙɸβɱⱱfvʋ"
 api = "θðtdnrɾɺszɬɮɹlʃʒʈɖɳɽʂʐɻɭ"
 lam = "ɕʑ"
-dors = "ʍcɟɲçʝjɥʎkgŋxɣɰʟ"
+dors = "ʍcɟɲçʝjɥʎkgŋxɣɰʟqɢɴʀχʁħʕieɛæɪyøœɶɵəɐaɯɤʌɑʊuoɔɒ"
 epi = "ʜʢʡ"
 
 -- passive articulators
@@ -89,16 +94,17 @@ dent = "ɱⱱfvʋθð"
 alv = "tdnrɾɺszɬɮɹl"
 postalv = "ʃʒɕʑ"
 pal = "ʈɖɳɽʂʐɻɭcɟɲçʝjɥʎieɛæɶɪyøœ"
+cent = "ɵəɐa"
 vel = "ʍkgŋxɣɰʟɯwɤʌɑʊuoɔɒ"
-uvul = ""
-phar = "ʜʢʡ"
+uvul = "qɢɴʀχʁ"
+phar = "ħʕʜʢʡ"
 
 -- manners
-stop = "pbtdʈɖcɟkgʡ"
-fric = "ɸβʍfvθðszɬɮʃʒɕʑʂʐçʝxɣʜʢ"
-nas = "mɱnɳɲŋ"
+stop = "pbtdʈɖcɟkgqɢʔʡ"
+fric = "ɸβʍfvθðszɬɮʃʒɕʑʂʐçʝxɣχʁħʕhɦʜʢ"
+nas = "mɱnɳɲŋɴ"
 tap = "ⱱɾɽɺ"
-trill = "ʙr"
+trill = "ʙrʀ"
 appr = "ʋɹlɻɭjɥɰwʎʟ"
 hi = "iɪyɵɯʊu"
 mhi = "eøɤo"
@@ -117,6 +123,7 @@ passiveOf x
     | x `elem` alv = Alveolar
     | x `elem` postalv = Postalveolar
     | x `elem` pal = Palatal
+    | x `elem` cent = Central
     | x `elem` vel = Velar
     | x `elem` uvul = Uvular
     | x `elem` phar = Pharyngeal

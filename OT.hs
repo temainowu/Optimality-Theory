@@ -62,44 +62,44 @@ and considering æ to be a cardinal vowel.
 -}
 
 boundary = ".+"
-universe = "pbmʙɸβwɱⱱfvʋθðtdnrɾszɬɮɹlʃʒɕʑʈɖɳɽʂʐɻɭcɟɲçʝjʎkgŋxɣɰʟieɛæɶɪyøœɵəɐaɯɤʌɑʊuoɔɒ"
+universe = "pbmʙɸβwʍɱⱱfvʋθðtdnrɾɺszɬɮɹlʃʒɕʑʈɖɳɽʂʐɻɭcɟɲçʝjɥʎkgŋxɣɰʟʜʢʡieɛæɶɪyøœɵəɐaɯɤʌɑʊuoɔɒ"
 obs = stop ++ fric
 res = complement obs
 vowel = "ieɛæɪyøœɶɵəɐaɯɤʌɑʊuoɔɒ"
 consonant = complement vowel
-unvoiced = "pɸfθtsɬʃʈʂcçkx"
+unvoiced = "pɸʍfθtsɬʃʈʂcçkxʜʢʡ"
 voiced = complement unvoiced
-rounded = "wyøœɵəɶɐaʊuoɔɒ"
+rounded = "ʍwɥyøœɵəɶɐaʊuoɔɒ"
 unrounded = complement rounded
 lax = "ɪɵʊəɐ"
 tense = complement lax
-lat = "ɬɮlɭʎʟ"
+lat = "ɺɬɮlɭʎʟ"
 sib = "sz"
 
 -- active articulators
 inflab = "pbmʙɸβɱⱱfvʋ"
-api = "θðtdnrɾszɬɮɹlʃʒʈɖɳɽʂʐɻɭ"
+api = "θðtdnrɾɺszɬɮɹlʃʒʈɖɳɽʂʐɻɭ"
 lam = "ɕʑ"
-dors = "cɟɲçʝjʎkgŋxɣɰʟ"
-epi = ""
+dors = "ʍcɟɲçʝjɥʎkgŋxɣɰʟ"
+epi = "ʜʢʡ"
 
 -- passive articulators
 suplab = "pbmʙɸβ"
 dent = "ɱⱱfvʋθð"
-alv = "tdnrɾszɬɮɹl"
+alv = "tdnrɾɺszɬɮɹl"
 postalv = "ʃʒɕʑ"
-pal = "ʈɖɳɽʂʐɻɭcɟɲçʝjʎieɛæɶɪyøœ"
-vel = "kgŋxɣɰʟɯwɤʌɑʊuoɔɒ"
+pal = "ʈɖɳɽʂʐɻɭcɟɲçʝjɥʎieɛæɶɪyøœ"
+vel = "ʍkgŋxɣɰʟɯwɤʌɑʊuoɔɒ"
 uvul = ""
-phar = ""
+phar = "ʜʢʡ"
 
 -- manners
-stop = "pbtdʈɖcɟkg"
-fric = "ɸβfvθðszɬɮʃʒɕʑʂʐçʝxɣ"
+stop = "pbtdʈɖcɟkgʡ"
+fric = "ɸβʍfvθðszɬɮʃʒɕʑʂʐçʝxɣʜʢ"
 nas = "mɱnɳɲŋ"
-tap = "ⱱɾɽ"
+tap = "ⱱɾɽɺ"
 trill = "ʙr"
-appr = "wʋɹlɻɭjɰʎʟ"
+appr = "ʋɹlɻɭjɥɰwʎʟ"
 hi = "iɪyɵɯʊu"
 mhi = "eøɤo"
 mid = "ɛœəʌɔ"

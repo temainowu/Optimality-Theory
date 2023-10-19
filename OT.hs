@@ -317,26 +317,26 @@ onset _ o = sum (map (f . take 2 . map sonorityOf) (syllables (unIndex o)))
 
 -- Main
 
-mostHarmonious :: Grammar -> String -> [Lexeme] -> [String]
-mostHarmonious g i os = map unIndex (mask (smallestFluxions (map (eval g (index i)) os)) os)
+mostOptimal :: Grammar -> String -> [Lexeme] -> [String]
+mostOptimal g i os = map unIndex (mask (smallestFluxions (map (eval g (index i)) os)) os)
 
-prop_mostHarmonious :: Grammar -> String -> Fluxion -> Lexeme -> Bool
-prop_mostHarmonious g i n o = fluxionLEq n (eval g (index i) (head (mask (smallestFluxions [eval g (index i) o]) [o])))
+prop_mostOptimal :: Grammar -> String -> Fluxion -> Lexeme -> Bool
+prop_mostOptimal g i n o = fluxionLEq n (eval g (index i) (head (mask (smallestFluxions [eval g (index i) o]) [o])))
 
--- quickCheck (prop_mostHarmonious *grammar* *input form* *harmony*)
--- theorhetically should return a form of harmony greater than the inputed harmony if one exists
+-- quickCheck (prop_mostOptimal *grammar* *input form* *harmony*)
+-- theoretically should return a form of harmony greater than the inputed harmony if one exists
 
 -- Examples
 
 {-
-mostHarmonious is the only function that needs to be called by the user
+mostOptimal is the only function that needs to be called by the user
 it takes a grammar, an input form (which is automatically indexed), and a list of indexed output forms
 it returns a list of the most harmonious output forms (which are automatically unindexed)
 
 examples:
 
 example a)
-> mostHarmonious [nasAgr, ident obsVoice] "amda" [index "ampa", index "amda"]
+> mostOptimal [nasAgr, ident obsVoice] "amda" [index "ampa", index "amda"]
 ["ampa"]
 
 nasAgr dominates ident obsVoice, 
@@ -352,7 +352,7 @@ tableu:
 ───────┴────────┴─────────────────┘
 
 example b)
-> mostHarmonious [ident obsVoice, nasAgr] "amda" [index "ampa", index "amda"]
+> mostOptimal [ident obsVoice, nasAgr] "amda" [index "ampa", index "amda"]
 ["amda"]
 
 identIO obsVoice dominates nasAgr,
@@ -368,7 +368,7 @@ tableu:
   ampa │       *!       │        │
 ───────┴────────────────┴────────┘
 
-the forms; index "amba", index "anda", index "embi", [('n',1),('d',2)], and [] 
+the forms; index "amba", index "anda", index "embi", [('n',[1]),('d',[2])], and [] 
 are all more harmonious forms in both examples,
 but they were not chosen because they were not in the list of possible outputs.
 

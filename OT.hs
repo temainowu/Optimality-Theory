@@ -33,7 +33,7 @@ data Place = InMouth Active Passive | Glottal
 data Passive = Superiolabial | Dental | Alveolar | Postalveolar | Palatal | Velar | Uvular | Pharyngeal | Epiglottal
     deriving (Eq, Show)
 
-data Active = Inferiolabial | Laminal | Apical | Dorsal 
+data Active = Inferiolabial | Apical | Laminal | Dorsal
     deriving (Eq, Show)
 
 data Manner = Stop | Fricative | Nasal | Trill | Tap | Approximant | Vowel 

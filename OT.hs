@@ -27,16 +27,19 @@ type PhoneClass = [Phone]
 -- PhoneClass (= [Phone]) is used when refering to classes of phones
 -- String (= [Phone]) is used when refering to a sequence of phones
 
-data Place = InMouth Active Passive | Glottal
+data Phone' = P GlottalState Active Passive Manner
     deriving (Eq, Show)
 
 data Passive = Superiolabial | Dental | Alveolar | Postalveolar | Palatal | Velar | Uvular | Pharyngeal | Epiglottal
     deriving (Eq, Show)
 
-data Active = Inferiolabial | Apical | Laminal | Dorsal
+data Active = Inferiolabial | Apical | Laminal | Dorsal | Glottal
     deriving (Eq, Show)
 
 data Manner = Stop | Fricative | Nasal | Trill | Tap | Approximant | Vowel 
+    deriving (Eq, Show)
+
+data GlottalState = Voiced | Voiceless
     deriving (Eq, Show)
 
 -- Classes of sounds

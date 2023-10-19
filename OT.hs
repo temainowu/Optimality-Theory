@@ -1,19 +1,16 @@
 import Test.QuickCheck
 import GHC.Driver.Session (globalPackageDatabasePath)
+import GHC.Parser.Lexer (P)
 
-type Phone = Char
--- should Phone be of type Char?
--- should it be String to account for phones that are more than one character long?
--- should it be [Place, Manner, ...] to represent phones more abstractly?
--- or not a list but a more abstract data type?
+type Phone = PhoneData
 
-type FindFeature f = Phone -> f
+type FindFeature f = Char -> f
 
 type Comp = Phone -> Phone -> Bool
 
 type Lexeme = [(Phone, [Int])]
 
-type Constraint = Lexeme -> Lexeme -> Int 
+type Constraint = Lexeme -> Lexeme -> Int
 
 type Fluxion = ([Int], Int)
 -- Fluxions are used to represent the harmony of a form
@@ -24,26 +21,29 @@ type Fluxion = ([Int], Int)
 
 type Grammar = [Constraint]
 
-type PhoneClass = [Phone]
--- PhoneClass (= [Phone]) is used when refering to classes of phones
--- String (= [Phone]) is used when refering to a sequence of phones
+type PhoneClass = [Char]
+-- PhoneClass (= [Char]) is used when refering to classes of phones
+-- String (= [Char]) is used when refering to a sequence of phones
 
-data PhoneData = P GlottalState Active Passive Manner
+data PhoneData = P GlottalState Active Passive Manner | SyllableBoundary | MorphemeBoundary
     deriving (Eq, Show)
 
 data Passive = Superiolabial | Dental | Alveolar | Postalveolar | Palatal | Central | Velar | Uvular | Pharyngeal | NoPassive
     deriving (Eq, Show)
 
-data Active = Inferiolabial | Apical | Laminal | Dorsal | Epiglottal | NoActive
+data Active = Inferiolabial | Apical | Laminal | Dorsal Rounding | Epiglottal | NoActive
     deriving (Eq, Show)
 
-data Manner = Click | Stop | Fricative | Nasal | Trill | Tap | Approximant | Vowel Height
+data Manner = Click | Stop | Fricative | Nasal | Trill | Tap | Approximant | Vowel Height | Boundary Char
     deriving (Eq, Show)
 
 data Height = High | MidHigh | Mid | MidLow | Low
     deriving (Eq, Show)
 
 data GlottalState = Voiced | Voiceless | Creaky | Breathy | Closed
+    deriving (Eq, Show)
+
+data Rounding = Rounded | Unrounded
     deriving (Eq, Show)
 
 -- Classes of sounds
@@ -100,6 +100,7 @@ uvul = "qɢɴʀχʁ"
 phar = "ħʕʜʢʡ"
 
 -- manners
+click = ""
 stop = "pbtdʈɖcɟkgqɢʔʡ"
 fric = "ɸβʍfvθðszɬɮʃʒɕʑʂʐçʝxɣχʁħʕhɦʜʢ"
 nas = "mɱnɳɲŋɴ"
@@ -115,6 +116,16 @@ lo = "a"
 -- ɵəɐa are not given places because they are central
 
 -- Auxiliary Functions
+
+isVowel :: Manner -> Bool
+isVowel m = m `elem` [Vowel High, Vowel MidHigh, Vowel Mid, Vowel MidLow, Vowel Low]
+
+isObstruent :: Manner -> Bool
+isObstruent m = m `elem` [Stop, Fricative]
+
+isRounded :: Active -> Bool
+isRounded (Dorsal Rounded) = True
+isRounded _ = False
 
 passiveOf :: FindFeature Passive
 passiveOf x
@@ -134,7 +145,8 @@ activeOf x
     | x `elem` inflab = Inferiolabial
     | x `elem` api = Apical
     | x `elem` lam = Laminal
-    | x `elem` dors = Dorsal
+    | x `elem` dors && x `elem` unrounded = Dorsal Unrounded
+    | x `elem` dors && x `elem` rounded = Dorsal Rounded
     | x `elem` epi = Epiglottal
     | otherwise = NoActive
 
@@ -142,9 +154,13 @@ glottalStateOf :: FindFeature GlottalState
 glottalStateOf x
     | x `elem` voiced = Voiced
     | x `elem` unvoiced = Voiceless
+    | x `elem` creaky = Creaky
+    | x `elem` breathy = Breathy
+    | x `elem` closed = Closed
 
 mannerOf :: FindFeature Manner
 mannerOf x
+    | x `elem` click = Click
     | x `elem` stop = Stop
     | x `elem` fric = Fricative
     | x `elem` nas = Nasal
@@ -156,9 +172,10 @@ mannerOf x
     | x `elem` mid = Vowel Mid
     | x `elem` mlo = Vowel MidLow
     | x `elem` lo = Vowel Low
+    | x `elem` boundary = Boundary x
 
-sonorityOf :: FindFeature Int
-sonorityOf x
+sonorityOf :: Phone -> Int
+sonorityOf (P _ _ _ m)
     | m == Stop = 0
     | m == Fricative = 1
     | m == Nasal = 2
@@ -170,7 +187,6 @@ sonorityOf x
     | m == Vowel Mid = 8
     | m == Vowel MidLow = 9
     | m == Vowel Low = 10
-    where m = mannerOf x
 
 -- % is the set difference operator
 (%) :: PhoneClass -> PhoneClass -> PhoneClass
@@ -180,13 +196,13 @@ xs % ys = [x | x <- xs, x `notElem` ys]
 complement :: PhoneClass -> PhoneClass
 complement xs = universe % xs
 
--- index "abc" = [('a',[0]),('b',[1]),('c',[2])] 
-index :: String -> Lexeme
-index xs = zip xs (map (: []) [0..])
+-- toLexeme "abc" = [(Phone a b c d,[0]),(Phone a b c d,[1]),(Phone a b c d,[2])] 
+toLexeme :: String -> Lexeme
+toLexeme xs = zip (map charToPhone xs) (map (: []) [0..])
 
--- unIndex [('a',[0, 1]),('b',[]),('c',[2, 3, 4])] = "abc"
-unIndex :: Lexeme -> String
-unIndex = filter (/= '+') . map fst
+-- unIndex [(Phone a b c d,[0, 1]),(Phone a b c d,[]),(Phone a b c d,[2, 3, 4])] = "abc"
+unIndex :: Lexeme -> [Phone]
+unIndex = filter (/= MorphemeBoundary) . map fst
 
 affix :: String -> String -> String
 affix xs ys = xs ++ '+' : ys
@@ -194,15 +210,17 @@ affix xs ys = xs ++ '+' : ys
 groups :: Int -> [a] -> [[a]]
 groups n xs = [take n (drop i xs) | i <- [0..length xs - n]]
 
-charToPhone' :: Char -> PhoneData
-charToPhone' x = P (glottalStateOf x) (activeOf x) (passiveOf x) (mannerOf x)
+charToPhone :: Char -> PhoneData
+charToPhone '.' = SyllableBoundary
+charToPhone '+' = MorphemeBoundary
+charToPhone x = P (glottalStateOf x) (activeOf x) (passiveOf x) (mannerOf x)
 
-syllables :: String -> [String]
+syllables :: [Phone] -> [[Phone]]
 syllables [] = []
-syllables ('.':xs) = syllables xs
-syllables xs = (\ f (a,as) -> a : f as) syllables (break (== '.') xs)
+syllables (SyllableBoundary:xs) = syllables xs
+syllables xs = (\ f (a,as) -> a : f as) syllables (break (== SyllableBoundary) xs)
 
-sizeOfCoda :: String -> Int
+sizeOfCoda :: [Phone] -> Int
 sizeOfCoda [] = 0
 sizeOfCoda [x] = 0
 sizeOfCoda (x:y:xs)
@@ -210,7 +228,7 @@ sizeOfCoda (x:y:xs)
     | otherwise = 0 + sizeOfCoda (y:xs)
 
 (≻) :: Lexeme -> Lexeme -> Grammar -> String -> Bool
-x ≻ y = \g i -> fluxionLEq (eval g (index i) x) (eval g (index i) y)
+x ≻ y = \g i -> fluxionLEq (eval g (toLexeme i) x) (eval g (toLexeme i) y)
 
 {- not possible because Constraint can't be an instance of Eq
 (⪢) :: Constraint -> Constraint -> Grammar -> Bool
@@ -295,25 +313,30 @@ gen (x:xs) = map (: xs) (complement [x]) ++ map (x :) (gen xs)
 
 -- same place
 place :: Comp
-place a b
-    | passiveOf a == passiveOf b = True
+place (P g0 a0 p0 m0) (P g1 a1 p1 m1)
+    | (p0 == p1) && (a0 == a1) = True
     | otherwise = False
 
 -- same voicing of obstuents
 obsVoice :: Comp
-obsVoice a b
-    | a `elem` voiced % res && b `elem` unvoiced = False
-    | a `elem` unvoiced && b `elem` voiced % res = False
+obsVoice (P g0 a0 p0 m0) (P g1 a1 p1 m1)
+    | g0 /= g1 && isObstruent m0 && isObstruent m1 = False
     | otherwise = True
+
+-- nasal agrees in place with following obstruent
+nasalObs :: Comp
+nasalObs a@(P g0 a0 p0 m0) b@(P g1 a1 p1 m1)
+            | m0 == Nasal && isObstruent m1 && place a b = True
+            | not (m0 == Nasal && isObstruent m1) = True
+            | otherwise = False
 
 -- I->O comparisons:
 
 -- nasality preservation
 nasal :: Comp
-nasal a b
-    | a `notElem` nas = True
-    | a `elem` nas && b `elem` nas = True
-    | otherwise = False
+nasal (P g0 a0 p0 m0) (P g1 a1 p1 m1)
+    | m0 == Nasal && m1 /= Nasal = False
+    | otherwise = True
 
 -- Constraints
 
@@ -343,15 +366,6 @@ uniformity i o = length [ 1 | (x,xps) <- o, length xps > 1]
 agree :: Comp -> Constraint
 agree f _ o = length [ 1 | [a,b] <- groups 2 (unIndex o), not (f a b)]
 
--- nasal agrees with place of following obstruent
-nasAgr :: Constraint
-nasAgr _ o = sum [auxNasAgr a b | [a,b] <- groups 2 (unIndex o)]
-    where
-        auxNasAgr a b
-            | a `elem` nas && b `elem` obs && place a b = 0
-            | a `notElem` nas || b `notElem` obs = 0
-            | otherwise = 1
-
 -- linear order preservation/no metathesis (usually classed as a faithfulness constraint)
 -- fix: [('b',[1]),('c',[2]),('a',[0])] gives 1 violation but should give 2
 linearity :: Constraint
@@ -359,14 +373,14 @@ linearity _ o = length [ 1 | [as,bs] <- groups 2 (map snd o), or [ any (< a) bs 
 
 -- no non-back rounded vowels
 noFrontRound :: Constraint
-noFrontRound _ o = length [ 1 | (x,xps) <- o, x `notElem` vel && x `elem` vowel && x `elem` rounded]
+noFrontRound _ o = length [ 1 | (P g a p m,xps) <- o, p /= Velar && isVowel m && isRounded a]
 
 -- syllable constraints:
 -- a syllable is too hard to define so a lot of the following constraints are just approximations that will likely never be perfect
 
 -- no complex syllables
 noComplex :: Constraint
-noComplex _ o = length [ x | x <- groups 3 (unIndex o), '.' `notElem` x]
+noComplex _ o = length [ x | x <- groups 3 (unIndex o), SyllableBoundary `notElem` x]
 
 -- no coda
 noCoda :: Constraint
@@ -375,18 +389,18 @@ noCoda _ o = sum (map sizeOfCoda (syllables (unIndex o)))
 -- no empty onset - fix: "sto" gives violation
 onset :: Constraint
 onset _ o = sum (map (f . take 2 . map sonorityOf) (syllables (unIndex o)))
-    where 
+    where
         f :: [Int] -> Int
         f [x] = 1
         f [a,b] | a > b = 1 | otherwise = 0
 
 -- Main
 
-mostOptimal :: Grammar -> String -> [Lexeme] -> [String]
-mostOptimal g i os = map unIndex (mask (smallestFluxions (map (eval g (index i)) os)) os)
+mostOptimal :: Grammar -> String -> [Lexeme] -> [[Phone]]
+mostOptimal g i os = map unIndex (mask (smallestFluxions (map (eval g (toLexeme i)) os)) os)
 
 prop_mostOptimal :: Grammar -> String -> Fluxion -> Lexeme -> Bool
-prop_mostOptimal g i n o = fluxionLEq n (eval g (index i) (head (mask (smallestFluxions [eval g (index i) o]) [o])))
+prop_mostOptimal g i n o = fluxionLEq n (eval g (toLexeme i) (head (mask (smallestFluxions [eval g (toLexeme i) o]) [o])))
 
 -- quickCheck (prop_mostOptimal *grammar* *input form* *harmony*)
 -- theoretically should return a form of harmony greater than the inputed harmony if one exists

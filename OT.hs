@@ -1,4 +1,5 @@
 import Test.QuickCheck
+import GHC.Driver.Session (globalPackageDatabasePath)
 
 type Phone = Char
 -- should Phone be of type Char?
@@ -30,16 +31,19 @@ type PhoneClass = [Phone]
 data Phone' = P GlottalState Active Passive Manner
     deriving (Eq, Show)
 
-data Passive = Superiolabial | Dental | Alveolar | Postalveolar | Palatal | Velar | Uvular | Pharyngeal | Epiglottal
+data Passive = Superiolabial | Dental | Alveolar | Postalveolar | Palatal | Velar | Uvular | Pharyngeal | NoPassive
     deriving (Eq, Show)
 
-data Active = Inferiolabial | Apical | Laminal | Dorsal | Glottal
+data Active = Inferiolabial | Apical | Laminal | Dorsal | Epiglottal | NoActive
     deriving (Eq, Show)
 
-data Manner = Stop | Fricative | Nasal | Trill | Tap | Approximant | HighVowel | MidHighVowel | MidVowel | MidLowVowel | LowVowel
+data Manner = Click | Stop | Fricative | Nasal | Trill | Tap | Approximant | Vowel Height
     deriving (Eq, Show)
 
-data GlottalState = Voiced | Voiceless
+data Height = High | MidHigh | Mid | MidLow | Low
+    deriving (Eq, Show)
+
+data GlottalState = Voiced | Voiceless | Creaky | Breathy | Closed
     deriving (Eq, Show)
 
 -- Classes of sounds
@@ -70,11 +74,11 @@ tense = complement lax
 lat = "ɬɮlɭʎʟ"
 sib = "sz"
 
--- tongue places
-
+-- active articulators
 api = "tdnszɹ" ++ "rɾɬɮlʃʒʈɖɳɽʂʐɻɭ" -- phones shouldn't be in multiple mutually exclusive classes
 lam = "tdnszɹ" ++ "ɕʑ" -- most alveolar phones are underspecified for laminal/apical/dental in the IPA
 dors = "cɟɲçʝjʎkgŋxɣɰʟ"
+epi = ""
 
 -- manners
 stop = "pbtdʈɖcɟkg"
@@ -89,7 +93,7 @@ mid = "ɛœəʌɔ"
 mlo = "æɶɐɑɒ"
 lo = "a"
 
--- places
+-- passive articulators
 lab = "pbmʙɸβ"
 labdent = "ɱⱱfvʋ"
 alv = "tdnrɾszɬɮɹl"
@@ -101,14 +105,27 @@ vel = "kgŋxɣɰʟɯwɤʌɑʊuoɔɒ"
 
 -- Auxiliary Functions
 
-placeOf :: FindFeature Passive
-placeOf x
+passiveOf :: FindFeature Passive
+passiveOf x
     | x `elem` lab = Superiolabial
     | x `elem` labdent = Dental
     | x `elem` alv = Alveolar
     | x `elem` postalv = Postalveolar
     | x `elem` pal = Palatal
     | x `elem` vel = Velar
+
+activeOf :: FindFeature Active
+activeOf x
+    | x `elem` lab ++ labdent = Inferiolabial
+    | x `elem` api = Apical
+    | x `elem` lam = Laminal
+    | x `elem` dors = Dorsal
+    | x `elem` epi = Epiglottal
+
+glottalStateOf :: FindFeature GlottalState
+glottalStateOf x
+    | x `elem` voiced = Voiced
+    | x `elem` unvoiced = Voiceless
 
 mannerOf :: FindFeature Manner
 mannerOf x
@@ -118,11 +135,11 @@ mannerOf x
     | x `elem` trill = Trill
     | x `elem` tap = Tap
     | x `elem` appr = Approximant
-    | x `elem` hi = HighVowel
-    | x `elem` mhi = MidHighVowel
-    | x `elem` mid = MidVowel
-    | x `elem` mlo = MidLowVowel
-    | x `elem` lo = LowVowel
+    | x `elem` hi = Vowel High
+    | x `elem` mhi = Vowel MidHigh
+    | x `elem` mid = Vowel Mid
+    | x `elem` mlo = Vowel MidLow
+    | x `elem` lo = Vowel Low
 
 sonorityOf :: FindFeature Int
 sonorityOf x
@@ -132,11 +149,11 @@ sonorityOf x
     | m == Trill = 3
     | m == Tap = 4
     | m == Approximant = 5
-    | m == HighVowel = 6
-    | m == MidHighVowel = 7
-    | m == MidVowel = 8
-    | m == MidLowVowel = 9
-    | m == LowVowel = 10
+    | m == Vowel High = 6
+    | m == Vowel MidHigh = 7
+    | m == Vowel Mid = 8
+    | m == Vowel MidLow = 9
+    | m == Vowel Low = 10
     where m = mannerOf x
 
 -- % is the set difference operator
@@ -160,6 +177,9 @@ affix xs ys = xs ++ '+' : ys
 
 groups :: Int -> [a] -> [[a]]
 groups n xs = [take n (drop i xs) | i <- [0..length xs - n]]
+
+charToPhone' :: Char -> Phone'
+charToPhone' x = P (glottalStateOf x) (activeOf x) (passiveOf x) (mannerOf x)
 
 syllables :: String -> [String]
 syllables [] = []
@@ -260,15 +280,15 @@ gen (x:xs) = map (: xs) (complement [x]) ++ map (x :) (gen xs)
 -- same place
 place :: Comp
 place a b
-    | placeOf a == placeOf b = True
+    | passiveOf a == passiveOf b = True
     | otherwise = False
 
 -- same voicing of obstuents
 obsVoice :: Comp
 obsVoice a b
-    | a `elem` voiced % res && b `elem` voiced % res = True
-    | a `elem` universe % voiced && b `elem` universe % voiced = True
-    | otherwise = False
+    | a `elem` voiced % res && b `elem` unvoiced = False
+    | a `elem` unvoiced && b `elem` voiced % res = False
+    | otherwise = True
 
 -- I->O comparisons:
 

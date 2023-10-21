@@ -29,16 +29,25 @@ data PhoneData = P GlottalState Active Passive Manner | SyllableBoundary | Morph
 data Passive = Superiolabial | Dental | Alveolar | Postalveolar | Palatal | Central | Velar | Uvular | Pharyngeal | NoPassive
     deriving (Eq, Show)
 
-data Active = Inferiolabial | Apical | Laminal | Dorsal Rounding | Epiglottal | NoActive
+data Active = Inferiolabial | Tongue TonguePlace Laterality | Epiglottal | NoActive
     deriving (Eq, Show)
 
-data Manner = Click | Stop | Fricative | Nasal | Trill | Tap | Approximant | Vowel Height | Boundary Char
+data TonguePlace = Apical | Laminal | Dorsal Rounding
+    deriving (Eq, Show)
+
+data Manner = Click | Stop | Affricate | Fricative Sibilance | Nasal | Trill | Tap | Approximant | Vowel Height | Boundary Char
     deriving (Eq, Show)
 
 data Height = High | MidHigh | Mid | MidLow | Low
     deriving (Eq, Show)
 
-data GlottalState = Voiced | Voiceless | Creaky | Breathy | Closed | VoicedIngressive
+data Sibilance = Sibilant | NonSibilant
+    deriving (Eq, Show)
+
+data Laterality = Lateral | NonLateral
+    deriving (Eq, Show)
+
+data GlottalState = Voiced | Voiceless | Creaky | Breathy | Closed | VoicedIngressive | VoicelessAspirated
     deriving (Eq, Show)
 
 data Rounding = Rounded | Unrounded
@@ -123,10 +132,10 @@ isVowel :: Manner -> Bool
 isVowel m = m `elem` [Vowel High, Vowel MidHigh, Vowel Mid, Vowel MidLow, Vowel Low]
 
 isObstruent :: Manner -> Bool
-isObstruent m = m `elem` [Stop, Fricative]
+isObstruent m = m `elem` [Stop, Fricative Sibilant, Fricative NonSibilant, Affricate]
 
 isRounded :: Active -> Bool
-isRounded (Dorsal Rounded) = True
+isRounded (Tongue (Dorsal Rounded) _) = True
 isRounded _ = False
 
 passiveOf :: FindFeature Passive
@@ -145,10 +154,15 @@ passiveOf x
 activeOf :: FindFeature Active
 activeOf x
     | x `elem` inflab = Inferiolabial
-    | x `elem` api = Apical
-    | x `elem` lam = Laminal
-    | x `elem` dors && x `elem` unrounded = Dorsal Unrounded
-    | x `elem` dors && x `elem` rounded = Dorsal Rounded
+    | x `elem` lat = case () of
+         () | x `elem` api -> Tongue Apical Lateral
+            | x `elem` lam -> Tongue Laminal Lateral
+            | x `elem` dors && x `elem` unrounded -> Tongue (Dorsal Unrounded) Lateral
+            | x `elem` dors && x `elem` rounded -> Tongue (Dorsal Rounded) Lateral
+    | x `elem` api && x `notElem` lat = Tongue Apical NonLateral 
+    | x `elem` lam && x `notElem` lat = Tongue Laminal NonLateral
+    | x `elem` dors && x `elem` unrounded = Tongue (Dorsal Unrounded) NonLateral
+    | x `elem` dors && x `elem` rounded = Tongue (Dorsal Rounded) NonLateral
     | x `elem` epi = Epiglottal
     | otherwise = NoActive
 
@@ -164,7 +178,8 @@ mannerOf :: FindFeature Manner
 mannerOf x
     | x `elem` click = Click
     | x `elem` stop = Stop
-    | x `elem` fric = Fricative
+    | x `elem` fric && x `elem` sib = Fricative Sibilant
+    | x `elem` fric && x `notElem` sib = Fricative NonSibilant
     | x `elem` nas = Nasal
     | x `elem` trill = Trill
     | x `elem` tap = Tap
@@ -178,17 +193,22 @@ mannerOf x
 
 sonorityOf :: Phone -> Int
 sonorityOf (P _ _ _ m)
-    | m == Stop = 0
-    | m == Fricative = 1
-    | m == Nasal = 2
-    | m == Trill = 3
+    | m == Click = 0
+    | m == Stop = 1
+    | m == Affricate = 2
+    | m == Fricative Sibilant = 3
+    | m == Fricative NonSibilant = 3
     | m == Tap = 4
-    | m == Approximant = 5
-    | m == Vowel High = 6
-    | m == Vowel MidHigh = 7
-    | m == Vowel Mid = 8
-    | m == Vowel MidLow = 9
-    | m == Vowel Low = 10
+    | m == Trill = 5
+    | m == Nasal = 6
+    | m == Approximant = 7
+    | m == Vowel High = 8
+    | m == Vowel MidHigh = 9
+    | m == Vowel Mid = 10
+    | m == Vowel MidLow = 11
+    | m == Vowel Low = 12
+
+
 
 -- % is the set difference operator
 (%) :: PhoneClass -> PhoneClass -> PhoneClass

@@ -38,7 +38,7 @@ data Manner = Click | Stop | Fricative | Nasal | Trill | Tap | Approximant | Vow
 data Height = High | MidHigh | Mid | MidLow | Low
     deriving (Eq, Show)
 
-data GlottalState = Voiced | Voiceless | Creaky | Breathy | Closed
+data GlottalState = Voiced | Voiceless | Creaky | Breathy | Closed | VoicedIngressive
     deriving (Eq, Show)
 
 data Rounding = Rounded | Unrounded
@@ -59,7 +59,7 @@ but with the addition of ɶ and ɒ
 and considering æ to be a cardinal vowel.
 -}
 
-universe = "pbmʙɸβwʍɱⱱfvʋθðtdnrɾɺszɬɮɹlʃʒɕʑʈɖɳɽʂʐɻɭcɟɲçʝjɥʎkgŋxɣɰʟqɢɴʀχʁħʕhɦʔʜʢʡʘǀǃǂǁieɛæɶɪyøœɵəɐaɯɤʌɑʊuoɔɒ"
+universe = "pbmʙɸβwʍɱⱱfvʋθðtdnrɾɺszɬɮɹlʃʒɕʑʈɖɳɽʂʐɻɭcɟɲçʝjɥʎkgŋxɣɰʟqɢɴʀχʁħʕhɦʔʜʢʡʘǀǃǂǁɓɗʄɠʛieɛæɶɪyøœɵəɐaɯɤʌɑʊuoɔɒ"
 boundary = ".+#"
 obs = stop ++ fric
 res = complement obs
@@ -78,23 +78,24 @@ voiced = "bmʙβwɱⱱvʋðdnrɾɺzɮɹlʒɕʑɖɳɽʐɻɭɟɲʝjɥʎgŋɣɰʟɢ
 creaky = ""
 breathy = "ɦ"
 closed = "ʔ"
+ingressive = "ɓɗʄɠʛ"
 
 -- active articulators
-inflab = "pbmʙɸβɱⱱfvʋʘ"
-api = "θðtdnrɾɺszɬɮɹlʃʒʈɖɳɽʂʐɻɭǀǃǁ"
+inflab = "pbmʙɸβɱⱱfvʋʘɓ"
+api = "θðtdnrɾɺszɬɮɹlʃʒʈɖɳɽʂʐɻɭǀǃǁɗ"
 lam = "ɕʑǂ"
-dors = "ʍcɟɲçʝjɥʎkgŋxɣɰʟqɢɴʀχʁħʕieɛæɪyøœɶɵəɐaɯɤʌɑʊuoɔɒ"
+dors = "ʍcɟɲçʝjɥʎkgŋxɣɰwʟqɢɴʀχʁħʕʄɠʛieɛæɪyøœɶɵəɐaɯɤʌɑʊuoɔɒ"
 epi = "ʜʢʡ"
 
 -- passive articulators
-suplab = "pbmʙɸβʘ"
+suplab = "pbmʙɸβʘɓ"
 dent = "ɱⱱfvʋθðǀ"
-alv = "tdnrɾɺszɬɮɹlǁ"
+alv = "tdnrɾɺszɬɮɹlǁɗ"
 postalv = "ʃʒɕʑǃǂ"
-pal = "ʈɖɳɽʂʐɻɭcɟɲçʝjɥʎieɛæɶɪyøœ"
+pal = "ʈɖɳɽʂʐɻɭcɟɲçʝjɥʎʄieɛæɶɪyøœ"
 cent = "ɵəɐa"
-vel = "ʍkgŋxɣɰʟɯwɤʌɑʊuoɔɒ"
-uvul = "qɢɴʀχʁ"
+vel = "ʍkgŋxɣɰwʟɠɯɤʌɑʊuoɔɒ"
+uvul = "qɢɴʀχʁʛ"
 phar = "ħʕʜʢʡ"
 
 -- manners
@@ -114,6 +115,9 @@ lo = "a"
 -- ɵəɐa are not given places because they are central
 
 -- Auxiliary Functions
+
+ejectivise :: Phone -> Phone
+ejectivise (P g a p m) = P Closed a p m
 
 isVowel :: Manner -> Bool
 isVowel m = m `elem` [Vowel High, Vowel MidHigh, Vowel Mid, Vowel MidLow, Vowel Low]

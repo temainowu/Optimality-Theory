@@ -35,7 +35,7 @@ data Active = Inferiolabial | Tongue TonguePlace Laterality | Epiglottal | NoAct
 data TonguePlace = Apical | Laminal | Dorsal Rounding
     deriving (Eq, Show)
 
-data Manner = Click | Stop | Affricate | Fricative Sibilance | Nasal | Trill | Tap | Approximant | Vowel Height | Boundary Char
+data Manner = Click | Stop | Affricate Sibilance | Fricative Sibilance | Nasal | Trill | Tap | Approximant | Vowel Height
     deriving (Eq, Show)
 
 data Height = High | MidHigh | Mid | MidLow | Low
@@ -79,7 +79,7 @@ unrounded = complement rounded
 lax = "ɪɵʊəɐ"
 tense = complement lax
 lat = "ɺɬɮlɭʎʟǁ"
-sib = "szʃʒɕʑ"
+sib = "szʃʒɕʑʂʐ"
 
 -- glottal states
 unvoiced = "pɸʍfθtsɬʃʈʂcçkxqχħhʜʢʡ"
@@ -132,7 +132,7 @@ isVowel :: Manner -> Bool
 isVowel m = m `elem` [Vowel High, Vowel MidHigh, Vowel Mid, Vowel MidLow, Vowel Low]
 
 isObstruent :: Manner -> Bool
-isObstruent m = m `elem` [Stop, Fricative Sibilant, Fricative NonSibilant, Affricate]
+isObstruent m = m `elem` [Stop, Fricative Sibilant, Fricative NonSibilant, Affricate Sibilant, Affricate NonSibilant]
 
 isRounded :: Active -> Bool
 isRounded (Tongue (Dorsal Rounded) _) = True
@@ -189,13 +189,13 @@ mannerOf x
     | x `elem` mid = Vowel Mid
     | x `elem` mlo = Vowel MidLow
     | x `elem` lo = Vowel Low
-    | x `elem` boundary = Boundary x
 
 sonorityOf :: Phone -> Int
 sonorityOf (P _ _ _ m)
     | m == Click = 0
     | m == Stop = 1
-    | m == Affricate = 2
+    | m == Affricate Sibilant = 2
+    | m == Affricate NonSibilant = 2
     | m == Fricative Sibilant = 3
     | m == Fricative NonSibilant = 3
     | m == Tap = 4
@@ -303,7 +303,9 @@ leq x y = uncurry (\(xs, _) (ys, _) -> xs <= ys) (doubleNormalise x y)
 prop_leq :: Fluxion -> Fluxion -> Bool
 prop_leq x y = leq x y == fluxionLEq x y
 
--- in this program all fluxions are of the same length, do not contain negative values, and the right of the pair is always 0
+-- in this program all fluxions are of the same length, 
+-- do not contain negative values, 
+-- and the right of the pair is always 0
 -- so some of the above cases are redundant
 
 smallestFluxion :: [Fluxion] -> Fluxion

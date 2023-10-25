@@ -35,7 +35,7 @@ data Active = Inferiolabial | Tongue TonguePlace Laterality | Epiglottal | NoAct
 data TonguePlace = Apical | Laminal | Dorsal Rounding
     deriving (Eq, Show)
 
-data Manner = Click | Stop | Affricate Sibilance | Fricative Sibilance | Nasal | Trill | Tap | Approximant | Vowel Height
+data Manner = Click | Stop Nasality | Affricate Sibilance | Fricative Sibilance | Trill | Tap | Approximant | Vowel Height Nasality
     deriving (Eq, Show)
 
 data Height = High | MidHigh | Mid | MidLow | Low
@@ -51,6 +51,9 @@ data GlottalState = Voiced | Voiceless | Creaky | Breathy | Closed | VoicedIngre
     deriving (Eq, Show)
 
 data Rounding = Rounded | Unrounded
+    deriving (Eq, Show)
+
+data Nasality = Nasal | Oral
     deriving (Eq, Show)
 
 -- Classes of sounds
@@ -129,10 +132,10 @@ ejectivise :: Phone -> Phone
 ejectivise (P g a p m) = P Closed a p m
 
 isVowel :: Manner -> Bool
-isVowel m = m `elem` [Vowel High, Vowel MidHigh, Vowel Mid, Vowel MidLow, Vowel Low]
+isVowel m = m `elem` [Vowel High Nasal, Vowel MidHigh Nasal, Vowel Mid Nasal, Vowel MidLow Nasal, Vowel Low Nasal, Vowel High Oral, Vowel MidHigh Oral, Vowel Mid Oral, Vowel MidLow Oral, Vowel Low Oral]
 
 isObstruent :: Manner -> Bool
-isObstruent m = m `elem` [Stop, Fricative Sibilant, Fricative NonSibilant, Affricate Sibilant, Affricate NonSibilant]
+isObstruent m = m `elem` [Stop Oral, Fricative Sibilant, Fricative NonSibilant, Affricate Sibilant, Affricate NonSibilant]
 
 isRounded :: Active -> Bool
 isRounded (Tongue (Dorsal Rounded) _) = True
@@ -177,36 +180,41 @@ glottalStateOf x
 mannerOf :: FindFeature Manner
 mannerOf x
     | x `elem` click = Click
-    | x `elem` stop = Stop
+    | x `elem` stop = Stop Oral
     | x `elem` fric && x `elem` sib = Fricative Sibilant
     | x `elem` fric && x `notElem` sib = Fricative NonSibilant
-    | x `elem` nas = Nasal
+    | x `elem` nas = Stop Nasal
     | x `elem` trill = Trill
     | x `elem` tap = Tap
     | x `elem` appr = Approximant
-    | x `elem` hi = Vowel High
-    | x `elem` mhi = Vowel MidHigh
-    | x `elem` mid = Vowel Mid
-    | x `elem` mlo = Vowel MidLow
-    | x `elem` lo = Vowel Low
+    | x `elem` hi && x `elem` nas = Vowel High Nasal
+    | x `elem` hi = Vowel High Oral
+    | x `elem` mhi && x `elem` nas = Vowel MidHigh Nasal
+    | x `elem` mhi = Vowel MidHigh Oral
+    | x `elem` mid && x `elem` nas = Vowel Mid Nasal
+    | x `elem` mid = Vowel Mid Oral
+    | x `elem` mlo && x `elem` nas = Vowel MidLow Nasal
+    | x `elem` mlo = Vowel MidLow Oral
+    | x `elem` lo && x `elem` nas = Vowel Low Nasal
+    | x `elem` lo = Vowel Low Oral
 
 sonorityOf :: Phone -> Int
 sonorityOf (P _ _ _ m)
     | m == Click = 0
-    | m == Stop = 1
+    | m == Stop Oral = 1
     | m == Affricate Sibilant = 2
     | m == Affricate NonSibilant = 2
     | m == Fricative Sibilant = 3
     | m == Fricative NonSibilant = 3
     | m == Tap = 4
     | m == Trill = 5
-    | m == Nasal = 6
+    | m == Stop Nasal = 6
     | m == Approximant = 7
-    | m == Vowel High = 8
-    | m == Vowel MidHigh = 9
-    | m == Vowel Mid = 10
-    | m == Vowel MidLow = 11
-    | m == Vowel Low = 12
+    | m == Vowel High Nasal || m == Vowel High Oral = 8
+    | m == Vowel MidHigh Nasal || m == Vowel MidHigh Oral = 9
+    | m == Vowel Mid Nasal || m == Vowel Mid Oral = 10
+    | m == Vowel MidLow Nasal || m == Vowel MidLow Oral = 11
+    | m == Vowel Low Nasal || m == Vowel Low Oral = 12
 
 
 
@@ -351,8 +359,8 @@ obsVoice (P g0 a0 p0 m0) (P g1 a1 p1 m1)
 -- nasal agrees in place with following obstruent
 nasalObs :: Comp
 nasalObs a@(P g0 a0 p0 m0) b@(P g1 a1 p1 m1)
-            | m0 == Nasal && isObstruent m1 && place a b = True
-            | not (m0 == Nasal && isObstruent m1) = True
+            | m0 == Stop Nasal && isObstruent m1 && place a b = True
+            | not (m0 == Stop Nasal && isObstruent m1) = True
             | otherwise = False
 
 -- I->O comparisons:
@@ -360,7 +368,7 @@ nasalObs a@(P g0 a0 p0 m0) b@(P g1 a1 p1 m1)
 -- nasality preservation
 nasal :: Comp
 nasal (P g0 a0 p0 m0) (P g1 a1 p1 m1)
-    | m0 == Nasal && m1 /= Nasal = False
+    | m0 == Stop Nasal && m1 /= Stop Nasal = False
     | otherwise = True
 
 -- Constraints

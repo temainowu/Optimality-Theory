@@ -124,8 +124,6 @@ mid = "ɛœəʌɔ"
 mlo = "æɶɐɑɒ"
 lo = "a"
 
--- ɵəɐa are not given places because they are central
-
 -- Auxiliary Functions
 
 ejectivise :: Phone -> Phone

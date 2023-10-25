@@ -59,15 +59,15 @@ data Nasality = Nasal | Oral
 -- Classes of sounds
 
 {- vowel chart:
-i		y		ɯ		u
-	ɪ		ɵ		ʊ	
-e		ø		ɤ		o
-ɛ		œ	ə	ʌ		ɔ
-æ		ɶ	ɐ	ɑ		ɒ
+i		y   ɨ   ɯ		u
+	ɪ			    ʊ	
+e		ø   ɵ   ɤ		o
+ɛ		œ	ə   ʌ		ɔ
+æ		ɶ	ɐ   ɑ		ɒ
 			a			
 
 this is based on dr geoff lindey 's vowel chart 
-but with the addition of ɶ and ɒ 
+but with the addition of ɶ, ɨ, and ɒ 
 and considering æ to be a cardinal vowel.
 -}
 
@@ -86,7 +86,7 @@ sib = "szʃʒɕʑʂʐ"
 
 -- glottal states
 unvoiced = "pɸʍfθtsɬʃʈʂcçkxqχħhʜʢʡ"
-voiced = "bmʙβwɱⱱvʋðdnrɾɺzɮɹlʒɕʑɖɳɽʐɻɭɟɲʝjɥʎgŋɣɰʟɢɴʀʁʕieɛæɶɪyøœɵəɐaɯɤʌɑʊuoɔɒ"
+voiced = "bmʙβwɱⱱvʋðdnrɾɺzɮɹlʒɕʑɖɳɽʐɻɭɟɲʝjɥʎgŋɣɰʟɢɴʀʁʕieɛæɶɪyøœɨɵəɐaɯɤʌɑʊuoɔɒ"
 creaky = ""
 breathy = "ɦ"
 closed = "ʔ"
@@ -96,7 +96,7 @@ ingressive = "ɓɗʄɠʛ"
 inflab = "pbmʙɸβɱⱱfvʋʘɓ"
 api = "θðtdnrɾɺszɬɮɹlʃʒʈɖɳɽʂʐɻɭǀǃǁɗ"
 lam = "ɕʑǂ"
-dors = "ʍcɟɲçʝjɥʎkgŋxɣɰwʟqɢɴʀχʁħʕʄɠʛieɛæɪyøœɶɵəɐaɯɤʌɑʊuoɔɒ"
+dors = "ʍcɟɲçʝjɥʎkgŋxɣɰwʟqɢɴʀχʁħʕʄɠʛieɛæɪyøœɶɨɵəɐaɯɤʌɑʊuoɔɒ"
 epi = "ʜʢʡ"
 
 -- passive articulators
@@ -105,7 +105,7 @@ dent = "ɱⱱfvʋθðǀ"
 alv = "tdnrɾɺszɬɮɹlǁɗ"
 postalv = "ʃʒɕʑǃǂ"
 pal = "ʈɖɳɽʂʐɻɭcɟɲçʝjɥʎʄieɛæɶɪyøœ"
-cent = "ɵəɐa"
+cent = "ɨɵəɐa"
 vel = "ʍkgŋxɣɰwʟɠɯɤʌɑʊuoɔɒ"
 uvul = "qɢɴʀχʁʛ"
 phar = "ħʕʜʢʡ"
@@ -118,8 +118,8 @@ nas = "mɱnɳɲŋɴ"
 tap = "ⱱɾɽɺ"
 trill = "ʙrʀ"
 appr = "ʋɹlɻɭjɥɰwʎʟ"
-hi = "iɪyɵɯʊu"
-mhi = "eøɤo"
+hi = "iɪyɨɯʊu"
+mhi = "eøɵɤo"
 mid = "ɛœəʌɔ"
 mlo = "æɶɐɑɒ"
 lo = "a"

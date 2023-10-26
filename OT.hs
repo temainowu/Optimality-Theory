@@ -1,8 +1,5 @@
+import OptimalityTheory.Phones 
 import Test.QuickCheck
-
-type Phone = PhoneData
-
-type FindFeature f = Char -> f
 
 type Comp = Phone -> Phone -> Bool
 
@@ -19,43 +16,6 @@ type Fluxion = ([Int], Int)
 
 type Grammar = [Constraint]
 
-type PhoneClass = [Char]
--- PhoneClass (= [Char]) is used when refering to classes of phones
--- String (= [Char]) is used when refering to a sequence of phones
-
-data PhoneData = P GlottalState Active Passive Manner | SyllableBoundary | MorphemeBoundary | WordBoundary
-    deriving (Eq, Show)
-
-data Passive = Superiolabial | Dental | Alveolar | Postalveolar | Palatal | Central | Velar | Uvular | Pharyngeal | NoPassive
-    deriving (Eq, Show)
-
-data Active = Inferiolabial | Tongue TonguePlace Laterality | Epiglottal | NoActive
-    deriving (Eq, Show)
-
-data TonguePlace = Apical | Laminal | Dorsal Rounding
-    deriving (Eq, Show)
-
-data Manner = Click | Stop Nasality | Affricate Sibilance | Fricative Sibilance | Trill | Tap | Approximant | Vowel Height Nasality
-    deriving (Eq, Show)
-
-data Height = High | MidHigh | Mid | MidLow | Low
-    deriving (Eq, Show)
-
-data Sibilance = Sibilant | NonSibilant
-    deriving (Eq, Show)
-
-data Laterality = Lateral | NonLateral
-    deriving (Eq, Show)
-
-data GlottalState = Voiced | Voiceless | Creaky | Breathy | Closed | VoicedIngressive | VoicelessAspirated
-    deriving (Eq, Show)
-
-data Rounding = Rounded | Unrounded
-    deriving (Eq, Show)
-
-data Nasality = Nasal | Oral
-    deriving (Eq, Show)
-
 -- Classes of sounds
 
 {- vowel chart:
@@ -69,133 +29,20 @@ e		ø   ɵ   ɤ		o
 this is based on dr geoff lindey 's vowel chart 
 but with the addition of ɶ, ɨ, and ɒ 
 and considering æ to be a cardinal vowel.
+
+vowel = "ieɛæɪyøœɶɵəɐaɯɤʌɑʊuoɔɒ"
+lax = "ɪɵʊəɐ"
 -}
 
-universe = "pbmʙɸβwʍɱⱱfvʋθðtdnrɾɺszɬɮɹlʃʒɕʑʈɖɳɽʂʐɻɭcɟɲçʝjɥʎkgŋxɣɰʟqɢɴʀχʁħʕhɦʔʜʢʡʘǀǃǂǁɓɗʄɠʛieɛæɶɪyøœɵəɐaɯɤʌɑʊuoɔɒ"
-boundary = ".+#"
-obs = stop ++ fric
-res = complement obs
-vowel = "ieɛæɪyøœɶɵəɐaɯɤʌɑʊuoɔɒ"
-consonant = complement vowel
-rounded = "ʍwɥyøœɵəɶɐaʊuoɔɒ"
-unrounded = complement rounded
-lax = "ɪɵʊəɐ"
-tense = complement lax
-lat = "ɺɬɮlɭʎʟǁ"
-sib = "szʃʒɕʑʂʐ"
-
--- glottal states
-unvoiced = "pɸʍfθtsɬʃʈʂcçkxqχħhʜʢʡʘǀǃǂǁ"
-voiced = "bmʙβwɱⱱvʋðdnrɾɺzɮɹlʒɕʑɖɳɽʐɻɭɟɲʝjɥʎgŋɣɰʟɢɴʀʁʕieɛæɶɪyøœɨɵəɐaɯɤʌɑʊuoɔɒ"
-creaky = ""
-breathy = "ɦ"
-closed = "ʔ"
-ingressive = "ɓɗʄɠʛ"
-
--- active articulators
-inflab = "pbmʙɸβɱⱱfvʋʘɓ"
-api = "θðtdnrɾɺszɬɮɹlʃʒʈɖɳɽʂʐɻɭǀǃǁɗ"
-lam = "ɕʑǂ"
-dors = "ʍcɟɲçʝjɥʎkgŋxɣɰwʟqɢɴʀχʁħʕʄɠʛieɛæɪyøœɶɨɵəɐaɯɤʌɑʊuoɔɒ"
-epi = "ʜʢʡ"
-
--- passive articulators
-suplab = "pbmʙɸβʘɓ"
-dent = "ɱⱱfvʋθðǀ"
-alv = "tdnrɾɺszɬɮɹlǁɗ"
-postalv = "ʃʒɕʑǃǂ"
-pal = "ʈɖɳɽʂʐɻɭcɟɲçʝjɥʎʄieɛæɶɪyøœ"
-cent = "ɨɵəɐa"
-vel = "ʍkgŋxɣɰwʟɠɯɤʌɑʊuoɔɒ"
-uvul = "qɢɴʀχʁʛ"
-phar = "ħʕʜʢʡ"
-
--- manners
-click = "ʘǀǃǂǁ"
-stop = "pbtdʈɖcɟkgqɢʔʡɓɗʄɠʛ"
-fric = "ɸβʍfvθðszɬɮʃʒɕʑʂʐçʝxɣχʁħʕhɦʜʢ"
-nas = "mɱnɳɲŋɴ"
-tap = "ⱱɾɽɺ"
-trill = "ʙrʀ"
-appr = "ʋɹlɻɭjɥɰwʎʟ"
-hi = "iɪyɨɯʊu"
-mhi = "eøɵɤo"
-mid = "ɛœəʌɔ"
-mlo = "æɶɐɑɒ"
-lo = "a"
 
 -- Auxiliary Functions
-
-ejectivise :: Phone -> Phone
-ejectivise (P g a p m) = P Closed a p m
 
 isVowel :: Manner -> Bool
 isVowel m = m `elem` [Vowel High Nasal, Vowel MidHigh Nasal, Vowel Mid Nasal, Vowel MidLow Nasal, Vowel Low Nasal, Vowel High Oral, Vowel MidHigh Oral, Vowel Mid Oral, Vowel MidLow Oral, Vowel Low Oral]
 
-isObstruent :: Manner -> Bool
-isObstruent m = m `elem` [Stop Oral, Fricative Sibilant, Fricative NonSibilant, Affricate Sibilant, Affricate NonSibilant]
-
 isRounded :: Active -> Bool
 isRounded (Tongue (Dorsal Rounded) _) = True
 isRounded _ = False
-
-passiveOf :: FindFeature Passive
-passiveOf x
-    | x `elem` suplab = Superiolabial
-    | x `elem` dent = Dental
-    | x `elem` alv = Alveolar
-    | x `elem` postalv = Postalveolar
-    | x `elem` pal = Palatal
-    | x `elem` cent = Central
-    | x `elem` vel = Velar
-    | x `elem` uvul = Uvular
-    | x `elem` phar = Pharyngeal
-    | otherwise = NoPassive
-
-activeOf :: FindFeature Active
-activeOf x
-    | x `elem` inflab = Inferiolabial
-    | x `elem` lat = case () of
-         () | x `elem` api -> Tongue Apical Lateral
-            | x `elem` lam -> Tongue Laminal Lateral
-            | x `elem` dors && x `elem` unrounded -> Tongue (Dorsal Unrounded) Lateral
-            | x `elem` dors && x `elem` rounded -> Tongue (Dorsal Rounded) Lateral
-    | x `elem` api && x `notElem` lat = Tongue Apical NonLateral 
-    | x `elem` lam && x `notElem` lat = Tongue Laminal NonLateral
-    | x `elem` dors && x `elem` unrounded = Tongue (Dorsal Unrounded) NonLateral
-    | x `elem` dors && x `elem` rounded = Tongue (Dorsal Rounded) NonLateral
-    | x `elem` epi = Epiglottal
-    | otherwise = NoActive
-
-glottalStateOf :: FindFeature GlottalState
-glottalStateOf x
-    | x `elem` voiced = Voiced
-    | x `elem` unvoiced = Voiceless
-    | x `elem` creaky = Creaky
-    | x `elem` breathy = Breathy
-    | x `elem` closed = Closed
-    | x `elem` ingressive = VoicedIngressive
-
-mannerOf :: FindFeature Manner
-mannerOf x
-    | x `elem` click = Click
-    | x `elem` stop = Stop Oral
-    | x `elem` fric && x `elem` sib = Fricative Sibilant
-    | x `elem` fric && x `notElem` sib = Fricative NonSibilant
-    | x `elem` nas = Stop Nasal
-    | x `elem` trill = Trill
-    | x `elem` tap = Tap
-    | x `elem` appr = Approximant
-    | x `elem` hi && x `elem` nas = Vowel High Nasal
-    | x `elem` hi = Vowel High Oral
-    | x `elem` mhi && x `elem` nas = Vowel MidHigh Nasal
-    | x `elem` mhi = Vowel MidHigh Oral
-    | x `elem` mid && x `elem` nas = Vowel Mid Nasal
-    | x `elem` mid = Vowel Mid Oral
-    | x `elem` mlo && x `elem` nas = Vowel MidLow Nasal
-    | x `elem` mlo = Vowel MidLow Oral
-    | x `elem` lo && x `elem` nas = Vowel Low Nasal
-    | x `elem` lo = Vowel Low Oral
 
 sonorityOf :: Phone -> Int
 sonorityOf (P _ _ _ m)
@@ -215,21 +62,22 @@ sonorityOf (P _ _ _ m)
     | m == Vowel MidLow Nasal || m == Vowel MidLow Oral = 11
     | m == Vowel Low Nasal || m == Vowel Low Oral = 12
 
-
-
--- % is the set difference operator
-(%) :: PhoneClass -> PhoneClass -> PhoneClass
-xs % ys = [x | x <- xs, x `notElem` ys]
+-- \\ is the set difference operator
+(\\) :: Eq a => [a] -> [a] -> [a]
+xs \\ ys = [x | x <- xs, x `notElem` ys]
 
 -- complement of set
-complement :: PhoneClass -> PhoneClass
-complement xs = universe % xs
+complement :: [Char] -> [Char]
+complement xs = universe \\ xs
 
--- toLexeme "abc" = [(Phone a b c d,[0]),(Phone a b c d,[1]),(Phone a b c d,[2])] 
+-- toLexeme "xyz" = [(Phone a b c d,[0]),(Phone a b c d,[1]),(Phone a b c d,[2])] 
 toLexeme :: String -> Lexeme
 toLexeme xs = zip (map charToPhone xs) (map (: []) [0..])
 
--- unIndex [(Phone a b c d,[0, 1]),(Phone a b c d,[]),(Phone a b c d,[2, 3, 4])] = "abc"
+-- inverse of toLexeme
+toString :: Lexeme -> String
+toString xs = filter (/= '+') (concatMap (phoneToString . fst) xs)
+
 unIndex :: Lexeme -> [Phone]
 unIndex = filter (/= MorphemeBoundary) . map fst
 
@@ -238,12 +86,6 @@ affix xs ys = xs ++ '+' : ys
 
 groups :: Int -> [a] -> [[a]]
 groups n xs = [take n (drop i xs) | i <- [0..length xs - n]]
-
-charToPhone :: Char -> PhoneData
-charToPhone '.' = SyllableBoundary
-charToPhone '+' = MorphemeBoundary
-charToPhone '#' = WordBoundary
-charToPhone x = P (glottalStateOf x) (activeOf x) (passiveOf x) (mannerOf x)
 
 syllables :: [Phone] -> [[Phone]]
 syllables [] = []
@@ -428,8 +270,8 @@ onset _ o = sum (map (f . take 2 . map sonorityOf) (syllables (unIndex o)))
 
 -- Main
 
-mostOptimal :: Grammar -> String -> [Lexeme] -> [[Phone]]
-mostOptimal g i os = map unIndex (mask (smallestFluxions (map (eval g (toLexeme i)) os)) os)
+mostOptimal :: Grammar -> String -> [Lexeme] -> [String]
+mostOptimal g i os = map toString (mask (smallestFluxions (map (eval g (toLexeme i)) os)) os)
 
 prop_mostOptimal :: Grammar -> String -> Fluxion -> Lexeme -> Bool
 prop_mostOptimal g i n o = fluxionLEq n (eval g (toLexeme i) (head (mask (smallestFluxions [eval g (toLexeme i) o]) [o])))

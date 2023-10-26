@@ -1,3 +1,4 @@
+module OptimalityTheory.OT where
 import OptimalityTheory.Phones 
 import Test.QuickCheck
 

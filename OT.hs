@@ -270,26 +270,26 @@ onset _ o = sum (map (f . take 2 . map sonorityOf) (syllables (unIndex o)))
 
 -- Main
 
-mostOptimal :: Grammar -> String -> [Lexeme] -> [String]
-mostOptimal g i os = map toString (mask (smallestFluxions (map (eval g (toLexeme i)) os)) os)
+optimal :: Grammar -> String -> [Lexeme] -> [String]
+optimal g i os = map toString (mask (smallestFluxions (map (eval g (toLexeme i)) os)) os)
 
-prop_mostOptimal :: Grammar -> String -> Fluxion -> Lexeme -> Bool
-prop_mostOptimal g i n o = fluxionLEq n (eval g (toLexeme i) (head (mask (smallestFluxions [eval g (toLexeme i) o]) [o])))
+prop_optimal :: Grammar -> String -> Fluxion -> Lexeme -> Bool
+prop_optimal g i n o = fluxionLEq n (eval g (toLexeme i) (head (mask (smallestFluxions [eval g (toLexeme i) o]) [o])))
 
--- quickCheck (prop_mostOptimal *grammar* *input form* *harmony*)
+-- quickCheck (prop_optimal *grammar* *input form* *harmony*)
 -- theoretically should return a form of harmony greater than the inputed harmony if one exists
 
 -- Examples
 
 {-
-mostOptimal is the only function that needs to be called by the user
+optimal is the only function that needs to be called by the user
 it takes a grammar, an input form (which is automatically indexed), and a list of indexed output forms
 it returns a list of the most harmonious output forms (which are automatically unindexed)
 
 examples:
 
 example a)
-> mostOptimal [nasAgr, ident obsVoice] "amda" [index "ampa", index "amda"]
+> optimal [nasAgr, ident obsVoice] "amda" [index "ampa", index "amda"]
 ["ampa"]
 
 nasAgr dominates ident obsVoice, 
@@ -305,7 +305,7 @@ tableu:
 ───────┴────────┴─────────────────┘
 
 example b)
-> mostOptimal [ident obsVoice, nasAgr] "amda" [index "ampa", index "amda"]
+> optimal [ident obsVoice, nasAgr] "amda" [index "ampa", index "amda"]
 ["amda"]
 
 identIO obsVoice dominates nasAgr,

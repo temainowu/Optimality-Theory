@@ -7,12 +7,7 @@ type Lexeme = [(Phone, [Int])]
 
 type Constraint = Lexeme -> Lexeme -> Int
 
-type Fluxion = ([Int], Int)
--- Fluxions are used to represent the harmony of a form
--- the smaller the fluxion, the more harmonic the form
--- ([a₀,a₁,...,aₖ],n) represents the fluxion (a₀ε⁰+a₁ε¹+...+aₖεᵏ)ωⁿ
--- this is able to represent all possible finitely long integer fluxions
--- see fluxions.txt for more information on fluxions
+type Harmony = [Int]
 
 type Grammar = [Constraint]
 
@@ -99,75 +94,15 @@ sizeOfCoda (x:y:xs)
     | sonorityOf x > sonorityOf y = 1 + sizeOfCoda (y:xs)
     | otherwise = 0 + sizeOfCoda (y:xs)
 
-(≻) :: Lexeme -> Lexeme -> Grammar -> String -> Bool
-x ≻ y = \g i -> fluxionLEq (eval g (toLexeme i) x) (eval g (toLexeme i) y)
+mostHarmonious :: [Harmony] -> Harmony
+mostHarmonious [] = error "empty list"
+mostHarmonious [x] = x
+mostHarmonious (x:xs)
+    | x <= mostHarmonious xs = x
+    | otherwise = mostHarmonious xs
 
-{- not possible because Constraint can't be an instance of Eq
-(⪢) :: Constraint -> Constraint -> Grammar -> Bool
-x ⪢ y = \g -> find g x < find g y
-
-find :: Eq a => [a] -> a -> Int
-find xs y = head [i | (i,x) <- zip [0..] xs, y == x]
--}
-
--- Fluxions
-
-fluxionLEq :: Fluxion -> Fluxion -> Bool
-fluxionLEq ([],n) ([],m) = True
-fluxionLEq ([],n) (y:ys,m)
-    | y /= 0 = y > 0
-    | otherwise = fluxionLEq ([],0) (ys,m-1)
-fluxionLEq (x:xs,n) ([],m)
-    | x /= 0 = x < 0
-    | otherwise = fluxionLEq (xs,n-1) ([],0)
-fluxionLEq (x:xs,n) (y:ys,m)
-    | x == 0 = fluxionLEq (xs,n-1) (y:ys,m)
-    | y == 0 = fluxionLEq (x:xs,n) (ys,m-1)
-    | n < m = y > 0
-    | n > m = x < 0
-    | n == m = case () of
-       () | x < y -> True
-          | x > y -> False
-          | otherwise -> fluxionLEq (xs,n-1) (ys,m-1)
-
--- equivalent to fluxionLEq written by cosmo bobak (https://github.com/cosmobobak):
-
--- takes two fluxions to representations with the same "n" and equal-length lists
-doubleNormalise :: ([Int], Int) -> ([Int], Int) -> (([Int], Int), ([Int], Int))
-doubleNormalise ([], n) ([], m) = doubleNormalise ([0], n) ([0], m)
-doubleNormalise r@(xs, n) l@(ys, m)
-  -- if the offsets are the same, we just need to pad the shorter list with zeros
-  | n == m = ((xs ++ replicate xsMakeUp 0, n), (ys ++ replicate ysMakeUp 0, m))
-  -- if the left fluxion has a smaller offset, we need to left-pad it with zeros
-  | n < m = doubleNormalise (replicate (m - n) 0 ++ xs, m) l
-  -- if the right fluxion has a smaller offset, we need to left-pad it with zeros
-  | otherwise = doubleNormalise r (replicate (n - m) 0 ++ ys, n)
-  where
-    xsMakeUp = max (length ys - length xs) 0
-    ysMakeUp = max (length xs - length ys) 0
-
-leq :: Fluxion -> Fluxion -> Bool
-leq x y = uncurry (\(xs, _) (ys, _) -> xs <= ys) (doubleNormalise x y)
-
-prop_leq :: Fluxion -> Fluxion -> Bool
-prop_leq x y = leq x y == fluxionLEq x y
-
--- in this program all fluxions are of the same length, 
--- do not contain negative values, 
--- and the right of the pair is always 0
--- so some of the above cases are redundant
-
-smallestFluxion :: [Fluxion] -> Fluxion
-smallestFluxion [] = error "no fluxions"
-smallestFluxion [x] = x
-smallestFluxion (x:xs)
-    | fluxionLEq x (smallestFluxion xs) = x
-    | otherwise = smallestFluxion xs
-
--- fluxionLessThanOrEqual x (y:ys) = x
-
-smallestFluxions :: [Fluxion] -> [Bool]
-smallestFluxions xs = map (== smallestFluxion xs) xs
+optimalForms :: [Harmony] -> [Bool]
+optimalForms xs = map (== mostHarmonious xs) xs
 
 mask :: [Bool] -> [a] -> [a]
 mask [] _ = []
@@ -175,8 +110,8 @@ mask _ [] = []
 mask (True:bs) (x:xs) = x : mask bs xs
 mask (False:bs) (x:xs) = mask bs xs
 
-eval :: Grammar -> Lexeme -> Lexeme -> Fluxion
-eval g i o = (map (\ f -> f i o) g,0)
+eval :: Grammar -> Lexeme -> Lexeme -> Harmony
+eval g i o = map (\ f -> f i o) g
 
 -- fix: does not generate all possible forms
 gen :: String -> [String]
@@ -271,10 +206,10 @@ onset _ o = sum (map (f . take 2 . map sonorityOf) (syllables (unIndex o)))
 -- Main
 
 optimal :: Grammar -> String -> [Lexeme] -> [String]
-optimal g i os = map toString (mask (smallestFluxions (map (eval g (toLexeme i)) os)) os)
+optimal g i os = map toString (mask (optimalForms (map (eval g (toLexeme i)) os)) os)
 
-prop_optimal :: Grammar -> String -> Fluxion -> Lexeme -> Bool
-prop_optimal g i n o = fluxionLEq n (eval g (toLexeme i) (head (mask (smallestFluxions [eval g (toLexeme i) o]) [o])))
+prop_optimal :: Grammar -> String -> Harmony -> Lexeme -> Bool
+prop_optimal g i n o = n <= eval g (toLexeme i) (head (mask (optimalForms [eval g (toLexeme i) o]) [o]))
 
 -- quickCheck (prop_optimal *grammar* *input form* *harmony*)
 -- theoretically should return a form of harmony greater than the inputed harmony if one exists

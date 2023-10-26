@@ -12,7 +12,7 @@ data Active = Inferiolabial | Tongue TonguePlace Laterality | Epiglottal | NoAct
 data TonguePlace = Apical | Laminal | Dorsal Rounding
     deriving (Eq, Show)
 
-data Manner = Click | Stop Nasality | Affricate Sibilance | Fricative Sibilance | Trill | Tap | Approximant | Vowel Height Nasality
+data Manner = Click Nasality | Stop Release Nasality | Affricate Sibilance | Fricative Sibilance | Trill | Tap | Approximant | Vowel Height Nasality
     deriving (Eq, Show)
 
 data Height = High | MidHigh | Mid | MidLow | Low
@@ -33,14 +33,17 @@ data Rounding = Rounded | Unrounded
 data Nasality = Nasal | Oral
     deriving (Eq, Show)
 
+data Release = Released | Unreleased
+    deriving (Eq, Show)
+
 universe :: String
-universe = "pbmʙɸβɱⱱfvʋθðtdnrɾɺszɬɮɹlʃʒɕʑʈɖɳɽʂʐɻɭcɟɲçʝjɥʎkgŋxʍɣɰwʟqɢɴʀχʁħʕhɦʔʜʢʡʘǀǃǂǁɓɗʄɠʛieɛæɶɪyøœɵəɐaɯɤʌɑʊuoɔɒ"
+universe = "pbmʙɸβɱⱱfvʋθðtdnrɾɺszɬɮɹlʃʒɕʑʈɖɳɽʂʐɻɭcɟɲçʝjɥʎkgŋxʍɣɰwʟqɢɴʀχʁħʕhɦʔʜʢʡʘǀǃ‼ǂǁɓɗʄɠʛieɛæɶɪyøœɵəɐaɯɤʌɑʊuoɔɒ"
 lat = "ɺɬɮlɭʎʟǁ"
 rounded = "ʍwɥyøœɵəɶɐaʊuoɔɒ"
 sib = "szʃʒɕʑʂʐ"
 
 -- glottal states
-unvoiced = "pɸfθtsɬʃʈʂcçkxʍqχħhʜʢʡʘǀǃǂǁ"
+unvoiced = "pɸfθtsɬʃʈʂcçkxʍqχħhʜʢʡʘǀǃ‼ǂǁ"
 voiced = "bmʙβɱⱱvʋðdnrɾɺzɮɹlʒɕʑɖɳɽʐɻɭɟɲʝjɥʎgŋɣɰwʟɢɴʀʁʕieɛæɶɪyøœɨɵəɐaɯɤʌɑʊuoɔɒ"
 creaky = ""
 breathy = "ɦ"
@@ -50,7 +53,7 @@ asp = ""
 
 -- active articulators
 inflab = "pbmʙɸβɱⱱfvʋʘɓ"
-api = "θðtdnrɾɺszɬɮɹlʃʒʈɖɳɽʂʐɻɭǀǃǁɗ"
+api = "θðtdnrɾɺszɬɮɹlʃʒʈɖɳɽʂʐɻɭǀǃ‼ǁɗ"
 lam = "ɕʑǂ"
 dors = "cɟɲçʝjɥʎkgŋxʍɣɰwʟqɢɴʀχʁħʕʄɠʛieɛæɪyøœɶɨɵəɐaɯɤʌɑʊuoɔɒ"
 epi = "ʜʢʡ"
@@ -60,14 +63,14 @@ suplab = "pbmʙɸβʘɓ"
 dent = "ɱⱱfvʋθðǀ"
 alv = "tdnrɾɺszɬɮɹlǁɗ"
 postalv = "ʃʒɕʑǃǂ"
-pal = "ʈɖɳɽʂʐɻɭcɟɲçʝjɥʎʄieɛæɶɪyøœ"
+pal = "ʈɖɳɽʂʐɻɭcɟɲçʝjɥʎ‼ʄieɛæɶɪyøœ"
 cent = "ɨɵəɐa"
 vel = "kgŋxʍɣɰwʟɠɯɤʌɑʊuoɔɒ"
 uvul = "qɢɴʀχʁʛ"
 phar = "ħʕʜʢʡ"
 
 -- manners
-click = "ʘǀǃǂǁ"
+click = "ʘǀǃ‼ǂǁ"
 stop = "pbtdʈɖcɟkgqɢʔʡɓɗʄɠʛ"
 fric = "ɸβʍfvθðszɬɮʃʒɕʑʂʐçʝxɣχʁħʕhɦʜʢ"
 nas = "mɱnɳɲŋɴ"
@@ -81,7 +84,7 @@ mlo = "æɶɐɑɒ"
 lo = "a"
 
 isObstruent :: Manner -> Bool
-isObstruent m = m `elem` [Click, Stop Oral, Fricative Sibilant, Fricative NonSibilant, Affricate Sibilant, Affricate NonSibilant]
+isObstruent m = m `elem` [Click Nasal, Click Oral, Stop Released Oral, Stop Unreleased Oral, Stop Released Nasal, Fricative Sibilant, Fricative NonSibilant, Affricate Sibilant, Affricate NonSibilant]
 
 passiveOf :: Char -> Passive
 passiveOf x
@@ -123,11 +126,13 @@ glottalStateOf x
 
 mannerOf :: Char -> Manner
 mannerOf x
-    | x `elem` click = Click
-    | x `elem` stop = Stop Oral
+    | x `elem` click && x `elem` nas = Click Nasal
+    | x `elem` click && x `notElem` nas = Click Oral
+    | x `elem` stop && x `elem` nas = Stop Released Nasal
+    | x `elem` stop && x `notElem` nas = Stop Released Oral
     | x `elem` fric && x `elem` sib = Fricative Sibilant
     | x `elem` fric && x `notElem` sib = Fricative NonSibilant
-    | x `elem` nas = Stop Nasal
+    | x `elem` nas = Stop Unreleased Nasal
     | x `elem` trill = Trill
     | x `elem` tap = Tap
     | x `elem` appr = Approximant
@@ -159,9 +164,9 @@ phoneToString (P _                  (Tongue (Dorsal _) NonLateral) Velar   (Vowe
 phoneToString (P _                  (Tongue (Dorsal _) Lateral)    _       (Vowel Low _))        = error "No lateral vowels"
 phoneToString (P Closed             _                              _       (Vowel _   _))        = error "No ejective vowels"
 phoneToString (P VoicelessAspirated _                              _       (Vowel _   _))        = error "No aspirated vowels"
-phoneToString (P VoicedIngressive   _                              _       m)                    | m /= Stop Oral = error "only plosives can be voiced ingressive"
-phoneToString (P VoicedIngressive   _                              _       Click)                = error "No voiced ingressive click"
-phoneToString (P VoicedIngressive   _                              _       (Stop Nasal))         = error "No voiced ingressive nasal"
+phoneToString (P VoicedIngressive   _                              _       m)                    | m `elem` [Stop Released Oral, Stop Unreleased Oral, Stop Released Nasal] = error "only plosives can be voiced ingressive"
+phoneToString (P VoicedIngressive   _                              _       (Click _))                = error "No voiced ingressive click"
+phoneToString (P VoicedIngressive   _                              _       (Stop Unreleased Nasal))         = error "No voiced ingressive nasal"
 phoneToString (P VoicedIngressive   _                              _       (Affricate _))        = error "No voiced ingressive affricates"
 phoneToString (P VoicedIngressive   _                              _       (Fricative NonSibilant)) = error "No voiced ingressive fricative"
 phoneToString (P VoicedIngressive   _                              _       Trill)                   = error "No voiced ingressive trill"
@@ -171,8 +176,8 @@ phoneToString (P _                  Inferiolabial                  _       (Affr
 phoneToString (P _                  Inferiolabial                  _       (Fricative Sibilant))    = error "No Labial Sibilant Fricative"
 phoneToString (P _                  Inferiolabial                  Superiolabial Tap)               = error "No Bilabial Tap"
 phoneToString (P _                  Inferiolabial                  Superiolabial Approximant)       = error "No Bilabial Approximant"
-phoneToString (P _                  Inferiolabial                  Dental        Click)             = error "No labiodental Click"
-phoneToString (P _                  Inferiolabial                  Dental        (Stop Oral))       = error "No labiodental Stop"
+phoneToString (P _                  Inferiolabial                  Dental        (Click _))             = error "No labiodental Click"
+phoneToString (P _                  Inferiolabial                  Dental        (Stop _ Oral))       = error "No labiodental Stop"
 
 phoneToString (P Voiced (Tongue Apical NonLateral) Dental Trill) = error "No dental trill"
 phoneToString (P Voiced (Tongue Apical NonLateral) Dental Tap) = error "No dental tap"
@@ -214,20 +219,21 @@ phoneToString (P Voiced (Tongue (Dorsal Rounded) NonLateral) Velar (Vowel MidLow
 phoneToString (P Voiced (Tongue (Dorsal _) NonLateral) _ (Vowel MidLow Oral)) = error "That's a weird vowel"
 phoneToString (P _ _ _ (Vowel _ _)) = error "No non-dorsal vowels"
 -- Bilabials
-phoneToString (P Voiced Inferiolabial Superiolabial Click) = "ʘ̬" -- not sure about this one
-phoneToString (P Voiceless Inferiolabial Superiolabial Click) = "ʘ"
-phoneToString (P Voiced Inferiolabial Superiolabial (Stop Oral)) = "b"
-phoneToString (P Voiceless Inferiolabial Superiolabial (Stop Oral)) = "p"
-phoneToString (P VoicedIngressive Inferiolabial Superiolabial (Stop Oral)) = "ɓ"
-phoneToString (P Voiced Inferiolabial Superiolabial (Stop Nasal)) = "m"
-phoneToString (P VoicedIngressive Inferiolabial Superiolabial (Stop Nasal)) = "ɓ̃" -- not sure about this one
+phoneToString (P Voiced Inferiolabial Superiolabial (Click Oral)) = "ʘ̬" -- not sure about this one
+phoneToString (P Voiceless Inferiolabial Superiolabial (Click Oral)) = "ʘ"
+phoneToString (P Voiced Inferiolabial Superiolabial (Stop Released Oral)) = "b"
+phoneToString (P Voiced Inferiolabial Superiolabial (Stop Released Nasal)) = "ᵐb"
+phoneToString (P Voiceless Inferiolabial Superiolabial (Stop Released Oral)) = "p"
+phoneToString (P VoicedIngressive Inferiolabial Superiolabial (Stop Released Oral)) = "ɓ"
+phoneToString (P Voiced Inferiolabial Superiolabial (Stop Unreleased Nasal)) = "m"
+phoneToString (P VoicedIngressive Inferiolabial Superiolabial (Stop Released Nasal)) = "ɓ̃" -- not sure about this one
 phoneToString (P Voiced Inferiolabial Superiolabial (Affricate NonSibilant)) = "b͡β"
 phoneToString (P Voiceless Inferiolabial Superiolabial (Affricate NonSibilant)) = "p͡ɸ"
 phoneToString (P Voiced Inferiolabial Superiolabial (Fricative NonSibilant)) = "β"
 phoneToString (P Voiceless Inferiolabial Superiolabial (Fricative NonSibilant)) = "ɸ"
 phoneToString (P Voiced Inferiolabial Superiolabial Trill) = "ʙ"
 -- Labiodentals
-phoneToString (P voiced Inferiolabial Dental (Stop Nasal)) = "ɱ"
+phoneToString (P voiced Inferiolabial Dental (Stop unreleased Nasal)) = "ɱ"
 phoneToString (P Voiced Inferiolabial Dental (Affricate NonSibilant)) = "b͡v"
 phoneToString (P Voiceless Inferiolabial Dental (Affricate NonSibilant)) = "p͡f"
 phoneToString (P Voiced Inferiolabial Dental (Fricative NonSibilant)) = "v"
@@ -236,13 +242,14 @@ phoneToString (P _ Inferiolabial Dental Trill) = error "No labiodental trill"
 phoneToString (P Voiced Inferiolabial Dental Tap) = "ⱱ"
 phoneToString (P Voiced Inferiolabial Dental Approximant) = "ʋ"
 -- Dentals
-phoneToString (P Voiced (Tongue Apical NonLateral) Dental Click) = "ǀ̬" -- not sure about this one
-phoneToString (P Voiceless (Tongue Apical NonLateral) Dental Click) = "ǀ"
-phoneToString (P Voiced (Tongue Apical NonLateral) Dental (Stop Oral)) = "d̪"
-phoneToString (P Voiceless (Tongue Apical NonLateral) Dental (Stop Oral)) = "t̪"
-phoneToString (P VoicedIngressive (Tongue Apical NonLateral) Dental (Stop Oral)) = "ɗ̪"
-phoneToString (P Voiced (Tongue Apical NonLateral) Dental (Stop Nasal)) = "n̪"
-phoneToString (P VoicedIngressive (Tongue Apical NonLateral) Dental (Stop Nasal)) = "ɗ̪̃" -- not sure about this one
+phoneToString (P Voiced (Tongue Apical NonLateral) Dental (Click Oral)) = "ǀ̬" -- not sure about this one
+phoneToString (P Voiceless (Tongue Apical NonLateral) Dental (Click Oral)) = "ǀ"
+phoneToString (P Voiced (Tongue Apical NonLateral) Dental (Stop Released Oral)) = "d̪"
+phoneToString (P Voiced (Tongue Apical NonLateral) Dental (Stop Released Nasal)) = "ⁿd̪"
+phoneToString (P Voiceless (Tongue Apical NonLateral) Dental (Stop Released Oral)) = "t̪"
+phoneToString (P VoicedIngressive (Tongue Apical NonLateral) Dental (Stop Released Oral)) = "ɗ̪"
+phoneToString (P Voiced (Tongue Apical NonLateral) Dental (Stop Unreleased Nasal)) = "n̪"
+phoneToString (P VoicedIngressive (Tongue Apical NonLateral) Dental (Stop Released Nasal)) = "ɗ̪̃" -- not sure about this one
 phoneToString (P Voiced (Tongue Apical NonLateral) Dental (Affricate NonSibilant)) = "d̪͡ð"
 phoneToString (P Voiceless (Tongue Apical NonLateral) Dental (Affricate NonSibilant)) = "t̪͡θ"
 phoneToString (P Voiced (Tongue Apical NonLateral) Dental (Fricative NonSibilant)) = "ð"
@@ -253,15 +260,16 @@ phoneToString (P Voiced (Tongue Apical NonLateral) Dental Trill) = "r̪"
 phoneToString (P Voiced (Tongue Apical NonLateral) Dental Approximant) = "ɹ̪"
 phoneToString (P Voiced (Tongue Apical Lateral) Dental Approximant) = "l̪"
 -- Alveolars
-phoneToString (P Voiced (Tongue Apical NonLateral) Alveolar Click) = "ǃ̬"
-phoneToString (P Voiceless (Tongue Apical NonLateral) Alveolar Click) = "ǃ"
-phoneToString (P Voiced (Tongue Apical Lateral) Alveolar Click) = "ǁ̬"
-phoneToString (P Voiceless (Tongue Apical Lateral) Alveolar Click) = "ǁ"
-phoneToString (P Voiced (Tongue Apical NonLateral) Alveolar (Stop Oral)) = "d"
-phoneToString (P Voiceless (Tongue Apical NonLateral) Alveolar (Stop Oral)) = "t"
-phoneToString (P VoicedIngressive (Tongue Apical NonLateral) Alveolar (Stop Oral)) = "ɗ"
-phoneToString (P Voiced (Tongue Apical NonLateral) Alveolar (Stop Nasal)) = "n"
-phoneToString (P VoicedIngressive (Tongue Apical NonLateral) Alveolar (Stop Nasal)) = "ɗ̃"
+phoneToString (P Voiced (Tongue Apical NonLateral) Alveolar (Click Oral)) = "ǃ̬"
+phoneToString (P Voiceless (Tongue Apical NonLateral) Alveolar (Click Oral)) = "ǃ"
+phoneToString (P Voiced (Tongue Apical Lateral) Alveolar (Click Oral)) = "ǁ̬"
+phoneToString (P Voiceless (Tongue Apical Lateral) Alveolar (Click Oral)) = "ǁ"
+phoneToString (P Voiced (Tongue Apical NonLateral) Alveolar (Stop Released Oral)) = "d"
+phoneToString (P Voiced (Tongue Apical NonLateral) Alveolar (Stop Released Nasal)) = "ⁿd"
+phoneToString (P Voiceless (Tongue Apical NonLateral) Alveolar (Stop Released Oral)) = "t"
+phoneToString (P VoicedIngressive (Tongue Apical NonLateral) Alveolar (Stop Released Oral)) = "ɗ"
+phoneToString (P Voiced (Tongue Apical NonLateral) Alveolar (Stop Unreleased Nasal)) = "n"
+phoneToString (P VoicedIngressive (Tongue Apical NonLateral) Alveolar (Stop Released Nasal)) = "ɗ̃"
 phoneToString (P Voiced (Tongue Apical NonLateral) Alveolar (Affricate Sibilant)) = "d͡z"
 phoneToString (P Voiceless (Tongue Apical NonLateral) Alveolar (Affricate Sibilant)) = "t͡s"
 phoneToString (P Voiced (Tongue Apical NonLateral) Alveolar (Affricate NonSibilant)) = "d͡ð͇"
@@ -279,14 +287,17 @@ phoneToString (P Voiced (Tongue Apical NonLateral) Alveolar Tap) = "ɾ"
 phoneToString (P Voiced (Tongue Apical Lateral) Alveolar Tap) = "ɺ"
 phoneToString (P Voiced (Tongue Apical NonLateral) Alveolar Approximant) = "ɹ"
 phoneToString (P Voiced (Tongue Apical Lateral) Alveolar Approximant) = "l"
+-- Laminal Alveolars
+phoneToString (P Voiced (Tongue Laminal NonLateral) Alveolar (Click Oral)) = ""
 -- Postalveolars
-phoneToString (P Voiced (Tongue Apical NonLateral) Postalveolar Click) = "ǃ̬"
-phoneToString (P Voiceless (Tongue Apical NonLateral) Postalveolar Click) = "ǃ"
-phoneToString (P Voiced (Tongue Apical NonLateral) Postalveolar (Stop Oral)) = "d̠"
-phoneToString (P Voiceless (Tongue Apical NonLateral) Postalveolar (Stop Oral)) = "t̠"
-phoneToString (P VoicedIngressive (Tongue Apical NonLateral) Postalveolar (Stop Oral)) = "ɗ̠"
-phoneToString (P Voiced (Tongue Apical NonLateral) Postalveolar (Stop Nasal)) = "n̠"
-phoneToString (P VoicedIngressive (Tongue Apical NonLateral) Postalveolar (Stop Nasal)) = "ɗ̠̃"
+phoneToString (P Voiced (Tongue Apical NonLateral) Postalveolar (Click Oral)) = "ǃ̬"
+phoneToString (P Voiceless (Tongue Apical NonLateral) Postalveolar (Click Oral)) = "ǃ"
+phoneToString (P Voiced (Tongue Apical NonLateral) Postalveolar (Stop Released Oral)) = "d̠"
+phoneToString (P Voiced (Tongue Apical NonLateral) Postalveolar (Stop Released Nasal)) = "ⁿd̠"
+phoneToString (P Voiceless (Tongue Apical NonLateral) Postalveolar (Stop Released Oral)) = "t̠"
+phoneToString (P VoicedIngressive (Tongue Apical NonLateral) Postalveolar (Stop Released Oral)) = "ɗ̠"
+phoneToString (P Voiced (Tongue Apical NonLateral) Postalveolar (Stop Unreleased Nasal)) = "n̠"
+phoneToString (P VoicedIngressive (Tongue Apical NonLateral) Postalveolar (Stop Released Nasal)) = "ɗ̠̃"
 phoneToString (P Voiced (Tongue Apical NonLateral) Postalveolar (Affricate Sibilant)) = "d͡ʒ"
 phoneToString (P Voiceless (Tongue Apical NonLateral) Postalveolar (Affricate Sibilant)) = "t͡ʃ"
 phoneToString (P Voiced (Tongue Apical NonLateral) Postalveolar (Affricate Sibilant)) = "d͡ɹ̠˔"
@@ -300,17 +311,20 @@ phoneToString (P Voiced (Tongue Apical NonLateral) Postalveolar Tap) = "ɾ̠"
 phoneToString (P Voiced (Tongue Apical NonLateral) Postalveolar Approximant) = "ɹ̠"
 phoneToString (P Voiced (Tongue Apical Lateral) Postalveolar Approximant) = "l̠"
 -- palatoalveolars
-phoneToString (P Voiced (Tongue Laminal NonLateral) Postalveolar Click) = "ǂ̬"
-phoneToString (P Voiceless (Tongue Laminal NonLateral) Postalveolar Click) = "ǂ"
+phoneToString (P Voiced (Tongue Laminal NonLateral) Postalveolar (Click Oral)) = "ǂ̬"
+phoneToString (P Voiceless (Tongue Laminal NonLateral) Postalveolar (Click Oral)) = "ǂ"
 phoneToString (P Voiced (Tongue Laminal NonLateral) Postalveolar (Affricate Sibilant)) = "d͡ʑ"
 phoneToString (P Voiceless (Tongue Laminal NonLateral) Postalveolar (Affricate Sibilant)) = "t͡ɕ"
 phoneToString (P Voiced (Tongue Laminal NonLateral) Postalveolar (Fricative Sibilant)) = "ʑ"
 phoneToString (P Voiceless (Tongue Laminal NonLateral) Postalveolar (Fricative Sibilant)) = "ɕ"
 -- Retroflexes
-phoneToString (P Voiced (Tongue Apical NonLateral) Palatal (Stop Oral)) = "ɖ"
-phoneToString (P Voiceless (Tongue Apical NonLateral) Palatal (Stop Oral)) = "ʈ"
-phoneToString (P VoicedIngressive (Tongue Apical NonLateral) Palatal (Stop Oral)) = error "No voiced ingressive retroflex stop"
-phoneToString (P Voiced (Tongue Apical NonLateral) Palatal (Stop Nasal)) = "ɳ"
+phoneToString (P Voiced (Tongue Apical NonLateral) Palatal (Click Oral)) = "‼̬"
+phoneToString (P Voiceless (Tongue Apical NonLateral) Palatal (Click Oral)) = "‼"
+phoneToString (P Voiced (Tongue Apical NonLateral) Palatal (Stop Released Oral)) = "ɖ"
+phoneToString (P Voiced (Tongue Apical NonLateral) Palatal (Stop Released Nasal)) = "ɳ͡ɖ"
+phoneToString (P Voiceless (Tongue Apical NonLateral) Palatal (Stop Released Oral)) = "ʈ"
+phoneToString (P VoicedIngressive (Tongue Apical NonLateral) Palatal (Stop Released Oral)) = error "No voiced ingressive retroflex stop"
+phoneToString (P Voiced (Tongue Apical NonLateral) Palatal (Stop Unreleased Nasal)) = "ɳ"
 phoneToString (P Voiced (Tongue Apical NonLateral) Palatal (Affricate Sibilant)) = "ɖ͡ʐ"
 phoneToString (P Voiceless (Tongue Apical NonLateral) Palatal (Affricate Sibilant)) = "ʈ͡ʂ"
 phoneToString (P Voiced (Tongue Apical NonLateral) Palatal (Affricate NonSibilant)) = "ɖ͡ɻ˔"
@@ -324,11 +338,12 @@ phoneToString (P Voiced (Tongue Apical NonLateral) Palatal Tap) = "ɽ"
 phoneToString (P Voiced (Tongue Apical NonLateral) Palatal Approximant) = "ɻ"
 phoneToString (P Voiced (Tongue Apical Lateral) Palatal Approximant) = "ɭ"
 -- Palatals
-phoneToString (P Voiced (Tongue (Dorsal Unrounded) NonLateral) Palatal (Stop Oral)) = "ɟ"
-phoneToString (P Voiceless (Tongue (Dorsal Unrounded) NonLateral) Palatal (Stop Oral)) = "c"
-phoneToString (P VoicedIngressive (Tongue (Dorsal Unrounded) NonLateral) Palatal (Stop Oral)) = "ʄ"
-phoneToString (P Voiced (Tongue (Dorsal Unrounded) NonLateral) Palatal (Stop Nasal)) = "ɲ"
-phoneToString (P VoicedIngressive (Tongue (Dorsal Unrounded) NonLateral) Palatal (Stop Nasal)) = "ʄ̃"
+phoneToString (P Voiced (Tongue (Dorsal Unrounded) NonLateral) Palatal (Stop Released Oral)) = "ɟ"
+phoneToString (P Voiced (Tongue (Dorsal Unrounded) NonLateral) Palatal (Stop Released Nasal)) = "ɲ͡ɟ"
+phoneToString (P Voiceless (Tongue (Dorsal Unrounded) NonLateral) Palatal (Stop Released Oral)) = "c"
+phoneToString (P VoicedIngressive (Tongue (Dorsal Unrounded) NonLateral) Palatal (Stop Released Oral)) = "ʄ"
+phoneToString (P Voiced (Tongue (Dorsal Unrounded) NonLateral) Palatal (Stop Unreleased Nasal)) = "ɲ"
+phoneToString (P VoicedIngressive (Tongue (Dorsal Unrounded) NonLateral) Palatal (Stop Released Nasal)) = "ʄ̃"
 phoneToString (P Voiced (Tongue (Dorsal Unrounded) NonLateral) Palatal (Affricate NonSibilant)) = "ɟ͡ʝ"
 phoneToString (P Voiceless (Tongue (Dorsal Unrounded) NonLateral) Palatal (Affricate NonSibilant)) = "c͡ç"
 phoneToString (P Voiced (Tongue (Dorsal Unrounded) NonLateral) Palatal (Fricative NonSibilant)) = "ʝ"
@@ -337,11 +352,12 @@ phoneToString (P Voiced (Tongue (Dorsal Unrounded) NonLateral) Palatal Approxima
 phoneToString (P Voiced (Tongue (Dorsal Rounded) NonLateral) Palatal Approximant) = "ɥ"
 phoneToString (P Voiced (Tongue (Dorsal Unrounded) Lateral) Palatal Approximant) = "ʎ"
 -- Velars
-phoneToString (P Voiced (Tongue (Dorsal Unrounded) NonLateral) Velar (Stop Oral)) = "ɡ"
-phoneToString (P Voiceless (Tongue (Dorsal Unrounded) NonLateral) Velar (Stop Oral)) = "k"
-phoneToString (P VoicedIngressive (Tongue (Dorsal Unrounded) NonLateral) Velar (Stop Oral)) = "ɠ"
-phoneToString (P Voiced (Tongue (Dorsal Unrounded) NonLateral) Velar (Stop Nasal)) = "ŋ"
-phoneToString (P VoicedIngressive (Tongue (Dorsal Unrounded) NonLateral) Velar (Stop Nasal)) = "ɠ̃"
+phoneToString (P Voiced (Tongue (Dorsal Unrounded) NonLateral) Velar (Stop Released Oral)) = "ɡ"
+phoneToString (P Voiced (Tongue (Dorsal Unrounded) NonLateral) Velar (Stop Released Nasal)) = "ŋ͡ɡ"
+phoneToString (P Voiceless (Tongue (Dorsal Unrounded) NonLateral) Velar (Stop Released Oral)) = "k"
+phoneToString (P VoicedIngressive (Tongue (Dorsal Unrounded) NonLateral) Velar (Stop Released Oral)) = "ɠ"
+phoneToString (P Voiced (Tongue (Dorsal Unrounded) NonLateral) Velar (Stop Unreleased Nasal)) = "ŋ"
+phoneToString (P VoicedIngressive (Tongue (Dorsal Unrounded) NonLateral) Velar (Stop Released Nasal)) = "ɠ̃"
 phoneToString (P Voiced (Tongue (Dorsal Unrounded) NonLateral) Velar (Affricate NonSibilant)) = "ɡ͡ɣ"
 phoneToString (P Voiceless (Tongue (Dorsal Unrounded) NonLateral) Velar (Affricate NonSibilant)) = "k͡x"
 phoneToString (P Voiced (Tongue (Dorsal Unrounded) NonLateral) Velar (Fricative NonSibilant)) = "ɣ"
@@ -351,11 +367,12 @@ phoneToString (P Voiced (Tongue (Dorsal Unrounded) NonLateral) Velar Approximant
 phoneToString (P Voiced (Tongue (Dorsal Rounded) NonLateral) Velar Approximant) = "w"
 phoneToString (P Voiced (Tongue (Dorsal Unrounded) Lateral) Velar Approximant) = "ʟ"
 -- Uvulars
-phoneToString (P Voiced (Tongue (Dorsal Unrounded) NonLateral) Uvular (Stop Oral)) = "ɢ"
-phoneToString (P Voiceless (Tongue (Dorsal Unrounded) NonLateral) Uvular (Stop Oral)) = "q"
-phoneToString (P VoicedIngressive (Tongue (Dorsal Unrounded) NonLateral) Uvular (Stop Oral)) = "ʛ"
-phoneToString (P Voiced (Tongue (Dorsal Unrounded) NonLateral) Uvular (Stop Nasal)) = "ɴ"
-phoneToString (P VoicedIngressive (Tongue (Dorsal Unrounded) NonLateral) Uvular (Stop Nasal)) = "ʛ̃"
+phoneToString (P Voiced (Tongue (Dorsal Unrounded) NonLateral) Uvular (Stop Released Oral)) = "ɢ"
+phoneToString (P Voiced (Tongue (Dorsal Unrounded) NonLateral) Uvular (Stop Released Nasal)) = "ɴ͡ɢ"
+phoneToString (P Voiceless (Tongue (Dorsal Unrounded) NonLateral) Uvular (Stop Released Oral)) = "q"
+phoneToString (P VoicedIngressive (Tongue (Dorsal Unrounded) NonLateral) Uvular (Stop Released Oral)) = "ʛ"
+phoneToString (P Voiced (Tongue (Dorsal Unrounded) NonLateral) Uvular (Stop Unreleased Nasal)) = "ɴ"
+phoneToString (P VoicedIngressive (Tongue (Dorsal Unrounded) NonLateral) Uvular (Stop Released Nasal)) = "ʛ̃"
 phoneToString (P Voiced (Tongue (Dorsal Unrounded) NonLateral) Uvular (Affricate NonSibilant)) = "ɢ͡ʁ"
 phoneToString (P Voiceless (Tongue (Dorsal Unrounded) NonLateral) Uvular (Affricate NonSibilant)) = "q͡χ"
 phoneToString (P Voiced (Tongue (Dorsal Unrounded) NonLateral) Uvular (Fricative NonSibilant)) = "ʁ"
@@ -365,11 +382,11 @@ phoneToString (P Voiced (Tongue (Dorsal Unrounded) NonLateral) Uvular Trill) = "
 phoneToString (P Voiced (Tongue (Dorsal Unrounded) NonLateral) Pharyngeal (Fricative NonSibilant)) = "ʕ"
 phoneToString (P Voiceless (Tongue (Dorsal Unrounded) NonLateral) Pharyngeal (Fricative NonSibilant)) = "ħ"
 -- Epiglottals
-phoneToString (P Voiceless Epiglottal Pharyngeal (Stop Oral)) = "ʡ"
+phoneToString (P Voiceless Epiglottal Pharyngeal (Stop Released Oral)) = "ʡ"
 phoneToString (P Voiced Epiglottal Pharyngeal (Fricative NonSibilant)) = "ʢ"
 phoneToString (P Voiceless Epiglottal Pharyngeal (Fricative NonSibilant)) = "ʜ"
 -- Glottals
-phoneToString (P Voiceless NoActive NoPassive (Stop Oral)) = "ʔ"
+phoneToString (P Voiceless NoActive NoPassive (Stop Released Oral)) = "ʔ"
 phoneToString (P Voiceless NoActive NoPassive (Fricative NonSibilant)) = "h"
 -- ono :(
 phoneToString (P {}) = error "AAAAH!!! I missed a case!"

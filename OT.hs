@@ -39,7 +39,7 @@ isVowel :: Manner -> Bool
 isVowel m = m `elem` [Vowel High Nasal, Vowel MidHigh Nasal, Vowel Mid Nasal, Vowel MidLow Nasal, Vowel Low Nasal, Vowel High Oral, Vowel MidHigh Oral, Vowel Mid Oral, Vowel MidLow Oral, Vowel Low Oral]
 
 isNasal :: Manner -> Bool
-isNasal m = m `elem` [Vowel High Nasal, Vowel MidHigh Nasal, Vowel Mid Nasal, Vowel MidLow Nasal, Vowel Low Nasal, Stop Nasal]
+isNasal m = m `elem` [Vowel High Nasal, Vowel MidHigh Nasal, Vowel Mid Nasal, Vowel MidLow Nasal, Vowel Low Nasal, Stop Released Nasal, Stop Unreleased Nasal]
 
 isRounded :: Active -> Bool
 isRounded (Tongue (Dorsal Rounded) _) = True
@@ -47,21 +47,19 @@ isRounded _ = False
 
 sonorityOf :: Phone -> Int
 sonorityOf (P _ _ _ m)
-    | m == Click = 0
-    | m == Stop Oral = 1
-    | m == Affricate Sibilant = 2
-    | m == Affricate NonSibilant = 2
-    | m == Fricative Sibilant = 3
-    | m == Fricative NonSibilant = 3
+    | m `elem` [Click Nasal, Click Oral] = 0
+    | m `elem` [Stop Released Oral, Stop Unreleased Oral, Stop Released Nasal] = 1
+    | m `elem` [Affricate Sibilant, Affricate NonSibilant] = 2
+    | m `elem` [Fricative Sibilant, Fricative NonSibilant] = 3
     | m == Tap = 4
     | m == Trill = 5
-    | m == Stop Nasal = 6
+    | m == Stop Unreleased Nasal = 6
     | m == Approximant = 7
-    | m == Vowel High Nasal || m == Vowel High Oral = 8
-    | m == Vowel MidHigh Nasal || m == Vowel MidHigh Oral = 9
-    | m == Vowel Mid Nasal || m == Vowel Mid Oral = 10
-    | m == Vowel MidLow Nasal || m == Vowel MidLow Oral = 11
-    | m == Vowel Low Nasal || m == Vowel Low Oral = 12
+    | m `elem` [Vowel High Nasal, Vowel High Oral] = 8
+    | m `elem` [Vowel MidHigh Nasal, Vowel MidHigh Oral] = 9
+    | m `elem` [Vowel Mid Nasal, Vowel Mid Oral] = 10
+    | m `elem` [Vowel MidLow Nasal, Vowel MidLow Oral] = 11
+    | m `elem` [Vowel Low Nasal, Vowel Low Oral] = 12
 
 -- \\ is the set difference operator
 (\\) :: Eq a => [a] -> [a] -> [a]
@@ -137,8 +135,8 @@ obsVoice (P g0 a0 p0 m0) (P g1 a1 p1 m1) = not (g0 /= g1 && isObstruent m0 && is
 -- nasal agrees in place with following obstruent
 nasalObs :: Comp
 nasalObs a@(P g0 a0 p0 m0) b@(P g1 a1 p1 m1)
-            | m0 == Stop Nasal && isObstruent m1 && place a b = True
-            | not (m0 == Stop Nasal && isObstruent m1) = True
+            | m0 == Stop Unreleased Nasal && isObstruent m1 && place a b = True
+            | not (m0 == Stop Unreleased Nasal && isObstruent m1) = True
             | otherwise = False
 
 -- vowel agrees in nasality with following sound

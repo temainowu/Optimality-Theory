@@ -40,8 +40,8 @@ rounded = "ʍwɥyøœɵəɶɐaʊuoɔɒ"
 sib = "szʃʒɕʑʂʐ"
 
 -- glottal states
-unvoiced = "pɸʍfθtsɬʃʈʂcçkxqχħhʜʢʡʘǀǃǂǁ"
-voiced = "bmʙβwɱⱱvʋðdnrɾɺzɮɹlʒɕʑɖɳɽʐɻɭɟɲʝjɥʎgŋɣɰʟɢɴʀʁʕieɛæɶɪyøœɨɵəɐaɯɤʌɑʊuoɔɒ"
+unvoiced = "pɸfθtsɬʃʈʂcçkxʍqχħhʜʢʡʘǀǃǂǁ"
+voiced = "bmʙβɱⱱvʋðdnrɾɺzɮɹlʒɕʑɖɳɽʐɻɭɟɲʝjɥʎgŋɣɰwʟɢɴʀʁʕieɛæɶɪyøœɨɵəɐaɯɤʌɑʊuoɔɒ"
 creaky = ""
 breathy = "ɦ"
 closed = "ʔ"
@@ -52,7 +52,7 @@ asp = ""
 inflab = "pbmʙɸβɱⱱfvʋʘɓ"
 api = "θðtdnrɾɺszɬɮɹlʃʒʈɖɳɽʂʐɻɭǀǃǁɗ"
 lam = "ɕʑǂ"
-dors = "ʍcɟɲçʝjɥʎkgŋxɣɰwʟqɢɴʀχʁħʕʄɠʛieɛæɪyøœɶɨɵəɐaɯɤʌɑʊuoɔɒ"
+dors = "cɟɲçʝjɥʎkgŋxʍɣɰwʟqɢɴʀχʁħʕʄɠʛieɛæɪyøœɶɨɵəɐaɯɤʌɑʊuoɔɒ"
 epi = "ʜʢʡ"
 
 -- passive articulators
@@ -62,7 +62,7 @@ alv = "tdnrɾɺszɬɮɹlǁɗ"
 postalv = "ʃʒɕʑǃǂ"
 pal = "ʈɖɳɽʂʐɻɭcɟɲçʝjɥʎʄieɛæɶɪyøœ"
 cent = "ɨɵəɐa"
-vel = "ʍkgŋxɣɰwʟɠɯɤʌɑʊuoɔɒ"
+vel = "kgŋxʍɣɰwʟɠɯɤʌɑʊuoɔɒ"
 uvul = "qɢɴʀχʁʛ"
 phar = "ħʕʜʢʡ"
 

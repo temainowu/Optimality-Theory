@@ -36,6 +36,9 @@ lax = "ɪɵʊəɐ"
 isVowel :: Manner -> Bool
 isVowel m = m `elem` [Vowel High Nasal, Vowel MidHigh Nasal, Vowel Mid Nasal, Vowel MidLow Nasal, Vowel Low Nasal, Vowel High Oral, Vowel MidHigh Oral, Vowel Mid Oral, Vowel MidLow Oral, Vowel Low Oral]
 
+isNasal :: Manner -> Bool
+isNasal m = m `elem` [Vowel High Nasal, Vowel MidHigh Nasal, Vowel Mid Nasal, Vowel MidLow Nasal, Vowel Low Nasal, Stop Nasal]
+
 isRounded :: Active -> Bool
 isRounded (Tongue (Dorsal Rounded) _) = True
 isRounded _ = False
@@ -145,7 +148,7 @@ nasalObs a@(P g0 a0 p0 m0) b@(P g1 a1 p1 m1)
 -- nasality preservation
 nasal :: Comp
 nasal (P g0 a0 p0 m0) (P g1 a1 p1 m1)
-    | m0 == Stop Nasal && m1 /= Stop Nasal = False
+    | isNasal m0 && not (isNasal m1) = False
     | otherwise = True
 
 -- Constraints

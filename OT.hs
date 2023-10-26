@@ -85,7 +85,7 @@ lat = "ɺɬɮlɭʎʟǁ"
 sib = "szʃʒɕʑʂʐ"
 
 -- glottal states
-unvoiced = "pɸʍfθtsɬʃʈʂcçkxqχħhʜʢʡ"
+unvoiced = "pɸʍfθtsɬʃʈʂcçkxqχħhʜʢʡʘǀǃǂǁ"
 voiced = "bmʙβwɱⱱvʋðdnrɾɺzɮɹlʒɕʑɖɳɽʐɻɭɟɲʝjɥʎgŋɣɰʟɢɴʀʁʕieɛæɶɪyøœɨɵəɐaɯɤʌɑʊuoɔɒ"
 creaky = ""
 breathy = "ɦ"
@@ -112,7 +112,7 @@ phar = "ħʕʜʢʡ"
 
 -- manners
 click = "ʘǀǃǂǁ"
-stop = "pbtdʈɖcɟkgqɢʔʡ"
+stop = "pbtdʈɖcɟkgqɢʔʡɓɗʄɠʛ"
 fric = "ɸβʍfvθðszɬɮʃʒɕʑʂʐçʝxɣχʁħʕhɦʜʢ"
 nas = "mɱnɳɲŋɴ"
 tap = "ⱱɾɽɺ"
@@ -174,6 +174,7 @@ glottalStateOf x
     | x `elem` creaky = Creaky
     | x `elem` breathy = Breathy
     | x `elem` closed = Closed
+    | x `elem` ingressive = VoicedIngressive
 
 mannerOf :: FindFeature Manner
 mannerOf x

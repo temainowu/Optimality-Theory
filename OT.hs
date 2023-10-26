@@ -1,3 +1,5 @@
+{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
+{-# HLINT ignore "Use camelCase" #-}
 module OptimalityTheory.OT where
 import OptimalityTheory.Phones 
 import Test.QuickCheck
@@ -126,21 +128,24 @@ gen (x:xs) = map (: xs) (complement [x]) ++ map (x :) (gen xs)
 
 -- same place
 place :: Comp
-place (P g0 a0 p0 m0) (P g1 a1 p1 m1)
-    | (p0 == p1) && (a0 == a1) = True
-    | otherwise = False
+place (P g0 a0 p0 m0) (P g1 a1 p1 m1) = (p0 == p1) && (a0 == a1)
 
 -- same voicing of obstuents
 obsVoice :: Comp
-obsVoice (P g0 a0 p0 m0) (P g1 a1 p1 m1)
-    | g0 /= g1 && isObstruent m0 && isObstruent m1 = False
-    | otherwise = True
+obsVoice (P g0 a0 p0 m0) (P g1 a1 p1 m1) = not (g0 /= g1 && isObstruent m0 && isObstruent m1)
 
 -- nasal agrees in place with following obstruent
 nasalObs :: Comp
 nasalObs a@(P g0 a0 p0 m0) b@(P g1 a1 p1 m1)
             | m0 == Stop Nasal && isObstruent m1 && place a b = True
             | not (m0 == Stop Nasal && isObstruent m1) = True
+            | otherwise = False
+
+-- vowel agrees in nasality with following sound
+isṼN :: Comp
+isṼN (P g0 a0 p0 m0) (P g1 a1 p1 m1)
+            | isVowel m0 && isNasal m0 && isNasal m1 = True
+            | not (isVowel m0) = True
             | otherwise = False
 
 -- I->O comparisons:

@@ -76,9 +76,6 @@ toLexeme xs = zip (map charToPhone xs) (map (: []) [0..])
 toString :: Lexeme -> String
 toString = concatMap (phoneToString . fst)
 
-unIndex :: Lexeme -> [Phone]
-unIndex = filter (/= MorphemeBoundary) . map fst
-
 affix :: String -> String -> String
 affix xs ys = xs ++ '+' : ys
 
@@ -187,7 +184,7 @@ noVoicedStops _ o = length [ backness phone | (phone@(P g a p m n),xps) <- o, m 
 
 -- adjacent elements must agree in some feature f, takes {place, obsVoice, nasalObs, isṼN, nasal} as argument
 agree :: Comp -> Constraint
-agree f _ o = length [ 1 | [a,b] <- groups 2 (unIndex o), not (f a b)]
+agree f _ o = length [ 1 | [a,b] <- groups 2 (map fst o), not (f a b)]
 
 -- linear order preservation/no metathesis (usually classed as a faithfulness constraint)
 -- fix: [('b',[1]),('c',[2]),('a',[0])] gives 1 violation but should give 2
@@ -203,15 +200,15 @@ noFrontRound _ o = length [ 1 | (P g a p m n,xps) <- o, p /= Velar && isVowel m 
 
 -- no complex syllables
 noComplex :: Constraint
-noComplex _ o = length [ x | x <- groups 3 (unIndex o), SyllableBoundary `notElem` x]
+noComplex _ o = length [ x | x <- groups 3 (map fst o), SyllableBoundary `notElem` x]
 
 -- no coda
 noCoda :: Constraint
-noCoda _ o = sum (map sizeOfCoda (syllables (unIndex o)))
+noCoda _ o = sum (map sizeOfCoda (syllables (map fst o)))
 
 -- no empty onset - fix: "sto" gives violation
 onset :: Constraint
-onset _ o = sum (map (f . take 2 . map sonorityOf) (syllables (unIndex o)))
+onset _ o = sum (map (f . take 2 . map sonorityOf) (syllables (map fst o)))
     where
         f :: [Int] -> Int
         f [x] = 1

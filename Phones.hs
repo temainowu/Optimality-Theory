@@ -4,7 +4,6 @@ data Phone = P GlottalState Active Passive Manner Nasality | SyllableBoundary | 
     deriving (Eq)
     
 instance Show Phone where
-    show :: Phone -> String
     show = phoneToString
 
 data Passive = Superiolabial | Dental | Alveolar | Postalveolar | Palatal | Central | Velar | Uvular | Pharyngeal | NoPassive

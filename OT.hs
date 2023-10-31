@@ -22,7 +22,7 @@ e		ø   ɵ   ɤ		o
 æ		ɶ	ɐ   ɑ		ɒ
 			a			
 
-this is based on dr geoff lindey 's vowel chart 
+this is based on dr geoff lindey's vowel chart 
 but with the addition of ɶ, ɨ, and ɒ 
 and considering æ to be a cardinal vowel.
 

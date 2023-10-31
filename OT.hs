@@ -1,5 +1,5 @@
 module OptimalityTheory.OT where
-import OptimalityTheory.Phones 
+import OptimalityTheory.Phones
 import Test.QuickCheck
 
 type Comp = Phone -> Phone -> Bool
@@ -32,6 +32,9 @@ lax = "ɪɵʊəɐ"
 
 
 -- Auxiliary Functions
+
+backness :: Phone -> Int
+backness (P _ a p _ _) = fromEnum p + fromEnum a
 
 isVowel :: Manner -> Bool
 isVowel m = m `elem` [Vowel High, Vowel MidHigh, Vowel Mid, Vowel MidLow, Vowel Low]
@@ -70,7 +73,7 @@ toLexeme xs = zip (map charToPhone xs) (map (: []) [0..])
 
 -- inverse of toLexeme
 toString :: Lexeme -> String
-toString xs = filter (/= '+') (concatMap (phoneToString . fst) xs)
+toString = concatMap (phoneToString . fst)
 
 unIndex :: Lexeme -> [Phone]
 unIndex = filter (/= MorphemeBoundary) . map fst
@@ -177,6 +180,10 @@ uniformity i o = sum [ length xps - 1 | (x,xps) <- o, length xps > 1]
 noNasalVowels :: Constraint
 noNasalVowels _ o = length [ 1 | (P g a p m n,xps) <- o, isVowel m && n == Nasal]
 
+-- no voiced stops
+noVoicedStops :: Constraint
+noVoicedStops _ o = length [ backness phone | (phone@(P g a p m n),xps) <- o, m == Stop Tenuis && g == Voiced]
+
 -- adjacent elements must agree in some feature f, takes {place, obsVoice, nasalObs, isṼN, nasal} as argument
 agree :: Comp -> Constraint
 agree f _ o = length [ 1 | [a,b] <- groups 2 (unIndex o), not (f a b)]
@@ -220,6 +227,9 @@ prop_optimal g i n o = n <= eval g (toLexeme i) (head (mask (optimalForms [eval 
 -- quickCheck (prop_optimal *grammar* *input form* *harmony*)
 -- theoretically should return a form of harmony greater than the inputed harmony if one exists
 
+-- optimal *grammar* *input form* (gen *input form*)
+-- theoretically should return the most harmonious output form(s) for the given grammar and input form
+
 -- Examples
 
 {-
@@ -230,7 +240,7 @@ it returns a list of the most harmonious output forms (which are automatically u
 examples:
 
 example a)
-> optimal [nasAgr, ident obsVoice] "amda" [index "ampa", index "amda"]
+> optimal [nasAgr, ident obsVoice] "amda" [toLexeme "ampa", toLexeme "amda"]
 ["ampa"]
 
 nasAgr dominates ident obsVoice, 

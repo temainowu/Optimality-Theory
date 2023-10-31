@@ -9,8 +9,31 @@ instance Show Phone where
 data Passive = Superiolabial | Dental | Alveolar | Postalveolar | Palatal | Central | Velar | Uvular | Pharyngeal | NoPassive
     deriving (Eq, Show)
 
+instance Enum Passive where
+    fromEnum Superiolabial = 0
+    fromEnum Dental = 1
+    fromEnum Alveolar = 2
+    fromEnum Postalveolar = 3
+    fromEnum Palatal = 4
+    fromEnum Central = 5
+    fromEnum Velar = 6
+    fromEnum Uvular = 7
+    fromEnum Pharyngeal = 8
+    fromEnum NoPassive = 9
+    toEnum _ = NoPassive
+
 data Active = Inferiolabial | Tongue TonguePlace Laterality | Epiglottal | NoActive
     deriving (Eq, Show)
+
+instance Enum Active where
+    fromEnum Inferiolabial = 0
+    fromEnum (Tongue Apical _) = 1
+    fromEnum (Tongue Laminal _) = 2
+    fromEnum (Tongue (Dorsal _) _) = 3
+    fromEnum Epiglottal = 4
+    fromEnum NoActive = 5
+    toEnum _ = NoActive
+
 
 data TonguePlace = Apical | Laminal | Dorsal Rounding
     deriving (Eq, Show)

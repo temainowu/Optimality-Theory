@@ -161,7 +161,7 @@ maxi i o = length [ 1 | (y,[yp]) <- i, or [yp `elem` xps | (x,xps) <- o]]
 dep :: Constraint
 dep i o = length [ 1 | (x,xps) <- o, null xps]
 
--- feature similarity/preservation
+-- feature similarity/preservation, takes {place, obsVoice, nasal} as argument
 ident :: Comp -> Constraint
 ident f i o = length [ 1 | (x,xps) <- o, (y,[yp]) <- i, not (f x y), yp `elem` xps]
 -- "ident nasal" = "IdentI->O(nasal)" in OT
@@ -169,7 +169,7 @@ ident f i o = length [ 1 | (x,xps) <- o, (y,[yp]) <- i, not (f x y), yp `elem` x
 
 -- no coalescence
 uniformity :: Constraint
-uniformity i o = length [ 1 | (x,xps) <- o, length xps > 1]
+uniformity i o = sum [ length xps - 1 | (x,xps) <- o, length xps > 1]
 
 -- markedness constraints (ignore first argument)
 
@@ -177,7 +177,7 @@ uniformity i o = length [ 1 | (x,xps) <- o, length xps > 1]
 noNasalVowels :: Constraint
 noNasalVowels _ o = length [ 1 | (P g a p m n,xps) <- o, isVowel m && n == Nasal]
 
--- adjacent elements must agree in some feature f
+-- adjacent elements must agree in some feature f, takes {place, obsVoice, nasalObs, isṼN, nasal} as argument
 agree :: Comp -> Constraint
 agree f _ o = length [ 1 | [a,b] <- groups 2 (unIndex o), not (f a b)]
 

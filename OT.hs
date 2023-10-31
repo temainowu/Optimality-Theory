@@ -1,5 +1,3 @@
-{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
-{-# HLINT ignore "Use camelCase" #-}
 module OptimalityTheory.OT where
 import OptimalityTheory.Phones 
 import Test.QuickCheck
@@ -36,30 +34,27 @@ lax = "ɪɵʊəɐ"
 -- Auxiliary Functions
 
 isVowel :: Manner -> Bool
-isVowel m = m `elem` [Vowel High Nasal, Vowel MidHigh Nasal, Vowel Mid Nasal, Vowel MidLow Nasal, Vowel Low Nasal, Vowel High Oral, Vowel MidHigh Oral, Vowel Mid Oral, Vowel MidLow Oral, Vowel Low Oral]
-
-isNasal :: Manner -> Bool
-isNasal m = m `elem` [Vowel High Nasal, Vowel MidHigh Nasal, Vowel Mid Nasal, Vowel MidLow Nasal, Vowel Low Nasal, Stop Released Nasal, Stop Unreleased Nasal]
+isVowel m = m `elem` [Vowel High, Vowel MidHigh, Vowel Mid, Vowel MidLow, Vowel Low]
 
 isRounded :: Active -> Bool
 isRounded (Tongue (Dorsal Rounded) _) = True
 isRounded _ = False
 
 sonorityOf :: Phone -> Int
-sonorityOf (P _ _ _ m)
-    | m `elem` [Click Nasal, Click Oral] = 0
-    | m `elem` [Stop Released Oral, Stop Unreleased Oral, Stop Released Nasal] = 1
-    | m `elem` [Affricate Sibilant, Affricate NonSibilant] = 2
+sonorityOf (P _ _ _ m _)
+    | m == Click = 0
+    | m `elem` [Stop Tenuis, Stop Unreleased, Stop Aspirated] = 1
+    | m `elem` [Stop (Fricated Sibilant), Stop (Fricated NonSibilant)] = 2
     | m `elem` [Fricative Sibilant, Fricative NonSibilant] = 3
     | m == Tap = 4
     | m == Trill = 5
-    | m == Stop Unreleased Nasal = 6
+    | m == NasalStop = 6
     | m == Approximant = 7
-    | m `elem` [Vowel High Nasal, Vowel High Oral] = 8
-    | m `elem` [Vowel MidHigh Nasal, Vowel MidHigh Oral] = 9
-    | m `elem` [Vowel Mid Nasal, Vowel Mid Oral] = 10
-    | m `elem` [Vowel MidLow Nasal, Vowel MidLow Oral] = 11
-    | m `elem` [Vowel Low Nasal, Vowel Low Oral] = 12
+    | m == Vowel High = 8
+    | m == Vowel MidHigh = 9
+    | m == Vowel Mid = 10
+    | m == Vowel MidLow = 11
+    | m == Vowel Low = 12
 
 -- \\ is the set difference operator
 (\\) :: Eq a => [a] -> [a] -> [a]
@@ -126,23 +121,23 @@ gen (x:xs) = map (: xs) (complement [x]) ++ map (x :) (gen xs)
 
 -- same place
 place :: Comp
-place (P g0 a0 p0 m0) (P g1 a1 p1 m1) = (p0 == p1) && (a0 == a1)
+place (P g0 a0 p0 m0 n0) (P g1 a1 p1 m1 n1) = (p0 == p1) && (a0 == a1)
 
 -- same voicing of obstuents
 obsVoice :: Comp
-obsVoice (P g0 a0 p0 m0) (P g1 a1 p1 m1) = not (g0 /= g1 && isObstruent m0 && isObstruent m1)
+obsVoice (P g0 a0 p0 m0 n0) (P g1 a1 p1 m1 n1) = not (g0 /= g1 && isObstruent m0 && isObstruent m1)
 
 -- nasal agrees in place with following obstruent
 nasalObs :: Comp
-nasalObs a@(P g0 a0 p0 m0) b@(P g1 a1 p1 m1)
-            | m0 == Stop Unreleased Nasal && isObstruent m1 && place a b = True
-            | not (m0 == Stop Unreleased Nasal && isObstruent m1) = True
+nasalObs a@(P g0 a0 p0 m0 n0) b@(P g1 a1 p1 m1 n1)
+            | m0 == NasalStop && isObstruent m1 && place a b = True
+            | not (m0 == NasalStop && isObstruent m1) = True
             | otherwise = False
 
 -- vowel agrees in nasality with following sound
 isṼN :: Comp
-isṼN (P g0 a0 p0 m0) (P g1 a1 p1 m1)
-            | isVowel m0 && isNasal m0 && isNasal m1 = True
+isṼN (P g0 a0 p0 m0 n0) (P g1 a1 p1 m1 n1)
+            | isVowel m0 && n0 == Nasal && n1 == Nasal = True
             | not (isVowel m0) = True
             | otherwise = False
 
@@ -150,8 +145,8 @@ isṼN (P g0 a0 p0 m0) (P g1 a1 p1 m1)
 
 -- nasality preservation
 nasal :: Comp
-nasal (P g0 a0 p0 m0) (P g1 a1 p1 m1)
-    | isNasal m0 && not (isNasal m1) = False
+nasal (P g0 a0 p0 m0 n0) (P g1 a1 p1 m1 n1)
+    | n0 == Nasal && n1 /= Nasal = False
     | otherwise = True
 
 -- Constraints
@@ -180,7 +175,7 @@ uniformity i o = length [ 1 | (x,xps) <- o, length xps > 1]
 
 -- no nasal vowels
 noNasalVowels :: Constraint
-noNasalVowels _ o = length [ 1 | (P g a p m,xps) <- o, isVowel m && isNasal m]
+noNasalVowels _ o = length [ 1 | (P g a p m n,xps) <- o, isVowel m && n == Nasal]
 
 -- adjacent elements must agree in some feature f
 agree :: Comp -> Constraint
@@ -193,7 +188,7 @@ linearity _ o = length [ 1 | [as,bs] <- groups 2 (map snd o), or [ any (< a) bs 
 
 -- no non-back rounded vowels
 noFrontRound :: Constraint
-noFrontRound _ o = length [ 1 | (P g a p m,xps) <- o, p /= Velar && isVowel m && isRounded a]
+noFrontRound _ o = length [ 1 | (P g a p m n,xps) <- o, p /= Velar && isVowel m && isRounded a]
 
 -- syllable constraints:
 -- a syllable is too hard to define so a lot of the following constraints are just approximations that will likely never be perfect

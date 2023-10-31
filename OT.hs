@@ -33,6 +33,7 @@ lax = "ɪɵʊəɐ"
 
 -- Auxiliary Functions
 
+-- 1/(backness phone) gives an aproximation of the amount of air trapped in the mouth in the closure of a stop
 backness :: Phone -> Int
 backness (P _ a p _ _) = fromEnum p + fromEnum a
 
@@ -240,7 +241,7 @@ it returns a list of the most harmonious output forms (which are automatically u
 examples:
 
 example a)
-> optimal [nasAgr, ident obsVoice] "amda" [toLexeme "ampa", toLexeme "amda"]
+> optimal [nasAgr, ident obsVoice] "amda" (map toLexeme ["ampa", "amda"])
 ["ampa"]
 
 nasAgr dominates ident obsVoice, 
@@ -256,7 +257,7 @@ tableu:
 ───────┴────────┴─────────────────┘
 
 example b)
-> optimal [ident obsVoice, nasAgr] "amda" [index "ampa", index "amda"]
+> optimal [ident obsVoice, nasAgr] "amda" (map toLexeme ["ampa", "amda"])
 ["amda"]
 
 identIO obsVoice dominates nasAgr,
@@ -272,7 +273,7 @@ tableu:
   ampa │       *!       │        │
 ───────┴────────────────┴────────┘
 
-the forms; index "amba", index "anda", index "embi", [('n',[1]),('d',[2])], and [] 
+the forms; toLexeme "amba", toLexeme "anda", toLexeme "embi", [('n',[1]),('d',[2])], and [] 
 are all more harmonious forms in both examples,
 but they were not chosen because they were not in the list of possible outputs.
 

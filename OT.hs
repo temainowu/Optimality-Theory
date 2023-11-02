@@ -182,6 +182,10 @@ noNasalVowels _ o = length [ 1 | (P g a p m n,xps) <- o, isVowel m && n == Nasal
 noVoicedStops :: Constraint
 noVoicedStops _ o = length [ backness phone | (phone@(P g a p m n),xps) <- o, m == Stop Tenuis && g == Voiced]
 
+-- no voicless resonants
+noVoicelessResonants :: Constraint
+noVoicelessResonants _ o = length [ 1 | (P g a p m n,xps) <- o, not (isObstruent m) && g == Voiceless]
+
 -- adjacent elements must agree in some feature f, takes {place, obsVoice, nasalObs, isṼN, nasal} as argument
 agree :: Comp -> Constraint
 agree f _ o = length [ 1 | [a,b] <- groups 2 (map fst o), not (f a b)]

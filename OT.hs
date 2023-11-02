@@ -136,8 +136,8 @@ nasalObs a@(P g0 a0 p0 m0 n0) b@(P g1 a1 p1 m1 n1)
             | otherwise = False
 
 -- vowel agrees in nasality with following sound
-isṼN :: Comp
-isṼN (P g0 a0 p0 m0 n0) (P g1 a1 p1 m1 n1)
+notVN :: Comp
+notVN (P g0 a0 p0 m0 n0) (P g1 a1 p1 m1 n1)
             | isVowel m0 && n0 == Nasal && n1 == Nasal = True
             | not (isVowel m0) = True
             | otherwise = False

@@ -68,6 +68,11 @@ xs \\ ys = [x | x <- xs, x `notElem` ys]
 complement :: [Char] -> [Char]
 complement xs = universe \\ xs
 
+count :: [Bool] -> Int
+count [] = 0
+count (True:bs) = 1 + count bs
+count (False:bs) = count bs
+
 -- toLexeme "xyz" = [(Phone a b c d,[0]),(Phone a b c d,[1]),(Phone a b c d,[2])] 
 toLexeme :: String -> Lexeme
 toLexeme xs = zip (map charToPhone xs) (map (: []) [0..])
@@ -156,15 +161,15 @@ nasal (P g0 a0 p0 m0 n0) (P g1 a1 p1 m1 n1)
 
 -- no deletion
 maxi :: Constraint
-maxi i o = length [ 1 | (y,[yp]) <- i, or [yp `elem` xps | (x,xps) <- o]]
+maxi i o = count [ or [yp `elem` xps | (x,xps) <- o] | (y,[yp]) <- i]
 
 -- no epenthesis
 dep :: Constraint
-dep i o = length [ 1 | (x,xps) <- o, null xps]
+dep i o = count [ null xps | (x,xps) <- o]
 
 -- feature similarity/preservation, takes {place, obsVoice, nasal} as argument
 ident :: Comp -> Constraint
-ident f i o = length [ 1 | (x,xps) <- o, (y,[yp]) <- i, not (f x y), yp `elem` xps]
+ident f i o = count [ not (f x y) | (x,xps) <- o, (y,[yp]) <- i, yp `elem` xps]
 -- "ident nasal" = "IdentI->O(nasal)" in OT
 -- "ident place" = "IdentIO(place)" in OT
 
@@ -176,25 +181,25 @@ uniformity i o = sum [ length xps - 1 | (x,xps) <- o, length xps > 1]
 
 -- no nasal vowels
 noNasalVowels :: Constraint
-noNasalVowels _ o = length [ 1 | (P g a p m n,xps) <- o, isVowel m && n == Nasal]
+noNasalVowels _ o = count [ isVowel m && n == Nasal | (P g a p m n,xps) <- o]
 
 -- no voiced stops
 noVoicedStops :: Constraint
-noVoicedStops _ o = length [ backness phone | (phone@(P g a p m n),xps) <- o, m == Stop Tenuis && g == Voiced]
+noVoicedStops _ o = sum [ backness phone | (phone@(P g a p m n),xps) <- o, m == Stop Tenuis && g == Voiced]
 
 -- no voicless resonants
 noVoicelessResonants :: Constraint
-noVoicelessResonants _ o = length [ 1 | (P g a p m n,_) <- o, not (isObstruent m) && g == Voiceless]
+noVoicelessResonants _ o = count [ not (isObstruent m) && g == Voiceless | (P g a p m n,_) <- o]
 
 -- no voiced obstruents
 noVoicedObstruents :: Constraint
-noVoicedObstruents _ o = length [ 1 | (P g a p m n,_) <- o, isObstruent m && g == Voiced]
+noVoicedObstruents _ o = count [ isObstruent m && g == Voiced | (P g a p m n,_) <- o]
 
 -- adjacent elements must agree in some feature f, takes {place, obsVoice, nasalObs, isṼN, nasal} as argument
 agree :: Comp -> Constraint
 agree f _ o = length [ 1 | [a,b] <- groups 2 (map fst o), not (f a b)]
 
--- linear order preservation/no metathesis (usually classed as a faithfulness constraint)
+-- linear order preservation/no metathesis (usually classed as a faithfulness constraint because indexes are considered part of the input)
 -- fix: [('b',[1]),('c',[2]),('a',[0])] gives 1 violation but should give 2
 linearity :: Constraint
 linearity _ o = length [ 1 | [as,bs] <- groups 2 (map snd o), or [ any (< a) bs | a <- as]]
@@ -226,6 +231,10 @@ onset _ o = sum (map (f . take 2 . map sonorityOf) (syllables (map fst o)))
 
 optimal :: Grammar -> String -> [Lexeme] -> [String]
 optimal g i os = map toString (mask (optimalForms (map (eval g (toLexeme i)) os)) os)
+
+-- better version of optimal if gen ever works:
+-- optimal' :: Grammar -> String -> [String]
+-- optimal' g i = optimal g i (map toLexeme (gen i))
 
 prop_optimal :: Grammar -> String -> Harmony -> Lexeme -> Bool
 prop_optimal g i n o = n <= eval g (toLexeme i) (head (mask (optimalForms [eval g (toLexeme i) o]) [o]))

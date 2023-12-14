@@ -18,13 +18,9 @@ type Grammar = [Constraint]
 i		y   ɨ   ɯ		u
 	ɪ			    ʊ	
 e		ø   ɵ   ɤ		o
-ɛ		œ	ə   ʌ		ɔ
-æ		ɶ	ɐ   ɑ		ɒ
-			a			
-
-this is based on dr geoff lindey's vowel chart 
-but with the addition of ɶ, ɨ, and ɒ 
-and considering æ to be a cardinal vowel.
+ɛ		œ	  ə   ʌ		ɔ
+æ		ɶ	  ɐ   ɑ		ɒ
+			  a			
 
 vowel = "ieɛæɪyøœɶɵəɐaɯɤʌɑʊuoɔɒ"
 lax = "ɪɵʊəɐ"

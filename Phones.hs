@@ -199,7 +199,9 @@ phoneToString (P _                  Inferiolabial                  _       (Fric
 phoneToString (P _                  Inferiolabial                  Superiolabial Tap                _) = error "No Bilabial Tap"
 phoneToString (P _                  Inferiolabial                  Superiolabial Approximant        _) = error "No Bilabial Approximant"
 phoneToString (P _                  Inferiolabial                  Dental        Click              _) = error "No labiodental Click"
-phoneToString (P _                  Inferiolabial                  Dental        (Stop _)        Oral) = error "No labiodental Stop"
+phoneToString (P _                  Inferiolabial                  Dental        (Stop Aspirated)Oral) = error "No labiodental Stop"
+phoneToString (P _                  Inferiolabial                  Dental        (Stop Tenuis)   Oral) = error "No labiodental Stop"
+phoneToString (P _                  Inferiolabial                  Dental        (Stop Unreleased)Oral) = error "No labiodental Stop"
 phoneToString (P Voiced (Tongue Apical NonLateral) Dental Trill _) = error "No dental trill"
 phoneToString (P Voiced (Tongue Apical NonLateral) Dental Tap   _) = error "No dental tap"
 -- breathy h
@@ -276,7 +278,7 @@ phoneToString (P Voiced (Tongue Apical NonLateral) Dental (Fricative NonSibilant
 phoneToString (P Voiceless (Tongue Apical NonLateral) Dental (Fricative NonSibilant) Oral) = "θ"
 phoneToString (P Voiced (Tongue Apical NonLateral) Dental (Fricative Sibilant) Oral) = "z̪"
 phoneToString (P Voiceless (Tongue Apical NonLateral) Dental (Fricative Sibilant) Oral) = "s̪"
-phoneToString (P Voiced (Tongue Apical NonLateral) Dental Trill Oral) = "r̪"
+phoneToString (P Voiced (Tongue Laminal NonLateral) Dental Trill Oral) = "r̪"
 phoneToString (P Voiced (Tongue Apical NonLateral) Dental Approximant Oral) = "ɹ̪"
 phoneToString (P Voiced (Tongue Apical Lateral) Dental Approximant Oral) = "l̪"
 -- Alveolars

@@ -65,12 +65,12 @@ data Release = Aspirated | Fricated Sibilance | Tenuis | Unreleased
 universe :: String
 universe = "pbmʙɸβɱⱱfvʋθðtdnrɾɺszɬɮɹlʃʒɕʑʈɖɳɽʂʐɻɭcɟɲçʝjɥʎkgŋxʍɣɰwʟqɢɴʀχʁħʕhɦʔʜʢʡʘǀǃ‼ǂǁɓɗʄɠʛieɛæɶɪyøœɵəɐaɯɤʌɑʊuoɔɒ"
 lat = "ɺɬɮlɭʎʟǁ"
-rounded = "ʍwɥyøœɵəɶɐaʊuoɔɒ"
+rounded = "ʍwɥyøœʏɵɞɶʉʊuoɔɒ"
 sib = "szʃʒɕʑʂʐ"
 
 -- glottal states
 unvoiced = "pɸfθtsɬʃʈʂcçkxʍqχħhʜʢʡʘǀǃ‼ǂǁ"
-voiced = "bmʙβɱⱱvʋðdnrɾɺzɮɹlʒɕʑɖɳɽʐɻɭɟɲʝjɥʎgŋɣɰwʟɢɴʀʁʕieɛæɶɪyøœɨɵəɐaɯɤʌɑʊuoɔɒ"
+voiced = "bmʙβɱⱱvʋðdnrɾɺzɮɹlʒɕʑɖɳɽʐɻɭɟɲʝjɥʎgŋɣɰwʟɢɴʀʁʕieɛæɪyøœɶʏɨɘəɐaʉɵɞɯɤʌɑʊuoɔɒ"
 creaky = ""
 breathy = "ɦ"
 closed = "ʔ"
@@ -81,7 +81,7 @@ asp = ""
 inflab = "pbmʙɸβɱⱱfvʋʘɓ"
 api = "θðtdnrɾɺszɬɮɹlʃʒʈɖɳɽʂʐɻɭǀǃ‼ǁɗ"
 lam = "ɕʑǂ"
-dors = "cɟɲçʝjɥʎkgŋxʍɣɰwʟqɢɴʀχʁħʕʄɠʛieɛæɪyøœɶɨɵəɐaɯɤʌɑʊuoɔɒ"
+dors = "cɟɲçʝjɥʎkgŋxʍɣɰwʟqɢɴʀχʁħʕʄɠʛieɛæɪyøœɶʏɨɘəɐaʉɵɞɯɤʌɑʊuoɔɒ"
 epi = "ʜʢʡ"
 
 -- passive articulators
@@ -89,8 +89,8 @@ suplab = "pbmʙɸβʘɓ"
 dent = "ɱⱱfvʋθðǀ"
 alv = "tdnrɾɺszɬɮɹlǁɗ"
 postalv = "ʃʒɕʑǃǂ"
-pal = "ʈɖɳɽʂʐɻɭcɟɲçʝjɥʎ‼ʄieɛæɶɪyøœ"
-cent = "ɨɵəɐa"
+pal = "ʈɖɳɽʂʐɻɭcɟɲçʝjɥʎ‼ʄieɛæɪyøœɶʏ"
+cent = "ɨʉɘɵəɞɐa"
 vel = "kgŋxʍɣɰwʟɠɯɤʌɑʊuoɔɒ"
 uvul = "qɢɴʀχʁʛ"
 phar = "ħʕʜʢʡ"
@@ -103,11 +103,19 @@ nas = "mɱnɳɲŋɴ"
 tap = "ⱱɾɽɺ"
 trill = "ʙrʀ"
 appr = "ʋɹlɻɭjɥɰwʎʟ"
-hi = "iɪyɨɯʊu"
-mhi = "eøɵɤo"
-mid = "ɛœəʌɔ"
+hi = "iɪʏyɨʉɯʊu"
+mhi = "eøɘɵɤo"
+mid = "ɛœəɞʌɔ"
 mlo = "æɶɐɑɒ"
 lo = "a"
+
+-- \\ is the set difference operator
+(\\) :: Eq a => [a] -> [a] -> [a]
+xs \\ ys = [x | x <- xs, x `notElem` ys]
+
+-- complement of set
+complement :: [Char] -> [Char]
+complement xs = universe \\ xs
 
 isObstruent :: Manner -> Bool
 isObstruent m = m `elem` [Click, Stop Tenuis, Stop Aspirated, Stop Unreleased, Fricative Sibilant, Fricative NonSibilant, Stop (Fricated Sibilant), Stop (Fricated NonSibilant)]

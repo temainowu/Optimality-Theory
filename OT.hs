@@ -15,14 +15,14 @@ type Grammar = [Constraint]
 -- Classes of sounds
 
 {- vowel chart:
-i		y   ɨ   ɯ		u
-	ɪ			    ʊ	
-e		ø   ɵ   ɤ		o
-ɛ		œ	  ə   ʌ		ɔ
-æ		ɶ	  ɐ   ɑ		ɒ
-			  a			
+i•y   ɨ•ʉ   ɯ•u
+	 ɪ•ʏ		•ʊ	
+e•ø   ɘ•ɵ   ɤ•o
+ɛ•œ	  ə•ɞ   ʌ•ɔ
+æ•ɶ	  ɐ•    ɑ•ɒ
+		  a•
 
-vowel = "ieɛæɪyøœɶɵəɐaɯɤʌɑʊuoɔɒ"
+vowel = "ieɛæɪyøœɶʏɨɘəɐaʉɵɞɯɤʌɑʊuoɔɒ"
 -}
 
 
@@ -54,14 +54,6 @@ sonorityOf (P _ _ _ m _)
     | m == Vowel Mid = 10
     | m == Vowel MidLow = 11
     | m == Vowel Low = 12
-
--- \\ is the set difference operator
-(\\) :: Eq a => [a] -> [a] -> [a]
-xs \\ ys = [x | x <- xs, x `notElem` ys]
-
--- complement of set
-complement :: [Char] -> [Char]
-complement xs = universe \\ xs
 
 count :: [Bool] -> Int
 count [] = 0

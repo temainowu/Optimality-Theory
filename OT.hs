@@ -36,7 +36,7 @@ isVowel :: Manner -> Bool
 isVowel m = m `elem` [Vowel High, Vowel MidHigh, Vowel Mid, Vowel MidLow, Vowel Low]
 
 isRounded :: Active -> Bool
-isRounded (Tongue (Dorsal Rounded) _) = True
+isRounded (Tongue Rounded _ _) = True  
 isRounded _ = False
 
 sonorityOf :: Phone -> Int

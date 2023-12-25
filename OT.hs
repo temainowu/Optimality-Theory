@@ -50,8 +50,8 @@ isFricative _ = False
 sonorityOf :: Phone -> Int
 sonorityOf (P _ _ _ m _)
     | m == Click = 0
-    | isFricative m = 1
-    | isStop m = 2
+    | isStop m = 1
+    | isFricative m = 2
     | m == Tap = 3
     | m == Trill = 4
     | m == NasalStop = 5

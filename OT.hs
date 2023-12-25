@@ -39,21 +39,28 @@ isRounded :: Active -> Bool
 isRounded (Tongue Rounded _ _) = True  
 isRounded _ = False
 
+isStop :: Manner -> Bool
+isStop (Stop _) = True
+isStop _ = False
+
+isFricative :: Manner -> Bool
+isFricative (Fricative _) = True
+isFricative _ = False
+
 sonorityOf :: Phone -> Int
 sonorityOf (P _ _ _ m _)
     | m == Click = 0
-    | m `elem` [Stop Tenuis, Stop Unreleased, Stop Aspirated] = 1
-    | m `elem` [Stop (Fricated Sibilant), Stop (Fricated NonSibilant)] = 2
-    | m `elem` [Fricative Sibilant, Fricative NonSibilant] = 3
-    | m == Tap = 4
-    | m == Trill = 5
-    | m == NasalStop = 6
-    | m == Approximant = 7
-    | m == Vowel High = 8
-    | m == Vowel MidHigh = 9
-    | m == Vowel Mid = 10
-    | m == Vowel MidLow = 11
-    | m == Vowel Low = 12
+    | isFricative m = 1
+    | isStop m = 2
+    | m == Tap = 3
+    | m == Trill = 4
+    | m == NasalStop = 5
+    | m == Approximant = 6
+    | m == Vowel High = 7
+    | m == Vowel MidHigh = 8
+    | m == Vowel Mid = 9
+    | m == Vowel MidLow = 10
+    | m == Vowel Low = 11
 
 count :: [Bool] -> Int
 count [] = 0

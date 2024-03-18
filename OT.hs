@@ -12,8 +12,6 @@ type Harmony = [Int]
 
 type Grammar = [Constraint]
 
--- Classes of sounds
-
 {- vowel chart:
            P    PV     V  
         -----------------

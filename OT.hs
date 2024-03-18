@@ -1,6 +1,6 @@
 module OptimalityTheory.OT where
 import OptimalityTheory.Phones
-import Test.QuickCheck
+import Data.List (sort)
 
 type Comp = Phone -> Phone -> Bool
 
@@ -15,19 +15,14 @@ type Grammar = [Constraint]
 -- Classes of sounds
 
 {- vowel chart:
-i		y   ɨ   ɯ		u
-	ɪ			    ʊ	
-e		ø   ɵ   ɤ		o
-ɛ		œ	ə   ʌ		ɔ
-æ		ɶ	ɐ   ɑ		ɒ
-			a			
+i•y   ɨ•ʉ   ɯ•u
+	 ɪ•ʏ		•ʊ	
+e•ø   ɘ•ɵ   ɤ•o
+ɛ•œ	  ə•ɞ   ʌ•ɔ
+æ•ɶ	  ɐ•    ɑ•ɒ
+		  a•
 
-this is based on dr geoff lindey's vowel chart 
-but with the addition of ɶ, ɨ, and ɒ 
-and considering æ to be a cardinal vowel.
-
-vowel = "ieɛæɪyøœɶɵəɐaɯɤʌɑʊuoɔɒ"
-lax = "ɪɵʊəɐ"
+vowel = "ieɛæɪyøœɶʏɨɘəɐaʉɵɞɯɤʌɑʊuoɔɒ"
 -}
 
 
@@ -41,32 +36,36 @@ isVowel :: Manner -> Bool
 isVowel m = m `elem` [Vowel High, Vowel MidHigh, Vowel Mid, Vowel MidLow, Vowel Low]
 
 isRounded :: Active -> Bool
-isRounded (Tongue (Dorsal Rounded) _) = True
+isRounded (Tongue Rounded _ _) = True  
 isRounded _ = False
+
+isStop :: Manner -> Bool
+isStop (Stop _) = True
+isStop _ = False
+
+isFricative :: Manner -> Bool
+isFricative (Fricative _) = True
+isFricative _ = False
 
 sonorityOf :: Phone -> Int
 sonorityOf (P _ _ _ m _)
     | m == Click = 0
-    | m `elem` [Stop Tenuis, Stop Unreleased, Stop Aspirated] = 1
-    | m `elem` [Stop (Fricated Sibilant), Stop (Fricated NonSibilant)] = 2
-    | m `elem` [Fricative Sibilant, Fricative NonSibilant] = 3
-    | m == Tap = 4
-    | m == Trill = 5
-    | m == NasalStop = 6
-    | m == Approximant = 7
-    | m == Vowel High = 8
-    | m == Vowel MidHigh = 9
-    | m == Vowel Mid = 10
-    | m == Vowel MidLow = 11
-    | m == Vowel Low = 12
+    | isStop m = 1
+    | isFricative m = 2
+    | m == Tap = 3
+    | m == Trill = 4
+    | m == NasalStop = 5
+    | m == Approximant = 6
+    | m == Vowel High = 7
+    | m == Vowel MidHigh = 8
+    | m == Vowel Mid = 9
+    | m == Vowel MidLow = 10
+    | m == Vowel Low = 11
 
--- \\ is the set difference operator
-(\\) :: Eq a => [a] -> [a] -> [a]
-xs \\ ys = [x | x <- xs, x `notElem` ys]
-
--- complement of set
-complement :: [Char] -> [Char]
-complement xs = universe \\ xs
+count :: [Bool] -> Int
+count [] = 0
+count (True:bs) = 1 + count bs
+count (False:bs) = count bs
 
 -- toLexeme "xyz" = [(Phone a b c d,[0]),(Phone a b c d,[1]),(Phone a b c d,[2])] 
 toLexeme :: String -> Lexeme
@@ -156,15 +155,15 @@ nasal (P g0 a0 p0 m0 n0) (P g1 a1 p1 m1 n1)
 
 -- no deletion
 maxi :: Constraint
-maxi i o = length [ 1 | (y,[yp]) <- i, or [yp `elem` xps | (x,xps) <- o]]
+maxi i o = count [ or [yp `elem` xps | (x,xps) <- o] | (y,[yp]) <- i]
 
 -- no epenthesis
 dep :: Constraint
-dep i o = length [ 1 | (x,xps) <- o, null xps]
+dep i o = count [ null xps | (x,xps) <- o]
 
 -- feature similarity/preservation, takes {place, obsVoice, nasal} as argument
 ident :: Comp -> Constraint
-ident f i o = length [ 1 | (x,xps) <- o, (y,[yp]) <- i, not (f x y), yp `elem` xps]
+ident f i o = count [ not (f x y) | (x,xps) <- o, (y,[yp]) <- i, yp `elem` xps]
 -- "ident nasal" = "IdentI->O(nasal)" in OT
 -- "ident place" = "IdentIO(place)" in OT
 
@@ -176,28 +175,46 @@ uniformity i o = sum [ length xps - 1 | (x,xps) <- o, length xps > 1]
 
 -- no nasal vowels
 noNasalVowels :: Constraint
-noNasalVowels _ o = length [ 1 | (P g a p m n,xps) <- o, isVowel m && n == Nasal]
+noNasalVowels _ o = count [ isVowel m && n == Nasal | (P g a p m n,xps) <- o]
 
 -- no voiced stops
 noVoicedStops :: Constraint
-noVoicedStops _ o = length [ backness phone | (phone@(P g a p m n),xps) <- o, m == Stop Tenuis && g == Voiced]
+noVoicedStops _ o = sum [ backness phone | (phone@(P g a p m n),xps) <- o, m == Stop Tenuis && g == Voiced]
 
 -- no voicless resonants
 noVoicelessResonants :: Constraint
-noVoicelessResonants _ o = length [ 1 | (P g a p m n,_) <- o, not (isObstruent m) && g == Voiceless]
+noVoicelessResonants _ o = count [ not (isObstruent m) && g == Voiceless | (P g a p m n,_) <- o]
 
 -- no voiced obstruents
 noVoicedObstruents :: Constraint
-noVoicedObstruents _ o = length [ 1 | (P g a p m n,_) <- o, isObstruent m && g == Voiced]
+noVoicedObstruents _ o = count [ isObstruent m && g == Voiced | (P g a p m n,_) <- o]
 
 -- adjacent elements must agree in some feature f, takes {place, obsVoice, nasalObs, isṼN, nasal} as argument
 agree :: Comp -> Constraint
 agree f _ o = length [ 1 | [a,b] <- groups 2 (map fst o), not (f a b)]
 
--- linear order preservation/no metathesis (usually classed as a faithfulness constraint)
--- fix: [('b',[1]),('c',[2]),('a',[0])] gives 1 violation but should give 2
+-- linear order preservation/no metathesis 
+-- usually classed as a faithfulness constraint because indexes are considered part of the input
 linearity :: Constraint
-linearity _ o = length [ 1 | [as,bs] <- groups 2 (map snd o), or [ any (< a) bs | a <- as]]
+linearity _ o = linea (concat [sort i | (_,i) <- o])
+
+linear :: [Int] -> Int
+linear xs = sum [x | (x,_) <- bubblesort (zip (repeat 0) xs)]
+  where 
+    bubblesort'iter :: [(Int,Int)] -> [(Int,Int)]
+    bubblesort'iter [] = []
+    bubblesort'iter [x] = [x]
+    bubblesort'iter ((m,x):(n,y):xs)
+      | x > y = (n,y) : bubblesort'iter ((m+1,x):xs)
+      | otherwise = (m,x) : bubblesort'iter ((n,y):xs)
+
+    bubblesort' :: [(Int,Int)] -> Int -> [(Int,Int)]
+    bubblesort' xs i 
+      | i == 0 = xs
+      | otherwise = bubblesort' (bubblesort'iter xs) (i - 1) 
+
+    bubblesort :: [(Int,Int)] -> [(Int,Int)]
+    bubblesort xs = bubblesort' xs (length xs)
 
 -- no non-back rounded vowels
 noFrontRound :: Constraint
@@ -226,6 +243,10 @@ onset _ o = sum (map (f . take 2 . map sonorityOf) (syllables (map fst o)))
 
 optimal :: Grammar -> String -> [Lexeme] -> [String]
 optimal g i os = map toString (mask (optimalForms (map (eval g (toLexeme i)) os)) os)
+
+-- better version of optimal if gen ever works:
+-- optimal' :: Grammar -> String -> [String]
+-- optimal' g i = optimal g i (map toLexeme (gen i))
 
 prop_optimal :: Grammar -> String -> Harmony -> Lexeme -> Bool
 prop_optimal g i n o = n <= eval g (toLexeme i) (head (mask (optimalForms [eval g (toLexeme i) o]) [o]))

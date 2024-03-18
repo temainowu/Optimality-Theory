@@ -15,12 +15,14 @@ type Grammar = [Constraint]
 -- Classes of sounds
 
 {- vowel chart:
-i•y   ɨ•ʉ   ɯ•u
-	 ɪ•ʏ		•ʊ	
-e•ø   ɘ•ɵ   ɤ•o
-ɛ•œ	  ə•ɞ   ʌ•ɔ
-æ•ɶ	  ɐ•    ɑ•ɒ
-		  a•
+           P    PV     V  
+        -----------------
+high    | i•y   ɨ•ʉ   ɯ•u
+        |    ɪ•ʏ		•ʊ	
+midhigh | e•ø   ɘ•ɵ   ɤ•o
+mid     | ɛ•œ	  ə•ɞ   ʌ•ɔ
+midlow  | æ•ɶ	  ɐ•    ɑ•ɒ
+low     | 		  a•
 
 vowel = "ieɛæɪyøœɶʏɨɘəɐaʉɵɞɯɤʌɑʊuoɔɒ"
 -}

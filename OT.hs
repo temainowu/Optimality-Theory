@@ -231,43 +231,50 @@ noComplex _ o = length [ x | x <- groups 3 (map fst o), SyllableBoundary `notEle
 noCoda :: Constraint
 noCoda _ o = sum (map sizeOfCoda (syllables (map fst o)))
 
--- no empty onset - fix: "sto" gives violation
 onset :: Constraint
-onset _ o = sum (map (f . take 2 . map sonorityOf) (syllables (map fst o)))
+onset _ o = sum (map (f . map sonorityOf) (syllables (map fst o)))
     where
+        maxi :: [Int] -> Int
+        maxi [x] = x
+        maxi (x:xs) = max x (maxi xs)
+
         f :: [Int] -> Int
-        f [x] = 1
-        f [a,b] | a > b = 1 | otherwise = 0
+        f xs = (fromEnum . null . fst) (break (== (maxi xs)) xs)
 
 -- Main
 
 optimal :: Grammar -> String -> [Lexeme] -> [String]
 optimal g i os = map toString (mask (optimalForms (map (eval g (toLexeme i)) os)) os)
 
+friendlyOptimal :: Grammar -> String -> [String] -> [String]
+friendlyOptimal g i = optimal g i . map toLexeme
+
 -- better version of optimal if gen ever works:
 -- optimal' :: Grammar -> String -> [String]
--- optimal' g i = optimal g i (map toLexeme (gen i))
+-- optimal' g i = friendlyOptimal g i (gen i)
+-- theoretically should return the most harmonious output form(s) for the given grammar and input form
 
 prop_optimal :: Grammar -> String -> Harmony -> Lexeme -> Bool
 prop_optimal g i n o = n <= eval g (toLexeme i) (head (mask (optimalForms [eval g (toLexeme i) o]) [o]))
 
+-- this^ prop is not a test, but uses quickCheck as a substitute for the gen function
+-- this should be used thusly:
 -- quickCheck (prop_optimal *grammar* *input form* *harmony*)
 -- theoretically should return a form of harmony greater than the inputed harmony if one exists
-
--- optimal *grammar* *input form* (gen *input form*)
--- theoretically should return the most harmonious output form(s) for the given grammar and input form
+-- so you would need to keep checking smaller and smaller harmonies until you find the smallest one
 
 -- Examples
 
 {-
-optimal is the only function that needs to be called by the user
-it takes a grammar, an input form (which is automatically indexed), and a list of indexed output forms
-it returns a list of the most harmonious output forms (which are automatically unindexed)
+optimal and friendlyOptimal are the only functions that should be called by the user
+they both take a grammar, an input form (which is automatically indexed), and a list of output forms 
+(which need be indexed if using optimal, but not if using friendlyOptimal)
+and return a list of the most harmonious output forms (which are automatically unindexed)
 
 examples:
 
 example a)
-> optimal [nasAgr, ident obsVoice] "amda" (map toLexeme ["ampa", "amda"])
+> friendlyOptimal [nasAgr, ident obsVoice] "amda" ["ampa", "amda"]
 ["ampa"]
 
 nasAgr dominates ident obsVoice, 
@@ -283,7 +290,7 @@ tableu:
 ───────┴────────┴─────────────────┘
 
 example b)
-> optimal [ident obsVoice, nasAgr] "amda" (map toLexeme ["ampa", "amda"])
+> friendlyOptimal [ident obsVoice, nasAgr] "amda" ["ampa", "amda"]
 ["amda"]
 
 identIO obsVoice dominates nasAgr,

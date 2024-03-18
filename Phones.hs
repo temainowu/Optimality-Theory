@@ -231,6 +231,7 @@ phoneToString (P Closed a p m n) | isObstruent m = phoneToString (P Voiceless a 
 phoneToString (P Voiceless a p m n) | not (isObstruent m) = phoneToString (P Voiced a p m n) ++ "̥"
 phoneToString (P Breathy a p m n) | isObstruent m = phoneToString (P Voiced a p m n) ++ "ʱ"
                                   | otherwise     = phoneToString (P Voiced a p m n) ++ "̤"
+phoneToString (P voiced a p Click n) = phoneToString (P voiced a p Click n) ++ "̬"
 -- Vowels
 phoneToString (P Voiced (Tongue Unrounded Dorsal Central) Palatal (Vowel High) Oral) = "i"
 phoneToString (P Voiced (Tongue Unrounded Dorsal Central) Palatal (Vowel MidHigh) Oral) = "e"
@@ -256,7 +257,6 @@ phoneToString (P Voiced (Tongue Rounded Dorsal Central) Velar (Vowel MidLow) Ora
 phoneToString (P Voiced (Tongue _ Dorsal Central) _ (Vowel MidLow) Oral) = error "That's a weird vowel"
 phoneToString (P _ _ _ (Vowel _) _) = error "No non-dorsal vowels"
 -- Bilabials
-phoneToString (P Voiced Inferiolabial Superiolabial Click Oral) = "ʘ̬" -- not sure about this one
 phoneToString (P Voiceless Inferiolabial Superiolabial Click Oral) = "ʘ"
 phoneToString (P Voiced Inferiolabial Superiolabial (Stop Tenuis) Oral) = "b"
 phoneToString (P Voiced Inferiolabial Superiolabial (Stop Tenuis) Nasal) = "ᵐb"
@@ -278,7 +278,6 @@ phoneToString (P _ Inferiolabial Dental Trill Oral) = error "No labiodental tril
 phoneToString (P Voiced Inferiolabial Dental Tap Oral) = "ⱱ"
 phoneToString (P Voiced Inferiolabial Dental Approximant Oral) = "ʋ"
 -- Dentals
-phoneToString (P Voiced (Tongue _ Apical Central) Dental Click Oral) = "ǀ̬" -- not sure about this one
 phoneToString (P Voiceless (Tongue _ Apical Central) Dental Click Oral) = "ǀ"
 phoneToString (P Voiced (Tongue _ Apical Central) Dental (Stop Tenuis) Oral) = "d̪"
 phoneToString (P Voiced (Tongue _ Apical Central) Dental (Stop Tenuis) Nasal) = "ⁿd̪"
@@ -295,7 +294,6 @@ phoneToString (P Voiced (Tongue _ Laminal Central) Dental Trill Oral) = "r̪"
 phoneToString (P Voiced (Tongue _ Apical Central) Dental Approximant Oral) = "ɹ̪"
 phoneToString (P Voiced (Tongue _ Apical Lateral) Dental Approximant Oral) = "l̪"
 -- Alveolars
-phoneToString (P Voiced (Tongue _ Apical Central) Alveolar Click Oral) = "ǃ̬"
 phoneToString (P Voiceless (Tongue _ Apical Central) Alveolar Click Oral) = "ǃ"
 phoneToString (P Voiced (Tongue _ Apical Lateral) Alveolar Click Oral) = "ǁ̬"
 phoneToString (P Voiceless (Tongue _ Apical Lateral) Alveolar Click Oral) = "ǁ"
@@ -324,7 +322,6 @@ phoneToString (P Voiced (Tongue _ Apical Lateral) Alveolar Approximant Oral) = "
 -- Laminal Alveolars
 phoneToString (P Voiced (Tongue _ Laminal Central) Alveolar Click Oral) = ""
 -- Postalveolars
-phoneToString (P Voiced (Tongue _ Apical Central) Postalveolar Click Oral) = "ǃ̬"
 phoneToString (P Voiceless (Tongue _ Apical Central) Postalveolar Click Oral) = "ǃ"
 phoneToString (P Voiced (Tongue _ Apical Central) Postalveolar (Stop (Fricated Sibilant)) Oral) = "d͡ʒ"
 phoneToString (P Voiceless (Tongue _ Apical Central) Postalveolar (Stop (Fricated Sibilant)) Oral) = "t͡ʃ"
@@ -336,14 +333,12 @@ phoneToString (P Voiced (Tongue _ Apical Central) Postalveolar (Fricative NonSib
 phoneToString (P Voiceless (Tongue _ Apical Central) Postalveolar (Fricative NonSibilant) Oral) = "ɹ̠̊˔"
 phoneToString (P v (Tongue _ Apical l) Postalveolar m n) = phoneToString (P v (Tongue _ Apical l) Alveolar m n) ++ "̠"
 -- palatoalveolars
-phoneToString (P Voiced (Tongue _ Laminal Central) Postalveolar Click Oral) = "ǂ̬"
 phoneToString (P Voiceless (Tongue _ Laminal Central) Postalveolar Click Oral) = "ǂ"
 phoneToString (P Voiced (Tongue _ Laminal Central) Postalveolar (Stop (Fricated Sibilant)) Oral) = "d͡ʑ"
 phoneToString (P Voiceless (Tongue _ Laminal Central) Postalveolar (Stop (Fricated Sibilant)) Oral) = "t͡ɕ"
 phoneToString (P Voiced (Tongue _ Laminal Central) Postalveolar (Fricative Sibilant) Oral) = "ʑ"
 phoneToString (P Voiceless (Tongue _ Laminal Central) Postalveolar (Fricative Sibilant) Oral) = "ɕ"
 -- Retroflexes
-phoneToString (P Voiced (Tongue _ Apical Central) Palatal Click Oral) = "‼̬"
 phoneToString (P Voiceless (Tongue _ Apical Central) Palatal Click Oral) = "‼"
 phoneToString (P Voiced (Tongue _ Apical Central) Palatal (Stop Tenuis) Oral) = "ɖ"
 phoneToString (P Voiced (Tongue _ Apical Central) Palatal (Stop Tenuis) Nasal) = "ɳ͡ɖ"

@@ -235,6 +235,9 @@ phoneToString (P Voiced a p Click n) = phoneToString (P Voiceless a p Click n) +
 phoneToString (P Voiced Inferiolabial Dental (Stop (Fricated NonSibilant)) Oral) = "b͡v"
 phoneToString (P Voiceless Inferiolabial Dental (Stop (Fricated NonSibilant)) Oral) = "p͡f"
 phoneToString (P v a p (Stop (Fricated s)) n) = phoneToString (P v a p (Stop Tenuis) n) ++ "͡" ++ phoneToString (P v a p (Fricative s) n)
+phoneToString (P Voiced Inferiolabial Superiolabial (Stop Tenuis) Nasal) = "ᵐb"
+phoneToString (P Voiced (Tongue _ Apical Central) Alveolar (Stop Tenuis) Nasal) = "ⁿd"
+phoneToString (P Voiced a p (Stop Tenuis) Nasal) = phoneToString (P Voiced a p NasalStop Nasal) ++ "͡" ++ phoneToString (P Voiced a p (Stop Tenuis) Oral)
 -- Vowels
 phoneToString (P Voiced (Tongue Unrounded Dorsal Central) Palatal (Vowel High) Oral) = "i"
 phoneToString (P Voiced (Tongue Unrounded Dorsal Central) Palatal (Vowel MidHigh) Oral) = "e"
@@ -262,7 +265,6 @@ phoneToString (P _ _ _ (Vowel _) _) = error "No non-dorsal vowels"
 -- Bilabials
 phoneToString (P Voiceless Inferiolabial Superiolabial Click Oral) = "ʘ"
 phoneToString (P Voiced Inferiolabial Superiolabial (Stop Tenuis) Oral) = "b"
-phoneToString (P Voiced Inferiolabial Superiolabial (Stop Tenuis) Nasal) = "ᵐb"
 phoneToString (P Voiceless Inferiolabial Superiolabial (Stop Tenuis) Oral) = "p"
 phoneToString (P VoicedIngressive Inferiolabial Superiolabial (Stop Tenuis) Oral) = "ɓ"
 phoneToString (P Voiced Inferiolabial Superiolabial NasalStop Nasal) = "m"
@@ -290,7 +292,6 @@ phoneToString (P Voiceless (Tongue _ Apical Central) Alveolar Click Oral) = "ǃ"
 phoneToString (P Voiced (Tongue _ Apical Lateral) Alveolar Click Oral) = "ǁ̬"
 phoneToString (P Voiceless (Tongue _ Apical Lateral) Alveolar Click Oral) = "ǁ"
 phoneToString (P Voiced (Tongue _ Apical Central) Alveolar (Stop Tenuis) Oral) = "d"
-phoneToString (P Voiced (Tongue _ Apical Central) Alveolar (Stop Tenuis) Nasal) = "ⁿd"
 phoneToString (P Voiceless (Tongue _ Apical Central) Alveolar (Stop Tenuis) Oral) = "t"
 phoneToString (P VoicedIngressive (Tongue _ Apical Central) Alveolar (Stop Tenuis) Oral) = "ɗ"
 phoneToString (P Voiced (Tongue _ Apical Central) Alveolar NasalStop Nasal) = "n"
@@ -321,7 +322,6 @@ phoneToString (P Voiceless (Tongue _ Laminal Central) Postalveolar (Fricative Si
 -- Retroflexes
 phoneToString (P Voiceless (Tongue _ Apical Central) Palatal Click Oral) = "‼"
 phoneToString (P Voiced (Tongue _ Apical Central) Palatal (Stop Tenuis) Oral) = "ɖ"
-phoneToString (P Voiced (Tongue _ Apical Central) Palatal (Stop Tenuis) Nasal) = "ɳ͡ɖ"
 phoneToString (P Voiceless (Tongue _ Apical Central) Palatal (Stop Tenuis) Oral) = "ʈ"
 phoneToString (P VoicedIngressive (Tongue _ Apical Central) Palatal (Stop Tenuis) _) = error "No voiced ingressive retroflex stop"
 phoneToString (P Voiced (Tongue _ Apical Central) Palatal NasalStop Nasal) = "ɳ"
@@ -335,7 +335,6 @@ phoneToString (P Voiced (Tongue _ Apical Central) Palatal Approximant Oral) = "�
 phoneToString (P Voiced (Tongue _ Apical Lateral) Palatal Approximant Oral) = "ɭ"
 -- Palatals
 phoneToString (P Voiced (Tongue Unrounded Dorsal Central) Palatal (Stop Tenuis) Oral) = "ɟ"
-phoneToString (P Voiced (Tongue Unrounded Dorsal Central) Palatal (Stop Tenuis) Nasal) = "ɲ͡ɟ"
 phoneToString (P Voiceless (Tongue Unrounded Dorsal Central) Palatal (Stop Tenuis) Oral) = "c"
 phoneToString (P VoicedIngressive (Tongue Unrounded Dorsal Central) Palatal (Stop Tenuis) Oral) = "ʄ"
 phoneToString (P Voiced (Tongue Unrounded Dorsal Central) Palatal NasalStop Nasal) = "ɲ"
@@ -346,7 +345,6 @@ phoneToString (P Voiced (Tongue Rounded Dorsal Central) Palatal Approximant Oral
 phoneToString (P Voiced (Tongue Unrounded Dorsal Lateral) Palatal Approximant Oral) = "ʎ"
 -- Velars
 phoneToString (P Voiced (Tongue Unrounded Dorsal Central) Velar (Stop Tenuis) Oral) = "ɡ"
-phoneToString (P Voiced (Tongue Unrounded Dorsal Central) Velar (Stop Tenuis) Nasal) = "ŋ͡ɡ"
 phoneToString (P Voiceless (Tongue Unrounded Dorsal Central) Velar (Stop Tenuis) Oral) = "k"
 phoneToString (P VoicedIngressive (Tongue Unrounded Dorsal Central) Velar (Stop Tenuis) Oral) = "ɠ"
 phoneToString (P Voiced (Tongue Unrounded Dorsal Central) Velar NasalStop Nasal) = "ŋ"
@@ -358,7 +356,6 @@ phoneToString (P Voiced (Tongue Rounded Dorsal Central) Velar Approximant Oral) 
 phoneToString (P Voiced (Tongue Unrounded Dorsal Lateral) Velar Approximant Oral) = "ʟ"
 -- Uvulars
 phoneToString (P Voiced (Tongue Unrounded Dorsal Central) Uvular (Stop Tenuis) Oral) = "ɢ"
-phoneToString (P Voiced (Tongue Unrounded Dorsal Central) Uvular (Stop Tenuis) Nasal) = "ɴ͡ɢ"
 phoneToString (P Voiceless (Tongue Unrounded Dorsal Central) Uvular (Stop Tenuis) Oral) = "q"
 phoneToString (P VoicedIngressive (Tongue Unrounded Dorsal Central) Uvular (Stop Tenuis) Oral) = "ʛ"
 phoneToString (P Voiced (Tongue Unrounded Dorsal Central) Uvular NasalStop Nasal) = "ɴ"

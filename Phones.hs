@@ -283,8 +283,6 @@ phoneToString (P Voiceless (Tongue _ Apical Central) Dental Click Oral) = "ǀ"
 phoneToString (P Voiced (Tongue _ Apical Central) Dental (Fricative NonSibilant) Oral) = "ð"
 phoneToString (P Voiceless (Tongue _ Apical Central) Dental (Fricative NonSibilant) Oral) = "θ"
 phoneToString (P Voiced (Tongue _ Apical _) Dental Tap Oral) = error "No dental tap"
-phoneToString (P _ (Tongue _ Apical _) Dental (Stop (Fricated Sibilant)) _) = error "No dental sibilant affricate"
-phoneToString (P _ (Tongue _ Apical Lateral) Dental (Stop (Fricated _)) _) = error "No dental lateral fricatives"
 phoneToString (P _ (Tongue _ Apical Lateral) Dental (Fricative _) _) = error "No dental lateral fricatives"
 phoneToString (P v (Tongue _ Apical l) Dental m n) = phoneToString (P v (Tongue _ Apical l) Alveolar m n) ++ "̪"
 -- Alveolars

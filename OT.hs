@@ -1,6 +1,6 @@
 module OptimalityTheory.OT where
 import OptimalityTheory.Phones
-import Test.QuickCheck
+import Data.List (sort)
 
 type Comp = Phone -> Phone -> Bool
 
@@ -193,10 +193,28 @@ noVoicedObstruents _ o = count [ isObstruent m && g == Voiced | (P g a p m n,_) 
 agree :: Comp -> Constraint
 agree f _ o = length [ 1 | [a,b] <- groups 2 (map fst o), not (f a b)]
 
--- linear order preservation/no metathesis (usually classed as a faithfulness constraint because indexes are considered part of the input)
--- fix: [('b',[1]),('c',[2]),('a',[0])] gives 1 violation but should give 2
+-- linear order preservation/no metathesis 
+-- usually classed as a faithfulness constraint because indexes are considered part of the input
 linearity :: Constraint
-linearity _ o = length [ 1 | [as,bs] <- groups 2 (map snd o), or [ any (< a) bs | a <- as]]
+linearity _ o = linea (concat [sort i | (_,i) <- o])
+
+linear :: [Int] -> Int
+linear xs = sum [x | (x,_) <- bubblesort (zip (repeat 0) xs)]
+  where 
+    bubblesort'iter :: [(Int,Int)] -> [(Int,Int)]
+    bubblesort'iter [] = []
+    bubblesort'iter [x] = [x]
+    bubblesort'iter ((m,x):(n,y):xs)
+      | x > y = (n,y) : bubblesort'iter ((m+1,x):xs)
+      | otherwise = (m,x) : bubblesort'iter ((n,y):xs)
+
+    bubblesort' :: [(Int,Int)] -> Int -> [(Int,Int)]
+    bubblesort' xs i 
+      | i == 0 = xs
+      | otherwise = bubblesort' (bubblesort'iter xs) (i - 1) 
+
+    bubblesort :: [(Int,Int)] -> [(Int,Int)]
+    bubblesort xs = bubblesort' xs (length xs)
 
 -- no non-back rounded vowels
 noFrontRound :: Constraint

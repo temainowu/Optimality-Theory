@@ -231,7 +231,7 @@ phoneToString (P Closed a p m n) | isObstruent m = phoneToString (P Voiceless a 
 phoneToString (P Voiceless a p m n) | not (isObstruent m) = phoneToString (P Voiced a p m n) ++ "̥"
 phoneToString (P Breathy a p m n) | isObstruent m = phoneToString (P Voiced a p m n) ++ "ʱ"
                                   | otherwise     = phoneToString (P Voiced a p m n) ++ "̤"
-phoneToString (P voiced a p Click n) = phoneToString (P voiced a p Click n) ++ "̬"
+phoneToString (P voiced a p Click n) = phoneToString (P Voiceless a p Click n) ++ "̬"
 -- Vowels
 phoneToString (P Voiced (Tongue Unrounded Dorsal Central) Palatal (Vowel High) Oral) = "i"
 phoneToString (P Voiced (Tongue Unrounded Dorsal Central) Palatal (Vowel MidHigh) Oral) = "e"

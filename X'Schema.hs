@@ -1,6 +1,6 @@
 module OptimalityTheory.X'Schema where
 
-import OptimalityTheory.Phones
+import Phones
 
 class Phrase p where
     symbol :: p -> Char

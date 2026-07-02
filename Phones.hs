@@ -1,4 +1,4 @@
-module OptimalityTheory.Phones where
+module Phones where
 
 data Phone = P GlottalState Active Passive Manner Nasality | SyllableBoundary | MorphemeBoundary | WordBoundary
     deriving (Eq)

@@ -101,7 +101,7 @@ prop_optimal g i n o = n <= eval g (toLexeme i) (head (mask (optimalForms [eval 
 -- quickCheck (prop_optimal *grammar* *input form* *harmony*)
 -- should return a form of harmony greater than the inputed harmony if one exists
 
--- IO comparisons:
+-- IO and linear comparisons:
 
 -- same place
 place :: Comp
@@ -115,8 +115,16 @@ manner (P g0 a0 p0 m0 n0) (P g1 a1 p1 m1 n1) = m0 == m1
 obsVoice :: Comp
 obsVoice (P g0 a0 p0 m0 n0) (P g1 a1 p1 m1 n1) = not (g0 /= g1 && isObstruent m0 && isObstruent m1)
 
+-- same voicing in fricatives
 fricVoice :: Comp
 fricVoice (P g0 a0 p0 m0 n0) (P g1 a1 p1 m1 n1) = not (g0 /= g1 && isFricative m0 && isFricative m1)
+
+continuancy :: Comp
+continuancy (P {}) (P _ _ _ (Vowel _) _) = True
+continuancy (P _ _ _ (Vowel _) _) (P {}) = True
+continuancy (P _ _ _ m0 _) (P _ _ _ m1 _) = isContinuant m0 == isContinuant m1
+
+-- Linear comparisons
 
 -- nasal agrees in place with following obstruent
 nasalObs :: Comp
@@ -186,6 +194,12 @@ noVoicelessResonants _ o = count [ not (isObstruent m) && g == Voiceless | (P g 
 -- no voiced obstruents
 noVoicedObstruents :: Constraint
 noVoicedObstruents _ o = count [ isObstruent m && g == Voiced | (P g a p m n,_) <- o]
+
+-- no back nasals 
+nasalBackness :: Constraint
+nasalBackness _ [] = 0
+nasalBackness _ ((p@(P _ _ _ NasalStop _), _):o) = backness p + nasalBackness [] o
+nasalBackness _ (_:o) = nasalBackness [] o
 
 -- adjacent elements must agree in some feature f, takes {place, obsVoice, nasalObs, isṼN, nasal} as argument
 agree :: Comp -> Constraint
@@ -294,9 +308,20 @@ manicule :: Bool -> String
 manicule False = "  "
 manicule True  = "☞ "
 
+-- compress with asterisms? (⁂)
 showViols :: Int -> Int -> Maybe Int -> String
 showViols l v Nothing = replicate v '*' ++ replicate (l - v) ' '
 showViols l v (Just x) = replicate x '*' ++ "!" ++ replicate (v - x) '*' ++ replicate (l - v - 1) ' '
+
+showViolsAsm :: Int -> Int -> Maybe Int -> String
+showViolsAsm l 0 Nothing = replicate l ' '
+showViolsAsm l 1 Nothing = '*' : replicate (l - 1) ' '
+showViolsAsm l 2 Nothing = "**" ++ replicate (l - 2) ' '
+showViolsAsm l v Nothing = '⁂' : showViolsAsm (l - 1) (v - 3) Nothing
+showViolsAsm l v (Just 0) = '!' : showViolsAsm (l - 1) v Nothing
+showViolsAsm l v (Just 1) = "*!" ++ showViolsAsm (l - 2) (v - 1) Nothing
+showViolsAsm l v (Just 2) = "**!" ++ showViolsAsm (l - 3) (v - 2) Nothing
+showViolsAsm l v (Just x) = '⁂' : showViolsAsm (l - 1) (v - 3) (Just (x - 3))
 
 valueOuts :: Int -> [Int] -> Grammar -> String -> [Lexeme] -> String
 valueOuts l ls g i os =
@@ -310,7 +335,7 @@ valueOuts l ls g i os =
           concatMap (++ " │ ")
           ((manicule (toString x `elem` optimal g i os) ++
           toString x ++ replicate (l - length (toString x)) ' ') : zipWith
-              (\ (t,l) v -> showViols l v t) (zip (findCritV (eval g (toLexeme i) x) (map (eval g (toLexeme i)) os)) ls)
+              (\ (t,l) v -> showViolsAsm l v t) (zip (findCritV (eval g (toLexeme i) x) (map (eval g (toLexeme i)) os)) ls)
               (eval g (toLexeme i) x))
     ) os
 

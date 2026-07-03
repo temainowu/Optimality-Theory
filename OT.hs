@@ -121,7 +121,6 @@ prop_optimal g i n o = n <= eval g (toLexeme i) (head (mask (optimalForms [eval 
 -- this should be used thusly:
 -- quickCheck (prop_optimal *grammar* *input form* *harmony*)
 -- theoretically should return a form of harmony greater than the inputed harmony if one exists
--- so you would need to keep checking smaller and smaller harmonies until you find the smallest one
 
 -- Constraints
 

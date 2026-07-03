@@ -283,7 +283,7 @@ phoneToString (P Voiceless (Tongue _ Apical Central) Dental Click Oral) = "ǀ"
 phoneToString (P Voiced (Tongue _ Apical Central) Dental (Fricative NonSibilant) Oral) = "ð"
 phoneToString (P Voiceless (Tongue _ Apical Central) Dental (Fricative NonSibilant) Oral) = "θ"
 phoneToString (P _ (Tongue _ Apical Lateral) Dental (Fricative _) _) = error "No dental lateral fricatives"
-phoneToString (P v (Tongue _ Apical l) Dental m n) = phoneToString (P v (Tongue _ Apical l) Alveolar m n) ++ "̪"
+phoneToString (P v (Tongue r Apical l) Dental m n) = phoneToString (P v (Tongue r Apical l) Alveolar m n) ++ "̪"
 -- Alveolars
 phoneToString (P Voiceless (Tongue _ Apical Central) Alveolar Click Oral) = "ǃ"
 phoneToString (P Voiceless (Tongue _ Apical Lateral) Alveolar Click Oral) = "ǁ"
@@ -310,7 +310,7 @@ phoneToString (P Voiced (Tongue _ Apical Central) Postalveolar (Fricative Sibila
 phoneToString (P Voiceless (Tongue _ Apical Central) Postalveolar (Fricative Sibilant) Oral) = "ʃ"
 phoneToString (P Voiced (Tongue _ Apical Central) Postalveolar (Fricative NonSibilant) Oral) = "ɹ̠˔"
 phoneToString (P Voiceless (Tongue _ Apical Central) Postalveolar (Fricative NonSibilant) Oral) = "ɹ̠̊˔"
-phoneToString (P v (Tongue _ Apical l) Postalveolar m n) = phoneToString (P v (Tongue _ Apical l) Alveolar m n) ++ "̠"
+phoneToString (P v (Tongue r Apical l) Postalveolar m n) = phoneToString (P v (Tongue r Apical l) Alveolar m n) ++ "̠"
 -- palatoalveolars
 phoneToString (P Voiceless (Tongue _ Laminal Central) Postalveolar Click Oral) = "ǂ"
 phoneToString (P Voiced (Tongue _ Laminal Central) Postalveolar (Fricative Sibilant) Oral) = "ʑ"

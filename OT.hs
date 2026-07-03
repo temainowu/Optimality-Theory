@@ -223,23 +223,7 @@ noCoda :: Constraint
 noCoda _ o = sum (map sizeOfCoda (syllables (map fst o)))
 
 onset :: Constraint
-onset _ o = sum (map (f2 . map sonorityOf) (syllables (map fst o)))
-    where
-        {- ok:
-        maxi :: [Int] -> Int
-        maxi [x] = x
-        maxi (x:xs) = max x (maxi xs)
-
-        f0 :: [Int] -> Int
-        f0 xs = (fromEnum . null) (takeWhile (/= maxi xs) xs)-}
-
-        -- bad:
-        -- f1 :: [Int] -> Int
-        -- f1 xs = (fromEnum . null) (takeWhile (/= foldr max (-1) xs) xs)
-
-        f2 :: [Int] -> Int
-        f2 (x:y:xs) | x <= y = 0
-        f2 _ = 1
+onset _ o = sum (map ((\ xs -> (fromEnum . null) (takeWhile (/= maximum xs) xs)) . map sonorityOf) (syllables (map fst o)))
 
 -- Auxiliary Functions
 

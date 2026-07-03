@@ -119,7 +119,7 @@ complement xs = universe \\ xs
 
 -- 1/(backness phone) gives an aproximation of the amount of air trapped in the mouth in the closure of a stop
 backness :: Phone -> Int
-backness (P _ a p _ _) = fromEnum p + fromEnum a
+backness (P _ _ p _ _) = fromEnum p + 1
 
 isVowel :: Manner -> Bool
 isVowel (Vowel _) = True
@@ -133,6 +133,12 @@ isRounded _ = False
 isStop :: Manner -> Bool
 isStop (Stop _) = True
 isStop _ = False
+
+isContinuant :: Manner -> Bool
+isContinuant (Stop _) = False 
+isContinuant NasalStop = False 
+isContinuant Click = False 
+isContinuant _ = True
 
 isFricative :: Manner -> Bool
 isFricative (Fricative _) = True

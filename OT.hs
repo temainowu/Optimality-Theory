@@ -1,6 +1,7 @@
 module OT where
 import Phones
 import Data.List (sort)
+import Data.Bifunctor
 
 type Comp = Phone -> Phone -> Bool
 
@@ -170,7 +171,7 @@ maxi i o = count [ not (or [yp `elem` xps | (x,xps) <- o]) | (y,[yp]) <- i]
 
 -- no epenthesis
 dep :: Constraint
-dep i o = count [ null xps | (x,xps) <- o]
+dep i o = count [ null xps && isPhone x | (x,xps) <- o]
 
 -- feature similarity/preservation, takes {place, obsVoice, nasal} as argument
 ident :: Comp -> Constraint
@@ -263,6 +264,9 @@ count (False:bs) = count bs
 toLexeme :: String -> Lexeme
 toLexeme xs = zip (map charToPhone xs) (map (: []) [0..])
 
+parToLexeme :: [(Char,[Int])] -> Lexeme
+parToLexeme = map (first charToPhone)
+
 -- inverse of toLexeme
 toString :: Lexeme -> String
 toString = concatMap (phoneToString . fst)
@@ -279,11 +283,16 @@ syllables (SyllableBoundary:xs) = syllables xs
 syllables xs = (\ f (a,as) -> a : f as) syllables (break (== SyllableBoundary) xs)
 
 sizeOfCoda :: [Phone] -> Int
+sizeOfCoda xs = length (dropWhile ((/= maximum (map sonorityOf xs)) . sonorityOf) xs) - 1
+
+{-
+sizeOfCoda :: [Phone] -> Int
 sizeOfCoda [] = 0
 sizeOfCoda [x] = 0
 sizeOfCoda (x:y:xs)
     | sonorityOf x > sonorityOf y = 1 + sizeOfCoda (y:xs)
     | otherwise = 0 + sizeOfCoda (y:xs)
+-}
 
 mostHarmonious :: [Harmony] -> Harmony
 mostHarmonious [] = error "empty list"

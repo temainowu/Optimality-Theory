@@ -120,7 +120,7 @@ prop_optimal g i n o = n <= eval g (toLexeme i) (head (mask (optimalForms [eval 
 -- this^ prop is not a test, but uses quickCheck as a substitute for the gen function
 -- this should be used thusly:
 -- quickCheck (prop_optimal *grammar* *input form* *harmony*)
--- theoretically should return a form of harmony greater than the inputed harmony if one exists
+-- should return a form of harmony greater than the inputed harmony if one exists
 
 -- Constraints
 

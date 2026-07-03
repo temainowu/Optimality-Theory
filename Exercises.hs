@@ -76,16 +76,17 @@ exe2'2 = PrettyList [
 constraints2'3 = [agree obsVoice, ident stopVoice, noVoicedObstruents, ident obsVoice, noVoicedStops]
 labels2'3 = ["Agree(ObsVce)", "Ident-IO(StopVoice)", "*Voiced Obs", "Ident-IO(ObsVce)", "*Voiced Stop"]
 
+-- optimal form is first in each list of candidates
 exe2'3 :: PrettyList Tableau 
 exe2'3 = PrettyList [
-        makeTableau constraints2'3 labels2'3 "pd" ["bd","pt","pd"], -- ss uv
-        makeTableau constraints2'3 labels2'3 "dk" ["tk","dg","dk"], -- ss vu
-        makeTableau constraints2'3 labels2'3 "sb" ["zb","sp","sb"], -- fs uv
-        makeTableau constraints2'3 labels2'3 "zp" ["sp","zb","zp"], -- fs vu
-        makeTableau constraints2'3 labels2'3 "kv" ["kf","gv","kv"], -- sf uv
-        makeTableau constraints2'3 labels2'3 "sv" ["sf","zv","sv"], -- ff uv
-        makeTableau constraints2'3 labels2'3 "dv" ["tf","dv","tv","df"], -- ss vv 
-        makeTableau constraints2'3 labels2'3 "vz" ["fs","vz","fz","vs"] -- ff vv
+        makeTableau constraints2'3 labels2'3 "pd" ["bd","pt","pd"], -- ss uv (stropdas)
+        makeTableau constraints2'3 labels2'3 "dk" ["tk","dg","dk"], -- ss vu (bloedkoraal)
+        makeTableau constraints2'3 labels2'3 "sb" ["zb","sp","sb"], -- fs uv (kasboek)
+        makeTableau constraints2'3 labels2'3 "zp" ["sp","zb","zp"], -- fs vu (kaaspers)
+        makeTableau constraints2'3 labels2'3 "kv" ["kf","gv","kv"], -- sf uv (boekvorm)
+        makeTableau constraints2'3 labels2'3 "sv" ["sf","zv","sv"], -- ff uv (bosveen)
+        makeTableau constraints2'3 labels2'3 "dv" ["tf","dv","tv","df"], -- ss vv (handvat)
+        makeTableau constraints2'3 labels2'3 "vz" ["fs","vz","fz","vs"] -- ff vv (drijfzand)
     ]
 
 -- Exercise 3.1 - -*um*-infixation in Ilokano (141)

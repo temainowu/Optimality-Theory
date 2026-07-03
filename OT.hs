@@ -84,8 +84,11 @@ makeTableau g ns i os = Tableau g ns i (map toLexeme os)
 example :: Tableau
 example = makeTableau [agree nasalObs, ident obsVoice, ident place] ["NasAgr", "ident-IO-ObsV","Ident-IO-place"] "amda" ["ampa", "amba", "amda", "embi"]
 
+viols :: Grammar -> String -> [Lexeme] -> [Harmony]
+viols g i = map (eval g i)
+
 optimal :: Grammar -> String -> [Lexeme] -> [String]
-optimal g i os = map toString (mask (optimalForms (map (eval g (toLexeme i)) os)) os)
+optimal g i os = map toString (mask (optimalForms (viols g i os)) os)
 
 friendlyOptimal :: Grammar -> String -> [String] -> [String]
 friendlyOptimal g i = optimal g i . map toLexeme
@@ -96,7 +99,7 @@ friendlyOptimal g i = optimal g i . map toLexeme
 -- theoretically should return the most harmonious output form(s) for the given grammar and input form
 
 prop_optimal :: Grammar -> String -> Harmony -> Lexeme -> Bool
-prop_optimal g i n o = n <= eval g (toLexeme i) (head (mask (optimalForms [eval g (toLexeme i) o]) [o]))
+prop_optimal g i n o = n <= eval g i (head (mask (optimalForms [eval g i o]) [o]))
 
 -- this^ prop is not a test, but uses quickCheck as a substitute for the gen function
 -- this should be used thusly:
@@ -310,8 +313,8 @@ mask _ [] = []
 mask (True:bs) (x:xs) = x : mask bs xs
 mask (False:bs) (x:xs) = mask bs xs
 
-eval :: Grammar -> Lexeme -> Lexeme -> Harmony
-eval g i o = map (\ f -> f i o) g
+eval :: Grammar -> String -> Lexeme -> Harmony
+eval g i o = map (\ f -> f (toLexeme i) o) g
 
 -- fix: does not generate all possible forms
 gen :: String -> [String]
@@ -349,8 +352,8 @@ valueOuts l ls g i os =
           concatMap (++ " │ ")
           ((manicule (toString x `elem` optimal g i os) ++
           toString x ++ replicate (l - length (toString x)) ' ') : zipWith
-              (\ (t,l) v -> showViolsAsm l v t) (zip (findCritV (eval g (toLexeme i) x) (map (eval g (toLexeme i)) os)) ls)
-              (eval g (toLexeme i) x))
+              (\ (t,l) v -> showViolsAsm l v t) (zip (findCritV (eval g i x) (viols g i os)) ls)
+              (eval g i x))
     ) os
 
 tail' :: [a] -> [a]
@@ -363,6 +366,8 @@ findCritV _ [] = []
 findCritV _ ([]:_) = []
 findCritV (v:vs) l@((x:xs):xss) = (if v <= minimum (map head l) then Nothing else Just (1 + minimum (map head l))) : findCritV vs (map tail' l)
 
+findCritV' :: Grammar -> String -> [Lexeme] -> [[String]]
+findCritV' g i os = map (map show) (viols g i os)
 
 {- vowel chart:
            P    PV     V  

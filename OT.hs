@@ -135,6 +135,42 @@ prop_optimal g i n o = n <= eval g (toLexeme i) (head (mask (optimalForms [eval 
 -- quickCheck (prop_optimal *grammar* *input form* *harmony*)
 -- should return a form of harmony greater than the inputed harmony if one exists
 
+-- IO comparisons:
+
+-- same place
+place :: Comp
+place (P g0 a0 p0 m0 n0) (P g1 a1 p1 m1 n1) = (p0 == p1) && (a0 == a1)
+
+-- same manner
+manner :: Comp
+manner (P g0 a0 p0 m0 n0) (P g1 a1 p1 m1 n1) = m0 == m1
+
+-- same voicing of obstuents
+obsVoice :: Comp
+obsVoice (P g0 a0 p0 m0 n0) (P g1 a1 p1 m1 n1) = not (g0 /= g1 && isObstruent m0 && isObstruent m1)
+
+-- nasal agrees in place with following obstruent
+nasalObs :: Comp
+nasalObs a@(P g0 a0 p0 m0 n0) b@(P g1 a1 p1 m1 n1)
+            | m0 == NasalStop && isObstruent m1 && place a b = True
+            | not (m0 == NasalStop && isObstruent m1) = True
+            | otherwise = False
+
+-- vowel agrees in nasality with following sound
+notVN :: Comp
+notVN (P g0 a0 p0 m0 n0) (P g1 a1 p1 m1 n1)
+            | isVowel m0 && n0 == Nasal && n1 == Nasal = True
+            | not (isVowel m0) = True
+            | otherwise = False
+
+-- I->O comparisons:
+
+-- nasality preservation
+nasal :: Comp
+nasal (P g0 a0 p0 m0 n0) (P g1 a1 p1 m1 n1)
+    | n0 == Nasal && n1 /= Nasal = False
+    | otherwise = True
+
 -- Constraints
 
 -- faithfulness constraints (care about both arguments)
@@ -313,42 +349,6 @@ eval g i o = map (\ f -> f i o) g
 gen :: String -> [String]
 gen [] = []
 gen (x:xs) = map (: xs) (complement [x]) ++ map (x :) (gen xs)
-
--- IO comparisons:
-
--- same place
-place :: Comp
-place (P g0 a0 p0 m0 n0) (P g1 a1 p1 m1 n1) = (p0 == p1) && (a0 == a1)
-
--- same manner
-manner :: Comp
-manner (P g0 a0 p0 m0 n0) (P g1 a1 p1 m1 n1) = m0 == m1
-
--- same voicing of obstuents
-obsVoice :: Comp
-obsVoice (P g0 a0 p0 m0 n0) (P g1 a1 p1 m1 n1) = not (g0 /= g1 && isObstruent m0 && isObstruent m1)
-
--- nasal agrees in place with following obstruent
-nasalObs :: Comp
-nasalObs a@(P g0 a0 p0 m0 n0) b@(P g1 a1 p1 m1 n1)
-            | m0 == NasalStop && isObstruent m1 && place a b = True
-            | not (m0 == NasalStop && isObstruent m1) = True
-            | otherwise = False
-
--- vowel agrees in nasality with following sound
-notVN :: Comp
-notVN (P g0 a0 p0 m0 n0) (P g1 a1 p1 m1 n1)
-            | isVowel m0 && n0 == Nasal && n1 == Nasal = True
-            | not (isVowel m0) = True
-            | otherwise = False
-
--- I->O comparisons:
-
--- nasality preservation
-nasal :: Comp
-nasal (P g0 a0 p0 m0 n0) (P g1 a1 p1 m1 n1)
-    | n0 == Nasal && n1 /= Nasal = False
-    | otherwise = True
 
 {- vowel chart:
            P    PV     V  

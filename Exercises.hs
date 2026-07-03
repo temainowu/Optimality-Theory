@@ -90,18 +90,22 @@ exe2'3 = PrettyList [
 
 -- Exercise 3.1 - -*um*-infixation in Ilokano (141)
 -- Exercise 3.1 - Epenthesis in Harari (141)
+
 -- Exercise 4.1 - Wargamay (191)
 -- Exercise 4.2 - Manam (191)
 -- Exercise 4.3 - Murinbata (191)
 -- Exercise 4.4 - Warlpiri (192)
 -- Exercise 4.5 - A factorial typology of stress systems (193)
+
 -- Exercise 5.1 - Reduplication in Axininca Campa (254)
 -- Exercise 5.2 - Reduplication in Oykangand (255)
 -- Exercise 5.3 - Infixing reduplication in Pangasinan (255)
 -- Exercise 5.4 - Infixing reduplication in Mangarayi (256)
 -- Exercise 5.5 - A factorial typology of reduplicative systems (256)
+
 -- Exercise 6.1 - Spanish (294)
 -- Exercise 6.2 - Belfast English (295)
 -- Exercise 6.3 - Factorial typology of OO-correspondence (295)
+
 -- Exercise 7.1 - Why the learner must use stratified hierarchies (339)
 -- Exercise 7.2 - Learning input forms under positional faithfulness (340)

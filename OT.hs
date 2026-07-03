@@ -277,7 +277,7 @@ prop_optimal g i n o = n <= eval g (toLexeme i) (head (mask (optimalForms [eval 
 -- Examples
 
 {-
-optimal and friendlyOptimal are the only functions that should be called by the user
+optimal and friendlyOptimal are the only functions that need be called by the user
 they both take a grammar, an input form (which is automatically indexed), and a list of output forms 
 (which need be indexed if using optimal, but not if using friendlyOptimal)
 and return a list of the most harmonious output forms (which are automatically unindexed)

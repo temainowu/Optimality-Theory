@@ -12,19 +12,177 @@ type Harmony = [Int]
 
 type Grammar = [Constraint]
 
-{- vowel chart:
-           P    PV     V  
-        -----------------
-high    | i•y   ɨ•ʉ   ɯ•u
-        |    ɪ•ʏ		•ʊ	
-midhigh | e•ø   ɘ•ɵ   ɤ•o
-mid     | ɛ•œ	  ə•ɞ   ʌ•ɔ
-midlow  | æ•ɶ	  ɐ•    ɑ•ɒ
-low     | 		  a•
+-- Examples
 
-vowel = "ieɛæɪyøœɶʏɨɘəɐaʉɵɞɯɤʌɑʊuoɔɒ"
+{-
+optimal and friendlyOptimal are the only functions that need be called by the user
+they both take a grammar, an input form (which is automatically indexed), and a list of output forms 
+(which need be indexed if using optimal, but not if using friendlyOptimal)
+and return a list of the most harmonious output forms (which are automatically unindexed)
+
+examples:
+
+example a)
+> friendlyOptimal [nasAgr, ident obsVoice] "amda" ["ampa", "amda"]
+["ampa"]
+
+nasAgr dominates ident obsVoice, 
+so the output form is "ampa" because 'm' agrees with 'p' in place.
+
+tableu:
+
+  amda │ nasAgr │ indent obsVoice │
+───────┼────────┼─────────────────┤
+  amda │   *!   │                 │
+───────┼────────┼─────────────────┤
+> ampa │        │        *        │
+───────┴────────┴─────────────────┘
+
+example b)
+> friendlyOptimal [ident obsVoice, nasAgr] "amda" ["ampa", "amda"]
+["amda"]
+
+identIO obsVoice dominates nasAgr,
+so the output form is "amda" because 'd' is voiced,
+ which matches the voicing of the corresponding input segment 'd'.
+
+tableu:
+
+  amda │ ident obsVoice │ nasAgr │
+───────┼────────────────┼────────┤
+> amda │                │   *    │
+───────┼────────────────┼────────┤
+  ampa │       *!       │        │
+───────┴────────────────┴────────┘
+
+the forms; toLexeme "amba", toLexeme "anda", toLexeme "embi", [('n',[1]),('d',[2])], and [] 
+are all more harmonious forms in both examples,
+but they were not chosen because they were not in the list of possible outputs.
+
 -}
 
+-- Main
+
+optimal :: Grammar -> String -> [Lexeme] -> [String]
+optimal g i os = map toString (mask (optimalForms (map (eval g (toLexeme i)) os)) os)
+
+friendlyOptimal :: Grammar -> String -> [String] -> [String]
+friendlyOptimal g i = optimal g i . map toLexeme
+
+-- better version of optimal if gen ever works:
+-- optimal' :: Grammar -> String -> [String]
+-- optimal' g i = friendlyOptimal g i (gen i)
+-- theoretically should return the most harmonious output form(s) for the given grammar and input form
+
+prop_optimal :: Grammar -> String -> Harmony -> Lexeme -> Bool
+prop_optimal g i n o = n <= eval g (toLexeme i) (head (mask (optimalForms [eval g (toLexeme i) o]) [o]))
+
+-- this^ prop is not a test, but uses quickCheck as a substitute for the gen function
+-- this should be used thusly:
+-- quickCheck (prop_optimal *grammar* *input form* *harmony*)
+-- theoretically should return a form of harmony greater than the inputed harmony if one exists
+-- so you would need to keep checking smaller and smaller harmonies until you find the smallest one
+
+-- Constraints
+
+-- faithfulness constraints (care about both arguments)
+
+-- no deletion
+maxi :: Constraint
+maxi i o = count [ or [yp `elem` xps | (x,xps) <- o] | (y,[yp]) <- i]
+
+-- no epenthesis
+dep :: Constraint
+dep i o = count [ null xps | (x,xps) <- o]
+
+-- feature similarity/preservation, takes {place, obsVoice, nasal} as argument
+ident :: Comp -> Constraint
+ident f i o = count [ not (f x y) | (x,xps) <- o, (y,[yp]) <- i, yp `elem` xps]
+-- "ident nasal" = "IdentI->O(nasal)" in OT
+-- "ident place" = "IdentIO(place)" in OT
+
+-- no coalescence
+uniformity :: Constraint
+uniformity i o = sum [ length xps - 1 | (x,xps) <- o, length xps > 1]
+
+-- markedness constraints (ignore first argument)
+
+-- no nasal vowels
+noNasalVowels :: Constraint
+noNasalVowels _ o = count [ isVowel m && n == Nasal | (P g a p m n,xps) <- o]
+
+-- no voiced stops
+noVoicedStops :: Constraint
+noVoicedStops _ o = sum [ backness phone | (phone@(P g a p m n),xps) <- o, m == Stop Tenuis && g == Voiced]
+
+-- no voicless resonants
+noVoicelessResonants :: Constraint
+noVoicelessResonants _ o = count [ not (isObstruent m) && g == Voiceless | (P g a p m n,_) <- o]
+
+-- no voiced obstruents
+noVoicedObstruents :: Constraint
+noVoicedObstruents _ o = count [ isObstruent m && g == Voiced | (P g a p m n,_) <- o]
+
+-- adjacent elements must agree in some feature f, takes {place, obsVoice, nasalObs, isṼN, nasal} as argument
+agree :: Comp -> Constraint
+agree f _ o = length [ 1 | [a,b] <- groups 2 (map fst o), not (f a b)]
+
+-- linear order preservation/no metathesis 
+-- usually classed as a faithfulness constraint because indexes are considered part of the input
+linearity :: Constraint
+linearity _ o = linear (concat [sort i | (_,i) <- o])
+
+linear :: [Int] -> Int
+linear xs = sum [x | (x,_) <- bubblesort (map (0,) xs)]
+  where
+    bubblesort'iter :: [(Int,Int)] -> [(Int,Int)]
+    bubblesort'iter [] = []
+    bubblesort'iter [x] = [x]
+    bubblesort'iter ((m,x):(n,y):xs)
+      | x > y = (n,y) : bubblesort'iter ((m+1,x):xs)
+      | otherwise = (m,x) : bubblesort'iter ((n,y):xs)
+
+    bubblesort' :: [(Int,Int)] -> Int -> [(Int,Int)]
+    bubblesort' xs i
+      | i == 0 = xs
+      | otherwise = bubblesort' (bubblesort'iter xs) (i - 1)
+
+    bubblesort :: [(Int,Int)] -> [(Int,Int)]
+    bubblesort xs = bubblesort' xs (length xs)
+
+-- no non-back rounded vowels
+noFrontRound :: Constraint
+noFrontRound _ o = length [ 1 | (P g a p m n,xps) <- o, p /= Velar && isVowel m && isRounded a]
+
+-- syllable constraints:
+-- a syllable is too hard to define so a lot of the following constraints are just approximations that will likely never be perfect
+
+-- no complex syllables
+noComplex :: Constraint
+noComplex _ o = length [ x | x <- groups 3 (map fst o), SyllableBoundary `notElem` x]
+
+-- no coda
+noCoda :: Constraint
+noCoda _ o = sum (map sizeOfCoda (syllables (map fst o)))
+
+onset :: Constraint
+onset _ o = sum (map (f2 . map sonorityOf) (syllables (map fst o)))
+    where
+        {- ok:
+        maxi :: [Int] -> Int
+        maxi [x] = x
+        maxi (x:xs) = max x (maxi xs)
+
+        f0 :: [Int] -> Int
+        f0 xs = (fromEnum . null) (takeWhile (/= maxi xs) xs)-}
+
+        -- bad:
+        -- f1 :: [Int] -> Int
+        -- f1 xs = (fromEnum . null) (takeWhile (/= foldr max (-1) xs) xs)
+
+        f2 :: [Int] -> Int
+        f2 (x:y:xs) | x <= y = 0
+        f2 _ = 1
 
 -- Auxiliary Functions
 
@@ -151,174 +309,15 @@ nasal (P g0 a0 p0 m0 n0) (P g1 a1 p1 m1 n1)
     | n0 == Nasal && n1 /= Nasal = False
     | otherwise = True
 
--- Constraints
+{- vowel chart:
+           P    PV     V  
+        -----------------
+high    | i•y   ɨ•ʉ   ɯ•u
+        |    ɪ•ʏ		•ʊ	
+midhigh | e•ø   ɘ•ɵ   ɤ•o
+mid     | ɛ•œ	  ə•ɞ   ʌ•ɔ
+midlow  | æ•ɶ	  ɐ•    ɑ•ɒ
+low     | 		  a•
 
--- faithfulness constraints (care about both arguments)
-
--- no deletion
-maxi :: Constraint
-maxi i o = count [ or [yp `elem` xps | (x,xps) <- o] | (y,[yp]) <- i]
-
--- no epenthesis
-dep :: Constraint
-dep i o = count [ null xps | (x,xps) <- o]
-
--- feature similarity/preservation, takes {place, obsVoice, nasal} as argument
-ident :: Comp -> Constraint
-ident f i o = count [ not (f x y) | (x,xps) <- o, (y,[yp]) <- i, yp `elem` xps]
--- "ident nasal" = "IdentI->O(nasal)" in OT
--- "ident place" = "IdentIO(place)" in OT
-
--- no coalescence
-uniformity :: Constraint
-uniformity i o = sum [ length xps - 1 | (x,xps) <- o, length xps > 1]
-
--- markedness constraints (ignore first argument)
-
--- no nasal vowels
-noNasalVowels :: Constraint
-noNasalVowels _ o = count [ isVowel m && n == Nasal | (P g a p m n,xps) <- o]
-
--- no voiced stops
-noVoicedStops :: Constraint
-noVoicedStops _ o = sum [ backness phone | (phone@(P g a p m n),xps) <- o, m == Stop Tenuis && g == Voiced]
-
--- no voicless resonants
-noVoicelessResonants :: Constraint
-noVoicelessResonants _ o = count [ not (isObstruent m) && g == Voiceless | (P g a p m n,_) <- o]
-
--- no voiced obstruents
-noVoicedObstruents :: Constraint
-noVoicedObstruents _ o = count [ isObstruent m && g == Voiced | (P g a p m n,_) <- o]
-
--- adjacent elements must agree in some feature f, takes {place, obsVoice, nasalObs, isṼN, nasal} as argument
-agree :: Comp -> Constraint
-agree f _ o = length [ 1 | [a,b] <- groups 2 (map fst o), not (f a b)]
-
--- linear order preservation/no metathesis 
--- usually classed as a faithfulness constraint because indexes are considered part of the input
-linearity :: Constraint
-linearity _ o = linear (concat [sort i | (_,i) <- o])
-
-linear :: [Int] -> Int
-linear xs = sum [x | (x,_) <- bubblesort (map (0,) xs)]
-  where
-    bubblesort'iter :: [(Int,Int)] -> [(Int,Int)]
-    bubblesort'iter [] = []
-    bubblesort'iter [x] = [x]
-    bubblesort'iter ((m,x):(n,y):xs)
-      | x > y = (n,y) : bubblesort'iter ((m+1,x):xs)
-      | otherwise = (m,x) : bubblesort'iter ((n,y):xs)
-
-    bubblesort' :: [(Int,Int)] -> Int -> [(Int,Int)]
-    bubblesort' xs i
-      | i == 0 = xs
-      | otherwise = bubblesort' (bubblesort'iter xs) (i - 1)
-
-    bubblesort :: [(Int,Int)] -> [(Int,Int)]
-    bubblesort xs = bubblesort' xs (length xs)
-
--- no non-back rounded vowels
-noFrontRound :: Constraint
-noFrontRound _ o = length [ 1 | (P g a p m n,xps) <- o, p /= Velar && isVowel m && isRounded a]
-
--- syllable constraints:
--- a syllable is too hard to define so a lot of the following constraints are just approximations that will likely never be perfect
-
--- no complex syllables
-noComplex :: Constraint
-noComplex _ o = length [ x | x <- groups 3 (map fst o), SyllableBoundary `notElem` x]
-
--- no coda
-noCoda :: Constraint
-noCoda _ o = sum (map sizeOfCoda (syllables (map fst o)))
-
-onset :: Constraint
-onset _ o = sum (map (f2 . map sonorityOf) (syllables (map fst o)))
-    where
-        {- ok:
-        maxi :: [Int] -> Int
-        maxi [x] = x
-        maxi (x:xs) = max x (maxi xs)
-
-        f0 :: [Int] -> Int
-        f0 xs = (fromEnum . null) (takeWhile (/= maxi xs) xs)-}
-
-        -- bad:
-        -- f1 :: [Int] -> Int
-        -- f1 xs = (fromEnum . null) (takeWhile (/= foldr max (-1) xs) xs)
-
-        f2 :: [Int] -> Int
-        f2 (x:y:xs) | x <= y = 0
-        f2 _ = 1
-
--- Main
-
-optimal :: Grammar -> String -> [Lexeme] -> [String]
-optimal g i os = map toString (mask (optimalForms (map (eval g (toLexeme i)) os)) os)
-
-friendlyOptimal :: Grammar -> String -> [String] -> [String]
-friendlyOptimal g i = optimal g i . map toLexeme
-
--- better version of optimal if gen ever works:
--- optimal' :: Grammar -> String -> [String]
--- optimal' g i = friendlyOptimal g i (gen i)
--- theoretically should return the most harmonious output form(s) for the given grammar and input form
-
-prop_optimal :: Grammar -> String -> Harmony -> Lexeme -> Bool
-prop_optimal g i n o = n <= eval g (toLexeme i) (head (mask (optimalForms [eval g (toLexeme i) o]) [o]))
-
--- this^ prop is not a test, but uses quickCheck as a substitute for the gen function
--- this should be used thusly:
--- quickCheck (prop_optimal *grammar* *input form* *harmony*)
--- theoretically should return a form of harmony greater than the inputed harmony if one exists
--- so you would need to keep checking smaller and smaller harmonies until you find the smallest one
-
--- Examples
-
-{-
-optimal and friendlyOptimal are the only functions that need be called by the user
-they both take a grammar, an input form (which is automatically indexed), and a list of output forms 
-(which need be indexed if using optimal, but not if using friendlyOptimal)
-and return a list of the most harmonious output forms (which are automatically unindexed)
-
-examples:
-
-example a)
-> friendlyOptimal [nasAgr, ident obsVoice] "amda" ["ampa", "amda"]
-["ampa"]
-
-nasAgr dominates ident obsVoice, 
-so the output form is "ampa" because 'm' agrees with 'p' in place.
-
-tableu:
-
-  amda │ nasAgr │ indent obsVoice │
-───────┼────────┼─────────────────┤
-  amda │   *!   │                 │
-───────┼────────┼─────────────────┤
-> ampa │        │        *        │
-───────┴────────┴─────────────────┘
-
-example b)
-> friendlyOptimal [ident obsVoice, nasAgr] "amda" ["ampa", "amda"]
-["amda"]
-
-identIO obsVoice dominates nasAgr,
-so the output form is "amda" because 'd' is voiced,
- which matches the voicing of the corresponding input segment 'd'.
-
-tableu:
-
-  amda │ ident obsVoice │ nasAgr │
-───────┼────────────────┼────────┤
-> amda │                │   *    │
-───────┼────────────────┼────────┤
-  ampa │       *!       │        │
-───────┴────────────────┴────────┘
-
-the forms; toLexeme "amba", toLexeme "anda", toLexeme "embi", [('n',[1]),('d',[2])], and [] 
-are all more harmonious forms in both examples,
-but they were not chosen because they were not in the list of possible outputs.
-
+vowel = "ieɛæɪyøœɶʏɨɘəɐaʉɵɞɯɤʌɑʊuoɔɒ"
 -}

@@ -21,9 +21,10 @@ data Tableau =
 
 instance Show Tableau where
   show (Tableau g ns i os) =
-      "  " ++ concatMap (++ " │ ") (i : ns) ++
-      valueOuts (maximum (map length (i: map toString os))) (map length ns) g i os ++ '\n' : replicate (2 + length i) '─' ++
+      "  " ++ concatMap (++ " │ ") ((i ++ replicate (lcol - length i) ' ') : ns) ++
+      valueOuts lcol (map length ns) g i os ++ '\n' : replicate (2 + lcol) '─' ++
       concatMap (("─┴─" ++) . (`replicate` '─') . length) ns ++ "─┘"
+      where lcol = maximum (map length (i: map toString os))
 
 -- Examples
 
@@ -331,7 +332,7 @@ valueOuts :: Int -> [Int] -> Grammar -> String -> [Lexeme] -> String
 valueOuts l ls g i os =
   concatMap (\ x ->
         '\n' :
-          replicate (2 + length i) '─' ++
+          replicate (2 + l) '─' ++
           concatMap (("─┼─" ++) . (`replicate` '─')) ls ++
           "─┤"
         ++
@@ -347,6 +348,7 @@ tail' :: [a] -> [a]
 tail' [] = []
 tail' (x:xs) = xs
 
+-- wrong and must fix, should only be one critical violation per row
 findCritV :: [Int] -> [[Int]] -> [Maybe Int]
 findCritV _ [] = []
 findCritV _ ([]:_) = []

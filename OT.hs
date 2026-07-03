@@ -149,6 +149,9 @@ manner (P g0 a0 p0 m0 n0) (P g1 a1 p1 m1 n1) = m0 == m1
 obsVoice :: Comp
 obsVoice (P g0 a0 p0 m0 n0) (P g1 a1 p1 m1 n1) = not (g0 /= g1 && isObstruent m0 && isObstruent m1)
 
+fricVoice :: Comp
+fricVoice (P g0 a0 p0 m0 n0) (P g1 a1 p1 m1 n1) = not (g0 /= g1 && isFricative m0 && isFricative m1)
+
 -- nasal agrees in place with following obstruent
 nasalObs :: Comp
 nasalObs a@(P g0 a0 p0 m0 n0) b@(P g1 a1 p1 m1 n1)
@@ -184,7 +187,7 @@ nasal (P g0 a0 p0 m0 n0) (P g1 a1 p1 m1 n1)
 
 -- no deletion
 maxi :: Constraint
-maxi i o = count [ or [yp `elem` xps | (x,xps) <- o] | (y,[yp]) <- i]
+maxi i o = count [ not (or [yp `elem` xps | (x,xps) <- o]) | (y,[yp]) <- i]
 
 -- no epenthesis
 dep :: Constraint

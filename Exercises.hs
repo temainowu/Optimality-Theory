@@ -53,6 +53,9 @@ exe2'1 = PrettyList [
     makeTableau constraints2'1 labels2'1 "pempo"   ["pempo", "pembo", "pepo"],
     makeTableau constraints2'1 labels2'1 "epempsa" ["epempsa", "epepsa", "epembsa", "epembza"]]
 
+-- something like /pemp-ta/ would become [pembda] not [pepta] under these constraints
+-- I don't know if this is testible in Greek
+
 -- Exercise 2.2 - Kikuyu Verbs (89)
 -- Exercise 2.3 - Voicing assimilation in Dutch (90)
 -- Exercise 3.1 - -*um*-infixation in Ilokano (141)

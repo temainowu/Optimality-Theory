@@ -45,11 +45,11 @@ instance Show Tableau where
       valueOuts (map length ns) g i os ++ '\n' : replicate (2 + length i) '─' ++
       concatMap (("─┴─" ++) . (`replicate` '─') . length) ns ++ "─┘"
 
-maketableau :: Grammar -> [String] -> String -> [String] -> Tableau
-maketableau g ns i os = tableau g ns i (map toLexeme os)
+makeTableau :: Grammar -> [String] -> String -> [String] -> Tableau
+makeTableau g ns i os = tableau g ns i (map toLexeme os)
 
 {-
-maketableau [agree nasalObs, ident obsVoice] ["NasAgr", "ident-IO-ObsV"] "amda" ["ampa", "amda"]
+makeTableau [agree nasalObs, ident obsVoice] ["NasAgr", "ident-IO-ObsV"] "amda" ["ampa", "amda"]
 -}
 
 -- Examples

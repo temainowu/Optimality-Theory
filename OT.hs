@@ -222,6 +222,7 @@ noComplex _ o = length [ x | x <- groups 3 (map fst o), SyllableBoundary `notEle
 noCoda :: Constraint
 noCoda _ o = sum (map sizeOfCoda (syllables (map fst o)))
 
+-- no null onset
 onset :: Constraint
 onset _ o = sum (map ((\ xs -> (fromEnum . null) (takeWhile (/= maximum xs) xs)) . map sonorityOf) (syllables (map fst o)))
 

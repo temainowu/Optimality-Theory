@@ -1,4 +1,4 @@
-module OptimalityTheory.Trees where
+module Trees where
 
 data Tree =  Label [Label] Tree Tree | L Label [Label] Tree Tree | X String
 

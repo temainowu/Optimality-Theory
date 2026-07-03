@@ -23,21 +23,34 @@ manicule :: Bool -> String
 manicule False = "  "
 manicule True  = "☞ "
 
+showViols :: Int -> Int -> Maybe Int -> String
+showViols l v Nothing = replicate v '*' ++ replicate (l - v) ' '
+showViols l v (Just x) = replicate x '*' ++ "!" ++ replicate (v - x) '*' ++ replicate (l - v - 1) ' '
+
 valueOuts :: [Int] -> Grammar -> String -> [Lexeme] -> String
 valueOuts ls g i os =
   concatMap (\ x ->
-        '\n' : 
-          replicate (2 + length i) '─' ++ 
-          concatMap (("─┼─" ++) . (`replicate` '─')) ls ++ 
-          "─┤" 
-        ++ 
-        "\n" ++ 
+        '\n' :
+          replicate (2 + length i) '─' ++
+          concatMap (("─┼─" ++) . (`replicate` '─')) ls ++
+          "─┤"
+        ++
+        "\n" ++
           concatMap (++ " │ ")
           ((manicule (toString x `elem` optimal g i os) ++
-          toString x) : zipWith 
-              (\ l v -> replicate v '*' ++ replicate (l - v) ' ') ls
+          toString x) : zipWith
+              (\ (t,l) v -> showViols l v t) (zip (findCritV (eval g (toLexeme i) x) (map (eval g (toLexeme i)) os)) ls)
               (eval g (toLexeme i) x))
     ) os
+
+tail' :: [a] -> [a]
+tail' [] = []
+tail' (x:xs) = xs
+
+findCritV :: [Int] -> [[Int]] -> [Maybe Int]
+findCritV _ [] = []
+findCritV _ ([]:_) = []
+findCritV (v:vs) l@((x:xs):xss) = (if v <= minimum (map head l) then Nothing else Just (1 + minimum (map head l))) : findCritV vs (map tail' l)
 
 instance Show Tableau where
   show (Tableau g ns i os) =
@@ -48,8 +61,13 @@ instance Show Tableau where
 makeTableau :: Grammar -> [String] -> String -> [String] -> Tableau
 makeTableau g ns i os = Tableau g ns i (map toLexeme os)
 
+exercise1'2 = makeTableau
+  [ident place,        agree obsVoice,    ident obsVoice,   noVoicedObstruents]
+  ["Ident-IO(Place)", "Agree(ObsVoice)", "Ident-IO(voice)", "*ObsVoice"]
+  "katz" ["katz", "kats", "kadz", "kads", "dogz"]
+
 {-
-makeTableau [agree nasalObs, ident obsVoice] ["NasAgr", "ident-IO-ObsV"] "amda" ["ampa", "amda"]
+makeTableau [agree nasalObs, ident obsVoice, ident place] ["NasAgr", "ident-IO-ObsV","Ident-IO-place"] "amda" ["ampa", "amba", "amda", "embi"]
 -}
 
 -- Examples

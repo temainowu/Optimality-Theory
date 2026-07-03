@@ -1,6 +1,6 @@
 module Phones where
 
-data Phone = P GlottalState Active Passive Manner Nasality | SyllableBoundary | MorphemeBoundary | WordBoundary
+data Phone = P GlottalState Active Passive Manner Nasality | SyllableBoundary | MorphemeBoundary | WordBoundary | Reduplicant
     deriving (Eq)
     
 instance Show Phone where
@@ -225,10 +225,17 @@ nasalityOf x
     | x `elem` nas = Nasal
     | otherwise = Oral
 
+isPhone :: Phone -> Bool
+isPhone SyllableBoundary = False 
+isPhone MorphemeBoundary = False 
+isPhone WordBoundary = False 
+isPhone _ = True
+
 charToPhone :: Char -> Phone
 charToPhone '.' = SyllableBoundary
 charToPhone '+' = MorphemeBoundary
 charToPhone '#' = WordBoundary
+charToPhone 'R' = Reduplicant
 charToPhone x = P (glottalStateOf x) (activeOf x) (passiveOf x) (mannerOf x) (nasalityOf x)
 
 

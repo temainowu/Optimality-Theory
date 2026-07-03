@@ -57,6 +57,20 @@ exe2'1 = PrettyList [
 -- I don't know if this is testible in Greek
 
 -- Exercise 2.2 - Kikuyu Verbs (89)
+
+constraints2'2 = [agree nasalObs, agree continuancy, ident manner, agree nasalObsVoice, noVoicedStops]
+
+labels2'2 = ["agree(NC-place)", "Agree(Continuancy)", "Ident-IO(Continuancy)", "*NC_o", "*VoicedStop"]
+
+exe2'2 :: PrettyList Tableau
+exe2'2 = PrettyList [
+    makeTableau constraints2'2 labels2'2 "bura"     ["βura", "bura"],
+    makeTableau constraints2'2 labels2'2 "ɴbureetɛ" ["mbureetɛ", "ɴbureetɛ"],
+    makeTableau constraints2'2 labels2'2 "koma"     ["koma", "goma"],
+    makeTableau constraints2'2 labels2'2 "ɴkomɛɛtɛ" ["ŋgomɛɛtɛ", "ɴkomɛɛtɛ", "ɴgomɛɛtɛ", "ŋkomɛɛtɛ"],
+    makeTableau constraints2'2 labels2'2 "ɣora"     ["ɣora", "gora"],
+    makeTableau constraints2'2 labels2'2 "ɴɣoreetɛ" ["ŋgoreetɛ", "ɴɣoreetɛ", "ɴgoreetɛ", "ŋɣoreetɛ"]]
+
 -- Exercise 2.3 - Voicing assimilation in Dutch (90)
 -- Exercise 3.1 - -*um*-infixation in Ilokano (141)
 -- Exercise 3.1 - Epenthesis in Harari (141)

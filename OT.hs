@@ -38,7 +38,7 @@ isVowel _ = False
 -- isVowel m = m `elem` [Vowel High, Vowel MidHigh, Vowel Mid, Vowel MidLow, Vowel Low]
 
 isRounded :: Active -> Bool
-isRounded (Tongue Rounded _ _) = True  
+isRounded (Tongue Rounded _ _) = True
 isRounded _ = False
 
 isStop :: Manner -> Bool
@@ -198,11 +198,11 @@ agree f _ o = length [ 1 | [a,b] <- groups 2 (map fst o), not (f a b)]
 -- linear order preservation/no metathesis 
 -- usually classed as a faithfulness constraint because indexes are considered part of the input
 linearity :: Constraint
-linearity _ o = linea (concat [sort i | (_,i) <- o])
+linearity _ o = linear (concat [sort i | (_,i) <- o])
 
 linear :: [Int] -> Int
-linear xs = sum [x | (x,_) <- bubblesort (zip (repeat 0) xs)]
-  where 
+linear xs = sum [x | (x,_) <- bubblesort (map (0,) xs)]
+  where
     bubblesort'iter :: [(Int,Int)] -> [(Int,Int)]
     bubblesort'iter [] = []
     bubblesort'iter [x] = [x]
@@ -211,9 +211,9 @@ linear xs = sum [x | (x,_) <- bubblesort (zip (repeat 0) xs)]
       | otherwise = (m,x) : bubblesort'iter ((n,y):xs)
 
     bubblesort' :: [(Int,Int)] -> Int -> [(Int,Int)]
-    bubblesort' xs i 
+    bubblesort' xs i
       | i == 0 = xs
-      | otherwise = bubblesort' (bubblesort'iter xs) (i - 1) 
+      | otherwise = bubblesort' (bubblesort'iter xs) (i - 1)
 
     bubblesort :: [(Int,Int)] -> [(Int,Int)]
     bubblesort xs = bubblesort' xs (length xs)
@@ -234,14 +234,23 @@ noCoda :: Constraint
 noCoda _ o = sum (map sizeOfCoda (syllables (map fst o)))
 
 onset :: Constraint
-onset _ o = sum (map (f . map sonorityOf) (syllables (map fst o)))
+onset _ o = sum (map (f2 . map sonorityOf) (syllables (map fst o)))
     where
+        {- ok:
         maxi :: [Int] -> Int
         maxi [x] = x
         maxi (x:xs) = max x (maxi xs)
 
-        f :: [Int] -> Int
-        f xs = (fromEnum . null . fst) (break (== (maxi xs)) xs)
+        f0 :: [Int] -> Int
+        f0 xs = (fromEnum . null) (takeWhile (/= maxi xs) xs)-}
+
+        -- bad:
+        -- f1 :: [Int] -> Int
+        -- f1 xs = (fromEnum . null) (takeWhile (/= foldr max (-1) xs) xs)
+
+        f2 :: [Int] -> Int
+        f2 (x:y:xs) | x <= y = 0
+        f2 _ = 1
 
 -- Main
 

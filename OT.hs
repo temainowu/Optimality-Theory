@@ -156,6 +156,13 @@ nasalObs a@(P g0 a0 p0 m0 n0) b@(P g1 a1 p1 m1 n1)
             | not (m0 == NasalStop && isObstruent m1) = True
             | otherwise = False
 
+-- *NC̥
+nasalObsVoice :: Comp
+nasalObsVoice a@(P g0 a0 p0 m0 n0) b@(P g1 a1 p1 m1 n1)
+            | m0 == NasalStop && isObstruent m1 && notElem g1 [Voiceless, Closed] = True
+            | not (m0 == NasalStop && isObstruent m1) = True
+            | otherwise = False
+
 -- vowel agrees in nasality with following sound
 notVN :: Comp
 notVN (P g0 a0 p0 m0 n0) (P g1 a1 p1 m1 n1)

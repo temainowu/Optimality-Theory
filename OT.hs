@@ -13,7 +13,7 @@ type Harmony = [Int]
 type Grammar = [Constraint]
 
 data Tableau =
-  tableau
+  Tableau
   Grammar -- constraints
   [String] -- constraint names (ik, sorry, I could just have another big lookup function)
   String -- inputs
@@ -40,13 +40,13 @@ valueOuts ls g i os =
     ) os
 
 instance Show Tableau where
-  show (tableau g ns i os) =
+  show (Tableau g ns i os) =
       "  " ++ concatMap (++ " │ ") (i : ns) ++
       valueOuts (map length ns) g i os ++ '\n' : replicate (2 + length i) '─' ++
       concatMap (("─┴─" ++) . (`replicate` '─') . length) ns ++ "─┘"
 
 makeTableau :: Grammar -> [String] -> String -> [String] -> Tableau
-makeTableau g ns i os = tableau g ns i (map toLexeme os)
+makeTableau g ns i os = Tableau g ns i (map toLexeme os)
 
 {-
 makeTableau [agree nasalObs, ident obsVoice] ["NasAgr", "ident-IO-ObsV"] "amda" ["ampa", "amda"]

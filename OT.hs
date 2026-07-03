@@ -111,6 +111,10 @@ place (P g0 a0 p0 m0 n0) (P g1 a1 p1 m1 n1) = (p0 == p1) && (a0 == a1)
 manner :: Comp
 manner (P g0 a0 p0 m0 n0) (P g1 a1 p1 m1 n1) = m0 == m1
 
+-- same voicing of stops
+stopVoice :: Comp
+stopVoice (P g0 a0 p0 m0 n0) (P g1 a1 p1 m1 n1) = not (g0 /= g1 && isStop m0 && isStop m1)
+
 -- same voicing of obstuents
 obsVoice :: Comp
 obsVoice (P g0 a0 p0 m0 n0) (P g1 a1 p1 m1 n1) = not (g0 /= g1 && isObstruent m0 && isObstruent m1)

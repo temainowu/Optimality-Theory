@@ -72,6 +72,22 @@ exe2'2 = PrettyList [
     makeTableau constraints2'2 labels2'2 "ɴɣoreetɛ" ["ŋgoreetɛ", "ɴɣoreetɛ", "ɴgoreetɛ", "ŋɣoreetɛ"]]
 
 -- Exercise 2.3 - Voicing assimilation in Dutch (90)
+
+constraints2'3 = [agree obsVoice, ident stopVoice, noVoicedObstruents, ident obsVoice, noVoicedStops]
+labels2'3 = ["Agree(ObsVce)", "Ident-IO(StopVoice)", "*Voiced Obs", "Ident-IO(ObsVce)", "*Voiced Stop"]
+
+exe2'3 :: PrettyList Tableau 
+exe2'3 = PrettyList [
+        makeTableau constraints2'3 labels2'3 "pd" ["bd","pt","pd"], -- ss uv
+        makeTableau constraints2'3 labels2'3 "dk" ["tk","dg","dk"], -- ss vu
+        makeTableau constraints2'3 labels2'3 "sb" ["zb","sp","sb"], -- fs uv
+        makeTableau constraints2'3 labels2'3 "zp" ["sp","zb","zp"], -- fs vu
+        makeTableau constraints2'3 labels2'3 "kv" ["kf","gv","kv"], -- sf uv
+        makeTableau constraints2'3 labels2'3 "sv" ["sf","zv","sv"], -- ff uv
+        makeTableau constraints2'3 labels2'3 "dv" ["tf","dv","tv","df"], -- ss vv 
+        makeTableau constraints2'3 labels2'3 "vz" ["fs","vz","fz","vs"] -- ff vv
+    ]
+
 -- Exercise 3.1 - -*um*-infixation in Ilokano (141)
 -- Exercise 3.1 - Epenthesis in Harari (141)
 -- Exercise 4.1 - Wargamay (191)

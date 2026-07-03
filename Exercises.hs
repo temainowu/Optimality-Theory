@@ -102,6 +102,17 @@ exe3'1 = Tableau
 
 -- Exercise 3.1 - Epenthesis in Harari (141)
 
+ctrs3'2 = [noCoda, dep]
+lbls3'2 = ["No-Coda", "Dep-IO"]
+
+exe3'2 :: PrettyList Tableau 
+exe3'2 = PrettyList [
+    Tableau ctrs3'2 lbls3'2 "tsabr" [
+        parToLexeme [('t',[0]),('i',[]),('.',[]),('s',[1]),('a',[2]),('.',[]),('b',[3]),('r',[4]),('i',[])],
+        parToLexeme [('t',[0]),('s',[1]),('a',[2]),('b',[3]),('r',[4])], 
+        parToLexeme [('t',[0]),('i',[]),('.',[]),('s',[1]),('a',[2]),('.',[]),('b',[3]),('i',[]),('r',[4])]]
+    ]
+
 -- Exercise 4.1 - Wargamay (191)
 -- Exercise 4.2 - Manam (191)
 -- Exercise 4.3 - Murinbata (191)
@@ -109,12 +120,49 @@ exe3'1 = Tableau
 -- Exercise 4.5 - A factorial typology of stress systems (193)
 
 -- Exercise 5.1 - Reduplication in Axininca Campa (254)
+
+-- how to implement Ident-BR???
+
+ctrs5'1 = [linearity, dep]
+lbls5'1 = ["Linearity-IO", "Dep-IO"]
+
+exe5'1 :: PrettyList Tableau 
+exe5'1 = PrettyList [
+    Tableau ctrs5'1 lbls5'1 "osampiR" [
+        parToLexeme 
+            [('o',[0]),('s',[1]),('a',[2]),('m',[3]),('p',[4]),('i',[5]),
+             ('s',[6,1]),('a',[6,2]),('m',[6,3]),('p',[6,4]),('i',[6,5])],
+        parToLexeme 
+            [('o',[0]),('s',[1]),('a',[2]),('m',[3]),('p',[4]),('i',[5]),
+             ('o',[6,0]),('s',[6,1]),('a',[6,2]),('m',[6,3]),('p',[6,4]),('i',[6,5])],
+        parToLexeme 
+            [('t',[]),('o',[0]),('s',[1]),('a',[2]),('m',[3]),('p',[4]),('i',[5]),
+             ('t',[]),('o',[6,0]),('s',[6,1]),('a',[6,2]),('m',[6,3]),('p',[6,4]),('i',[6,5])]
+        ]]
+
 -- Exercise 5.2 - Reduplication in Oykangand (255)
 -- Exercise 5.3 - Infixing reduplication in Pangasinan (255)
 -- Exercise 5.4 - Infixing reduplication in Mangarayi (256)
 -- Exercise 5.5 - A factorial typology of reduplicative systems (256)
 
 -- Exercise 6.1 - Spanish (294)
+
+{-
+/donθeʎ+a/   → [donθeʎa]
+/donθeʎ+a-s/ → [donθeʎas]
+/donθeʎ/     → [donθel]
+/donθeʎ-s/   → [donθeles]
+
+/desdeɲ+a/   → [desdeɲa]
+/desdeɲ+a-s/ → [desdeɲas]
+/desdeɲ/     → [desden]
+/desdeɲ-s/   → [desdenes]
+
+"+" is a morpheme boundary *within* a stem and 
+"-" is a morpheme boundary *outwith* a stem
+the relevant markedness constraint is an undominated *stem-final-palatal
+-}
+
 -- Exercise 6.2 - Belfast English (295)
 -- Exercise 6.3 - Factorial typology of OO-correspondence (295)
 

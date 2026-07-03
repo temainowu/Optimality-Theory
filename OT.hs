@@ -27,8 +27,8 @@ showViols :: Int -> Int -> Maybe Int -> String
 showViols l v Nothing = replicate v '*' ++ replicate (l - v) ' '
 showViols l v (Just x) = replicate x '*' ++ "!" ++ replicate (v - x) '*' ++ replicate (l - v - 1) ' '
 
-valueOuts :: [Int] -> Grammar -> String -> [Lexeme] -> String
-valueOuts ls g i os =
+valueOuts :: Int -> [Int] -> Grammar -> String -> [Lexeme] -> String
+valueOuts l ls g i os =
   concatMap (\ x ->
         '\n' :
           replicate (2 + length i) '─' ++
@@ -38,7 +38,7 @@ valueOuts ls g i os =
         "\n" ++
           concatMap (++ " │ ")
           ((manicule (toString x `elem` optimal g i os) ++
-          toString x) : zipWith
+          toString x ++ replicate (l - length (toString x)) ' ') : zipWith
               (\ (t,l) v -> showViols l v t) (zip (findCritV (eval g (toLexeme i) x) (map (eval g (toLexeme i)) os)) ls)
               (eval g (toLexeme i) x))
     ) os
@@ -55,16 +55,11 @@ findCritV (v:vs) l@((x:xs):xss) = (if v <= minimum (map head l) then Nothing els
 instance Show Tableau where
   show (Tableau g ns i os) =
       "  " ++ concatMap (++ " │ ") (i : ns) ++
-      valueOuts (map length ns) g i os ++ '\n' : replicate (2 + length i) '─' ++
+      valueOuts (maximum (map length (i: map toString os))) (map length ns) g i os ++ '\n' : replicate (2 + length i) '─' ++
       concatMap (("─┴─" ++) . (`replicate` '─') . length) ns ++ "─┘"
 
 makeTableau :: Grammar -> [String] -> String -> [String] -> Tableau
 makeTableau g ns i os = Tableau g ns i (map toLexeme os)
-
-exercise1'2 = makeTableau
-  [ident place,        agree obsVoice,    ident obsVoice,   noVoicedObstruents]
-  ["Ident-IO(Place)", "Agree(ObsVoice)", "Ident-IO(voice)", "*ObsVoice"]
-  "katz" ["katz", "kats", "kadz", "kads", "dogz"]
 
 {-
 makeTableau [agree nasalObs, ident obsVoice, ident place] ["NasAgr", "ident-IO-ObsV","Ident-IO-place"] "amda" ["ampa", "amba", "amda", "embi"]
@@ -324,6 +319,10 @@ gen (x:xs) = map (: xs) (complement [x]) ++ map (x :) (gen xs)
 -- same place
 place :: Comp
 place (P g0 a0 p0 m0 n0) (P g1 a1 p1 m1 n1) = (p0 == p1) && (a0 == a1)
+
+-- same manner
+manner :: Comp
+manner (P g0 a0 p0 m0 n0) (P g1 a1 p1 m1 n1) = m0 == m1
 
 -- same voicing of obstuents
 obsVoice :: Comp

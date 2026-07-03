@@ -12,6 +12,46 @@ type Harmony = [Int]
 
 type Grammar = [Constraint]
 
+data Tableau =
+  Tableu
+  Grammar -- constraints
+  [String] -- constraint names (ik, sorry, I could just have another big lookup function)
+  String -- inputs
+  [Lexeme] -- outputs
+
+manicule :: Bool -> String
+manicule False = "  "
+manicule True  = "☞ "
+
+valueOuts :: [Int] -> Grammar -> String -> [Lexeme] -> String
+valueOuts ls g i os =
+  concatMap (\ x ->
+        '\n' : 
+          replicate (2 + length i) '─' ++ 
+          concatMap (("─┼─" ++) . (`replicate` '─')) ls ++ 
+          "─┤" 
+        ++ 
+        "\n" ++ 
+          concatMap (++ " │ ")
+          ((manicule (toString x `elem` optimal g i os) ++
+          toString x) : zipWith 
+              (\ l v -> replicate v '*' ++ replicate (l - v) ' ') ls
+              (eval g (toLexeme i) x))
+    ) os
+
+instance Show Tableau where
+  show (Tableu g ns i os) =
+      "  " ++ concatMap (++ " │ ") (i : ns) ++
+      valueOuts (map length ns) g i os ++ '\n' : replicate (2 + length i) '─' ++
+      concatMap (("─┴─" ++) . (`replicate` '─') . length) ns ++ "─┘"
+
+makeTableu :: Grammar -> [String] -> String -> [String] -> Tableau
+makeTableu g ns i os = Tableu g ns i (map toLexeme os)
+
+{-
+makeTableu [agree nasalObs, ident obsVoice] ["NasAgr", "ident-IO-ObsV"] "amda" ["ampa", "amda"]
+-}
+
 -- Examples
 
 {-
@@ -31,7 +71,7 @@ so the output form is "ampa" because 'm' agrees with 'p' in place.
 
 tableu:
 
-  amda │ nasAgr │ indent obsVoice │
+  amda │ nasAgr │ ident obsVoice │
 ───────┼────────┼─────────────────┤
   amda │   *!   │                 │
 ───────┼────────┼─────────────────┤

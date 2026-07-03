@@ -1,6 +1,6 @@
 module Exercises where
 
-import OT 
+import OT
 import Phones
 
 newtype PrettyList a = PrettyList [a]
@@ -12,7 +12,7 @@ instance Show a => Show (PrettyList a) where
 -- Exercises from Kager (1999)
 
 -- Exercise 1.1 - Japanese (50)
-nowbŋ :: Constraint 
+nowbŋ :: Constraint
 nowbŋ _ ((P _ (Tongue _ Dorsal _) _ NasalStop Nasal, _):o) = 1
 nowbŋ _ _ = 0
 
@@ -77,7 +77,7 @@ constraints2'3 = [agree obsVoice, ident stopVoice, noVoicedObstruents, ident obs
 labels2'3 = ["Agree(ObsVce)", "Ident-IO(StopVoice)", "*Voiced Obs", "Ident-IO(ObsVce)", "*Voiced Stop"]
 
 -- optimal form is first in each list of candidates
-exe2'3 :: PrettyList Tableau 
+exe2'3 :: PrettyList Tableau
 exe2'3 = PrettyList [
         makeTableau constraints2'3 labels2'3 "pd" ["bd","pt","pd"], -- ss uv (stropdas)
         makeTableau constraints2'3 labels2'3 "dk" ["tk","dg","dk"], -- ss vu (bloedkoraal)
@@ -90,6 +90,16 @@ exe2'3 = PrettyList [
     ]
 
 -- Exercise 3.1 - -*um*-infixation in Ilokano (141)
+
+-- free variation between "gumradwet" and "grumadwet" from input /um-gradwet/
+exe3'1 :: Tableau
+exe3'1 = Tableau
+    [noCoda, \ _ -> fromEnum . (0 `notElem`) . snd . head, linearity]
+    ["No-Coda", "Align-um-L", "Linearity-IO"]
+    "umgradwet"
+    [toLexeme "umgradwet", (charToPhone 'g', [2]) : (charToPhone 'u', [0]) : (charToPhone 'm', [1]) : toLexeme "radwet",
+    (charToPhone 'g', [2]) : (charToPhone 'r', [3]) : (charToPhone 'u', [0]) : (charToPhone 'm', [1]) : toLexeme "adwet"]
+
 -- Exercise 3.1 - Epenthesis in Harari (141)
 
 -- Exercise 4.1 - Wargamay (191)

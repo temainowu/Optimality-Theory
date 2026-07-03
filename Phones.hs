@@ -117,6 +117,42 @@ xs \\ ys = [x | x <- xs, x `notElem` ys]
 complement :: [Char] -> [Char]
 complement xs = universe \\ xs
 
+-- 1/(backness phone) gives an aproximation of the amount of air trapped in the mouth in the closure of a stop
+backness :: Phone -> Int
+backness (P _ a p _ _) = fromEnum p + fromEnum a
+
+isVowel :: Manner -> Bool
+isVowel (Vowel _) = True
+isVowel _ = False
+-- isVowel m = m `elem` [Vowel High, Vowel MidHigh, Vowel Mid, Vowel MidLow, Vowel Low]
+
+isRounded :: Active -> Bool
+isRounded (Tongue Rounded _ _) = True
+isRounded _ = False
+
+isStop :: Manner -> Bool
+isStop (Stop _) = True
+isStop _ = False
+
+isFricative :: Manner -> Bool
+isFricative (Fricative _) = True
+isFricative _ = False
+
+sonorityOf :: Phone -> Int
+sonorityOf (P _ _ _ m _)
+    | m == Click = 0
+    | isStop m = 1
+    | isFricative m = 2
+    | m == Tap = 3
+    | m == Trill = 4
+    | m == NasalStop = 5
+    | m == Approximant = 6
+    | m == Vowel High = 7
+    | m == Vowel MidHigh = 8
+    | m == Vowel Mid = 9
+    | m == Vowel MidLow = 10
+    | m == Vowel Low = 11
+
 isObstruent :: Manner -> Bool
 isObstruent m = m `elem` [Click, Stop Tenuis, Stop Aspirated, Stop Unreleased, Fricative Sibilant, Fricative NonSibilant, Stop (Fricated Sibilant), Stop (Fricated NonSibilant)]
 

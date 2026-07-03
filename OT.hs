@@ -19,51 +19,11 @@ data Tableau =
   String -- inputs
   [Lexeme] -- outputs
 
-manicule :: Bool -> String
-manicule False = "  "
-manicule True  = "☞ "
-
-showViols :: Int -> Int -> Maybe Int -> String
-showViols l v Nothing = replicate v '*' ++ replicate (l - v) ' '
-showViols l v (Just x) = replicate x '*' ++ "!" ++ replicate (v - x) '*' ++ replicate (l - v - 1) ' '
-
-valueOuts :: Int -> [Int] -> Grammar -> String -> [Lexeme] -> String
-valueOuts l ls g i os =
-  concatMap (\ x ->
-        '\n' :
-          replicate (2 + length i) '─' ++
-          concatMap (("─┼─" ++) . (`replicate` '─')) ls ++
-          "─┤"
-        ++
-        "\n" ++
-          concatMap (++ " │ ")
-          ((manicule (toString x `elem` optimal g i os) ++
-          toString x ++ replicate (l - length (toString x)) ' ') : zipWith
-              (\ (t,l) v -> showViols l v t) (zip (findCritV (eval g (toLexeme i) x) (map (eval g (toLexeme i)) os)) ls)
-              (eval g (toLexeme i) x))
-    ) os
-
-tail' :: [a] -> [a]
-tail' [] = []
-tail' (x:xs) = xs
-
-findCritV :: [Int] -> [[Int]] -> [Maybe Int]
-findCritV _ [] = []
-findCritV _ ([]:_) = []
-findCritV (v:vs) l@((x:xs):xss) = (if v <= minimum (map head l) then Nothing else Just (1 + minimum (map head l))) : findCritV vs (map tail' l)
-
 instance Show Tableau where
   show (Tableau g ns i os) =
       "  " ++ concatMap (++ " │ ") (i : ns) ++
       valueOuts (maximum (map length (i: map toString os))) (map length ns) g i os ++ '\n' : replicate (2 + length i) '─' ++
       concatMap (("─┴─" ++) . (`replicate` '─') . length) ns ++ "─┘"
-
-makeTableau :: Grammar -> [String] -> String -> [String] -> Tableau
-makeTableau g ns i os = Tableau g ns i (map toLexeme os)
-
-{-
-makeTableau [agree nasalObs, ident obsVoice, ident place] ["NasAgr", "ident-IO-ObsV","Ident-IO-place"] "amda" ["ampa", "amba", "amda", "embi"]
--}
 
 -- Examples
 
@@ -115,6 +75,12 @@ but they were not chosen because they were not in the list of possible outputs.
 -}
 
 -- Main
+
+makeTableau :: Grammar -> [String] -> String -> [String] -> Tableau
+makeTableau g ns i os = Tableau g ns i (map toLexeme os)
+
+example :: Tableau
+example = makeTableau [agree nasalObs, ident obsVoice, ident place] ["NasAgr", "ident-IO-ObsV","Ident-IO-place"] "amda" ["ampa", "amba", "amda", "embi"]
 
 optimal :: Grammar -> String -> [Lexeme] -> [String]
 optimal g i os = map toString (mask (optimalForms (map (eval g (toLexeme i)) os)) os)
@@ -269,42 +235,6 @@ onset _ o = sum (map ((\ xs -> (fromEnum . null) (takeWhile (/= maximum xs) xs))
 
 -- Auxiliary Functions
 
--- 1/(backness phone) gives an aproximation of the amount of air trapped in the mouth in the closure of a stop
-backness :: Phone -> Int
-backness (P _ a p _ _) = fromEnum p + fromEnum a
-
-isVowel :: Manner -> Bool
-isVowel (Vowel _) = True
-isVowel _ = False
--- isVowel m = m `elem` [Vowel High, Vowel MidHigh, Vowel Mid, Vowel MidLow, Vowel Low]
-
-isRounded :: Active -> Bool
-isRounded (Tongue Rounded _ _) = True
-isRounded _ = False
-
-isStop :: Manner -> Bool
-isStop (Stop _) = True
-isStop _ = False
-
-isFricative :: Manner -> Bool
-isFricative (Fricative _) = True
-isFricative _ = False
-
-sonorityOf :: Phone -> Int
-sonorityOf (P _ _ _ m _)
-    | m == Click = 0
-    | isStop m = 1
-    | isFricative m = 2
-    | m == Tap = 3
-    | m == Trill = 4
-    | m == NasalStop = 5
-    | m == Approximant = 6
-    | m == Vowel High = 7
-    | m == Vowel MidHigh = 8
-    | m == Vowel Mid = 9
-    | m == Vowel MidLow = 10
-    | m == Vowel Low = 11
-
 count :: [Bool] -> Int
 count [] = 0
 count (True:bs) = 1 + count bs
@@ -359,6 +289,40 @@ eval g i o = map (\ f -> f i o) g
 gen :: String -> [String]
 gen [] = []
 gen (x:xs) = map (: xs) (complement [x]) ++ map (x :) (gen xs)
+
+manicule :: Bool -> String
+manicule False = "  "
+manicule True  = "☞ "
+
+showViols :: Int -> Int -> Maybe Int -> String
+showViols l v Nothing = replicate v '*' ++ replicate (l - v) ' '
+showViols l v (Just x) = replicate x '*' ++ "!" ++ replicate (v - x) '*' ++ replicate (l - v - 1) ' '
+
+valueOuts :: Int -> [Int] -> Grammar -> String -> [Lexeme] -> String
+valueOuts l ls g i os =
+  concatMap (\ x ->
+        '\n' :
+          replicate (2 + length i) '─' ++
+          concatMap (("─┼─" ++) . (`replicate` '─')) ls ++
+          "─┤"
+        ++
+        "\n" ++
+          concatMap (++ " │ ")
+          ((manicule (toString x `elem` optimal g i os) ++
+          toString x ++ replicate (l - length (toString x)) ' ') : zipWith
+              (\ (t,l) v -> showViols l v t) (zip (findCritV (eval g (toLexeme i) x) (map (eval g (toLexeme i)) os)) ls)
+              (eval g (toLexeme i) x))
+    ) os
+
+tail' :: [a] -> [a]
+tail' [] = []
+tail' (x:xs) = xs
+
+findCritV :: [Int] -> [[Int]] -> [Maybe Int]
+findCritV _ [] = []
+findCritV _ ([]:_) = []
+findCritV (v:vs) l@((x:xs):xss) = (if v <= minimum (map head l) then Nothing else Just (1 + minimum (map head l))) : findCritV vs (map tail' l)
+
 
 {- vowel chart:
            P    PV     V  
